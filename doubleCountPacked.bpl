@@ -1,16 +1,16 @@
-//type Ref represents object references
 type Ref;
 type PredicateTypes;
 type FractionType = [Ref, PredicateTypes] int;
 type PackedType = [Ref, PredicateTypes] bool;
-
+var packed: PackedType;
+var frac: FractionType;
 const null: Ref;
+
 const unique okP: PredicateTypes;
 
 var val: [Ref]int;
 var dbl: [Ref]int;
-var packed: PackedType;
-var frac: FractionType;
+
 
 function okPred(this:Ref, val: [Ref]int, dbl: [Ref]int, packed: PackedType) returns (bool);
 
@@ -42,6 +42,7 @@ dbl[this]:=dbl[this]+2;
 assume okPred(this, val, dbl, packed);
 //I need to deal with the fractions, how that works.
 //I might need a small example for that.
+assert packed[this,okP];
 
 }
 

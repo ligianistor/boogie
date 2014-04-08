@@ -43,7 +43,7 @@ axiom (forall this:Ref, x:int, y:int, val: [Ref]int, next: [Ref]Ref, frac: Fract
      (this==null) ==> (packed[this, RangeP] ) 
      ); 
      
- //this axiom is used for unpacking
+//this axiom is used for unpacking
      axiom (forall this:Ref, x:int, y:int, val: [Ref]int, next: [Ref]Ref, frac: FractionType, packed: PackedType,
         xRangePred: [Ref] int, yRangePred: [Ref] int :: 
 {RangePred(this,val,next,frac,x,y, packed, xRangePred, yRangePred)}
@@ -140,10 +140,15 @@ var xConsumeInRangePred: [Ref] int;
 var yConsumeInRangePred: [Ref] int;
 const unique ConsumeInRangeP:PredicateTypes;
 
+function ConsumeInRangePred(this:Ref, x:int, y:int,  startJobs: [Ref]Ref, 
+              xConsumeInRangePred: [Ref] int, yConsumeInRangePred: [Ref] int,
+              packed: PackedType, xRangePred: [Ref] int, yRangePred: [Ref] int) returns (bool);
+
 //this axiom is for packing the ConsumeInRange predicate
 axiom (forall this:Ref, x:int, y:int,  startJobs: [Ref]Ref, 
               xConsumeInRangePred: [Ref] int, yConsumeInRangePred: [Ref] int,
               packed: PackedType, xRangePred: [Ref] int, yRangePred: [Ref] int :: 
+{ConsumeInRangePred(this, x, y,  startJobs, xConsumeInRangePred, yConsumeInRangePred, packed, xRangePred, yRangePred)}
  (packed[startJobs[this], RangeP] && (xRangePred[startJobs[this]] == x) && (yRangePred[startJobs[this]] == y )==> 
     (packed[this, ConsumeInRangeP] && (xConsumeInRangePred[this]==x) && (yConsumeInRangePred[this]==y) ) 
 )); 
@@ -152,6 +157,7 @@ axiom (forall this:Ref, x:int, y:int,  startJobs: [Ref]Ref,
 axiom (forall this:Ref, x:int, y:int,  startJobs: [Ref]Ref, 
               xConsumeInRangePred: [Ref] int, yConsumeInRangePred: [Ref] int,
               packed: PackedType, xRangePred: [Ref] int, yRangePred: [Ref] int :: 
+{ConsumeInRangePred(this, x, y,  startJobs, xConsumeInRangePred, yConsumeInRangePred, packed, xRangePred, yRangePred)}
  (packed[this, ConsumeInRangeP] && (xConsumeInRangePred[this]==x) && (yConsumeInRangePred[this]==y)==> 
     ( packed[startJobs[this], RangeP] && (xRangePred[startJobs[this]] == x ) && (yRangePred[startJobs[this]] == y ) ) 
 )); 
@@ -178,9 +184,13 @@ var endLargeJobs: [Ref]Ref;
 
 const unique BothInRangeP:PredicateTypes;
 
+function BothInRangePred(this:Ref,  startSmallJobs: [Ref]Ref, startLargeJobs: [Ref]Ref,
+              packed: PackedType, xRangePred: [Ref] int, yRangePred: [Ref] int) returns (bool);
+
 //this axiom is for packing the BothInRange predicate
 axiom (forall this:Ref,  startSmallJobs: [Ref]Ref, startLargeJobs: [Ref]Ref,
               packed: PackedType, xRangePred: [Ref] int, yRangePred: [Ref] int :: 
+{BothInRangePred(this,  startSmallJobs, startLargeJobs, packed, xRangePred, yRangePred)}
  (packed[startSmallJobs[this], RangeP] && (xRangePred[startSmallJobs[this]] == 0) && (yRangePred[startSmallJobs[this]] == 10) 
 && packed[startLargeJobs[this], RangeP] && (xRangePred[startLargeJobs[this]] == 11) && (yRangePred[startLargeJobs[this]] == 100) 
 ==> 
@@ -189,7 +199,8 @@ axiom (forall this:Ref,  startSmallJobs: [Ref]Ref, startLargeJobs: [Ref]Ref,
 
 //this axiom is for unpacking the BothInRange predicate
 axiom (forall this:Ref,  startSmallJobs: [Ref]Ref, startLargeJobs: [Ref]Ref,
-              packed: PackedType, xRangePred: [Ref] int, yRangePred: [Ref] int :: 
+              packed: PackedType, xRangePred: [Ref] int, yRangePred: [Ref] int ::
+{BothInRangePred(this,  startSmallJobs, startLargeJobs, packed, xRangePred, yRangePred)} 
  ((packed[this, BothInRangeP])
 ==> 
 packed[startSmallJobs[this], RangeP] && (xRangePred[startSmallJobs[this]] == 11) && (yRangePred[startSmallJobs[this]] == 100) 
@@ -247,9 +258,14 @@ var cons2: [Ref]Ref;
 
 const unique WorkingSystemP:PredicateTypes;
 
+function WorkingSystemPred(this:Ref, prod1:[Ref]Ref,  prod2: [Ref]Ref,  cons1: [Ref]Ref,  cons2: [Ref]Ref,
+              packed: PackedType, xConsumeInRangePred: [Ref] int, yConsumeInRangePred: [Ref] int) returns (bool);
+
 //this axiom is for packing the WorkingSystem predicate
 axiom (forall this:Ref, prod1:[Ref]Ref,  prod2: [Ref]Ref,  cons1: [Ref]Ref,  cons2: [Ref]Ref,
               packed: PackedType, xConsumeInRangePred: [Ref] int, yConsumeInRangePred: [Ref] int :: 
+{WorkingSystemPred(this, prod1,  prod2,  cons1,  cons2,
+              packed, xConsumeInRangePred, yConsumeInRangePred)}
  (packed[prod1[this], BothInRangeP] && packed[prod2[this], BothInRangeP] 
 && packed[cons1[this], ConsumeInRangeP] && packed[cons2[this], ConsumeInRangeP] 
 && (xConsumeInRangePred[cons1[this]] == 0) && (yConsumeInRangePred[cons1[this]] == 10)
@@ -261,8 +277,9 @@ axiom (forall this:Ref, prod1:[Ref]Ref,  prod2: [Ref]Ref,  cons1: [Ref]Ref,  con
 //this axiom is for unpacking the WorkingSystem predicate
 axiom (forall this:Ref, prod1:[Ref]Ref,  prod2: [Ref]Ref,  cons1: [Ref]Ref,  cons2: [Ref]Ref,
               packed: PackedType, xConsumeInRangePred: [Ref] int, yConsumeInRangePred: [Ref] int :: 
- (
- (packed[this, WorkingSystemP]) 
+{WorkingSystemPred(this, prod1,  prod2,  cons1,  cons2,
+              packed, xConsumeInRangePred, yConsumeInRangePred)}
+ ((packed[this, WorkingSystemP]) 
 ==> 
 packed[prod1[this], BothInRangeP] && packed[prod2[this], BothInRangeP] 
 && packed[cons1[this], ConsumeInRangeP] && packed[cons2[this], ConsumeInRangeP] 
