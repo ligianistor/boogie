@@ -1,4 +1,4 @@
-//type Ref represents object references for any class
+//type Ref represents object references
 type Ref;
 type PredicateTypes;
 type FractionType = [Ref, PredicateTypes] int;

@@ -18,23 +18,26 @@ var packed: PackedType;
 var xRangePred: [Ref] int;
 var yRangePred: [Ref] int;
 
+//after calling procedures PackRangeNextNull, any kind 
+//of Pack procedures, I have to do
+//packed[this, rangeP]:=true
+
 procedure PackRangeNextNull(this:Ref, x:int, y:int);
-ensures ((this != null) &&  (next[this] == null) && (val[this] >= x) && (val[this] <= y) ==> 
-    (packed[this, RangeP] && (xRangePred[this]==x) && (yRangePred[this]==y) ) );
+requires (this != null) &&  (next[this] == null) && (val[this] >= x) && (val[this] <= y);
+ensures (xRangePred[this]==x) && (yRangePred[this]==y);
 
 
 procedure PackRangeNextNotNull(this:Ref, x:int, y:int);
-ensures  ( (this != null) && (next[this] != null) && (val[this] >= x) && (val[this] <= y) && 
-    packed[next[this], RangeP] && (xRangePred[next[this]]==x) && (yRangePred[next[this]]==y)
-       ==>  (packed[this, RangeP] && (xRangePred[this]==x) && (yRangePred[this]==y) )  );
+requires (this != null) && (next[this] != null) && (val[this] >= x) && (val[this] <= y) && 
+    packed[next[this], RangeP] && (xRangePred[next[this]]==x) && (yRangePred[next[this]]==y);
+ensures (xRangePred[this]==x) && (yRangePred[this]==y);
 
 procedure PackThisNull(this:Ref);
-ensures  (this==null) ==> (packed[this, RangeP] );
+requires this==null;
 
 procedure UnpackRange(this:Ref, x:int, y:int);
-ensures 
-(packed[this, RangeP] && (xRangePred[this]==x) && (yRangePred[this]==y) )
-==>
+requires packed[this, RangeP] && (xRangePred[this]==x) && (yRangePred[this]==y);
+ensures
 (this != null) &&
 (val[this] >= x) &&
 (val[this] <= y) && 
@@ -84,6 +87,9 @@ call addModulo11(next[this], x);
   //val[this] was not modified
   //but Boogie does not know that
 assume old(val[this])==val[this];
+assume next[this]==null;
 call PackRangeNextNull(this, 0, 10);
+assume next[this]!=null;
 call PackRangeNextNotNull(this, 0, 10);
+packed[this,RangeP]:=true;
   }

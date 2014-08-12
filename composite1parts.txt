@@ -1,0 +1,225 @@
+
+procedure updateCountRec(this: Ref)
+modifies count, frac, packed;
+requires this!=null;
+requires packed[this, parentP] == false;
+requires parent[this]!=null ==> (frac[parent[this], parentP]>0);
+requires (parent[this]!=null) && (this==right[parent[this]]) ==> (frac[parent[this], rightP]>=50);
+requires (parent[this]!=null) && (this==left[parent[this]]) ==> (frac[parent[this], leftP]>=50);
+requires parent[this]==null ==> (frac[this, countP] >= 50);
+requires (forall r:Ref:: (r!=this) ==> packed[r, countP]);
+requires packed[this, leftP];
+requires packed[this, rightP];
+requires (frac[this,leftP] >=50) &&   (frac[this,rightP] >=50);
+requires (frac[this, countP] >= 50);
+
+ensures   (packed[this, parentP]);    
+
+{
+ var fracLocal: FractionType;
+
+  if (parent[this] != null)
+ {
+
+//we assert what is true when packed[this, parentP]==false
+assert frac[this, countP]>=50;
+fracLocal[this, countP]:=frac[this, countP];
+
+//this asserts that we have a fraction to parentP
+assert (frac[parent[this], parentP]>0);
+//we unpack parent[this] from parentP
+//might need to say that other objects are not unpacked for parentP
+packed[parent[this], parentP]:=false;
+assert (forall r:Ref:: (r!=this) ==> (packed[r, countP]));
+
+//we can assume this because we just unpacked
+//parent[this] from parentP
+assume frac[parent[this], countP]>=50;
+fracLocal[parent[this], countP]:=frac[parent[this], countP];
+
+
+//we unpack parent[this] from countP
+packed[parent[this], countP]:=false;
+
+//we can assume this because we just unpacked parent[this] from countP
+assume (frac[this,leftP]>=50) && (frac[this,rightP]>=50);
+fracLocal[parent[this], rightP]:=frac[parent[this], rightP];
+
+
+//we assume this is the right child of parent[this]
+//the other case is analogous
+assume this==right[parent[this]];
+assert (parent[this]!=null) && (this==right[parent[this]]) ==> frac[parent[this],rightP]>=50;
+fracLocal[parent[this],rightP]:=fracLocal[parent[this], rightP] +frac[parent[this],rightP];
+
+assert (fracLocal[parent[this],rightP]>=100);
+//unpack parent[this] from rightP
+packed[parent[this], rightP]:=false;
+assert  (packed[parent[this],rightP]==false)  ==> frac[right[parent[this]],countP]>=50;
+fracLocal[this, countP]:=fracLocal[this, countP]+frac[this, countP];
+
+assert (frac[this,leftP] >=50) &&   (frac[this,rightP] >=50);
+assert packed[this, parentP]==false;
+frac[this, countP]:=fracLocal[this, countP];
+assert (frac[this, countP] >= 100);
+assert packed[this, rightP] && (rcRightPred[this] == count[right[this]]);
+assert (exists c2:int :: packed[this, rightP] && (rcRightPred[this] == c2));
+packed[this, rightP]:=true;
+assert packed[this, leftP] && (lcLeftPred[this] == count[left[this]]);
+assert (exists c1:int :: packed[this, leftP] && (lcLeftPred[this] == c1)); 
+packed[this, leftP]:=true;
+      call updateCount(this);
+assert (exists c:int ::
+          packed[this, countP] && (cCountPred[this] == c)
+         );
+assert packed[this, countP] && (cCountPred[this] == count[this]);
+assert packed[this, countP];
+assert (frac[this, countP]>=100)  ; 
+
+//assert the preconditions of updateCountRec
+assert parent[this]!=null;
+packed[parent[this], parentP]:=false;
+
+//we can assume these because we have just unpacked parent[this] from parentP
+assume parent[parent[this]]!=null ==> ( frac[parent[parent[this]], parentP]>0);
+assume parent[parent[this]]==null ==> (frac[parent[this], countP] >= 50);
+assume (parent[parent[this]]!=null) && (this==right[parent[parent[this]]]) ==> (frac[parent[parent[this]], rightP]>=50);
+assume (parent[parent[this]]!=null) && (this==left[parent[parent[this]]]) ==> (frac[parent[parent[this]], leftP]>=50);
+
+
+assert packed[parent[this], rightP] && (rcRightPred[parent[this]] == count[this]);
+assert (exists c2:int :: packed[parent[this], rightP] && (rcRightPred[parent[this]] == c2));
+packed[parent[this],rightP]:=true;
+assert (forall r:Ref:: (r!=parent[this]) ==> (packed[r, countP]));
+
+//assertions for proving isPackedLeftPred(parent[this]...
+//we assume this, the other case is trivial
+//we could write a new procedure for the other case?
+assume left[parent[this]] != null;
+assert packed[left[parent[this]], countP];
+//we can assume this because isPackedCountPred is packed for left[parent[this]]
+assume packed[left[parent[this]], countP] && (cCountPred[left[parent[this]]]==count[this]);
+
+assert packed[parent[this], leftP] && (lcLeftPred[parent[this]]== count[left[parent[this]]]);
+assert (exists c1:int :: packed[parent[this], leftP] && (lcLeftPred[parent[this]]== c1)); 
+packed[parent[this],leftP]:=true;
+      call updateCountRec(parent[this]);
+      }
+    else
+  { 
+assert (frac[this, countP] >= 50);
+fracLocal[this, countP]:=frac[this, countP];
+assert  parent[this]==null ==> (frac[this, countP] >= 50);
+fracLocal[this, countP]:=fracLocal[this, countP] + frac[this, countP];
+frac[this, countP]:=fracLocal[this, countP];
+assert (frac[this, countP] >= 100);    
+ 
+         call updateCount(this);
+
+  }  
+ }
+
+
+ 
+ procedure updateCount(this: Ref)
+ modifies count, frac, packed;
+ requires this != null;
+ requires packed[this, leftP];
+ requires packed[this, rightP];
+ requires (frac[this,leftP] >=50) &&   (frac[this,rightP] >=50)  && (frac[this, countP] >= 100);
+        
+ensures ( exists c:int :: packed[this, countP] && (cCountPred[this]==c)
+         );
+ensures packed[this, countP];
+ensures (frac[this, countP]>=100);
+ensures (forall r:Ref:: (r!=this) ==> (packed[r, countP]==old(packed[r, countP])));
+     
+
+ {
+   var newc:int;
+   newc := 1;
+
+
+        if (left[this] != null)
+           {
+       newc := newc + count[left[this]];
+       }
+       
+        if (right[this] != null)
+             {
+         
+         newc := newc + count[right[this]];
+         
+       }
+        
+    count[this] := newc;   
+       
+ 
+    packed[this, countP]:=true;
+    
+      }
+
+
+procedure setLeft(this: Ref, l:Ref)
+modifies parent, left, count, frac, packed;
+requires this!=null;
+requires this!=l;
+requires l!=null;
+requires packed[this, parentP];
+requires packed[l, parentP];
+requires (forall r:Ref:: packed[r, countP]);
+ensures packed[this, parentP];
+ {
+
+packed[this, parentP]:=false;
+
+
+   parent[l]:=this;
+   left[this]:=l;
+
+
+packed[this, leftP]:=true;
+
+packed[this, rightP]:=true;
+
+packed[this, countP]:=false;
+
+
+   call updateCountRec(this);
+   
+}
+
+
+
+-------------------------------------
+
+assert (
+  exists lc: int, rc:int ::
+  ( packed[this, leftP] && (lcLeftPred[this] == lc) && 
+  (rcRightPred[this] == rc) &&
+ (count[this] == lc+rc+1) )
+);
+
+----------------------------------------------
+assert  (lcLeftPred[this] == 0);
+assert (lcLeftPred[this] == 0) ==> (
+  exists lc: int ::
+ (lcLeftPred[this] == lc)
+);
+
+assert (
+  exists lc: int ::
+ (lcLeftPred[this] == lc)
+);
+-------------------------------
+assert (
+ exists lc: int, rc:int ::
+  ( packed[this, leftP] && (lcLeftPred[this] == lc) && 
+  (frac[this, leftP] >= 50) &&
+  packed[this, rightP] &&
+  (rcRightPred[this] == rc) &&
+(frac[this, rightP] >= 50) && 
+ (count[this] == lc+rc+1) &&
+ ( count[this]== 1) )
+);
+

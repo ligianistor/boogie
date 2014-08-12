@@ -23,16 +23,15 @@ var pPairedPred: [Ref] Ref;
 //this is a special kind of predicate that only says what are the values of the keys
 //and it will be handled in a special way, as in this example
 procedure PackPaired(this:Ref);
-ensures ((vPairedPred[this] == val[this]) && (pPairedPred[this] == pair[this])) ==> 
-        packed[this, pairedP];
+requires (vPairedPred[this] == val[this]) && (pPairedPred[this] == pair[this]);
+ensures  packed[this, pairedP];
 
 procedure UnpackPaired(this:Ref);
-ensures packed[this, pairedP]   ==>
- ((vPairedPred[this] == val[this]) && (pPairedPred[this] == pair[this]));
+requires packed[this, pairedP];
+ensures (vPairedPred[this] == val[this]) && (pPairedPred[this] == pair[this]);
 
 procedure PackOK(this:Ref);
-ensures (
-packed[this, pairedP] &&
+requires packed[this, pairedP] &&
 (vPairedPred[this]== val[this]) &&
 (pPairedPred[this]== pair[this])  && 
 (frac[this, pairedP]>=50) &&
@@ -41,14 +40,12 @@ packed[pair[this], pairedP] &&
 (pPairedPred[pair[this]]== this)  && 
 (frac[pair[this], pairedP]>=50) &&
 packed[pair[this], okP] &&
-(frac[pair[this], okP]>=50)
-)
-==> packed[this,okP];
+(frac[pair[this], okP]>=50);
+ensures packed[this,okP];
 
 procedure UnpackOK(this:Ref);
-ensures packed[this,okP] ==> 
-(
-packed[this, pairedP] &&
+requires packed[this,okP];
+ensures packed[this, pairedP] &&
 (vPairedPred[this]== val[this]) &&
 (pPairedPred[this]== pair[this])  && 
 (frac[this, pairedP]>=50) &&
@@ -57,8 +54,7 @@ packed[pair[this], pairedP] &&
 (pPairedPred[pair[this]]== this)  && 
 (frac[pair[this], pairedP]>=50) &&
 packed[pair[this], okP] &&
-(frac[pair[this], okP]>=50)
-);
+(frac[pair[this], okP]>=50);
 
 //used for packing predicate ok
 //the automatic rule is that wherever we see v, we replace it 

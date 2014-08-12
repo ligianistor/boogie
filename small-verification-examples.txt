@@ -1,0 +1,72 @@
+// illustrates pack/unpack
+class DoubleCount {
+  int val;
+  int dbl;
+  
+  predicate OK() = exists v,d: val -> v CROSS dbl -> d CROSS d == v*2
+  
+  void increment() {
+    val = val + 1;
+	dbl = dbl + 1;
+  }
+}
+
+// illustrates sharing: can have two Share objects pointing to the same DoubleCount
+class Share {
+  DoubleCount dc;
+  
+  predicate ShareCount() = exists d: dc -> d CROSS 1/2 d in OK()
+  
+public void touch() {
+    dc.increment();
+  }
+}
+
+main() {
+DoubleCount dc;
+Share s1 = new Share(dc);
+Share s2 = new Share(dc);
+s1.touch();
+//invariant is kept
+//s2 can rely on invariant
+s2.touch();
+
+}
+
+-------------------------------------------------
+
+// variant: replace DoubleCount with MultCount, with a predicate Mult(x) and d=v*x
+// variant: have Share declare predicate ShareCount(MultCount dc) to precisely track the alias, and use it to reclaim full permission of the underlying MultCount, then change x
+
+// simpler example of 2 mutually dependent objects
+class Pair {
+  int val;
+  Pair pair;
+  
+  predicate OK() = exists v,p,k: 1/2 this in Paired(v,p) CROSS 1/2 p in Paired(v,this) CROSS 1/2 p in OK();
+  
+  predicate Paired(int v, Pair p) = val -> v CROSS pair -> p
+
+  void increment() {
+    // unpack OK
+	// unpack 1/2 this in Paired(v,p)
+	p.increment1();
+	// have packed 1/2 this in Paired(v,p)
+	// pack OK
+  }
+  void increment1() {
+    // unpack OK
+	// now have 1.0 this in Paired(v,p)
+	// unpack 1.0 this in Paired(v,p)
+	val = val + 1;
+	// pack 1.0 this in Paired(v,p)
+	p.increment2();
+	// pack OK
+  }
+  void increment2() {
+    // have 1.0 this in Paired(v,p)
+	// unpack 1.0 this in Paired(v,p)
+	val = val + 1;
+	// pack 1.0 this in Paired(v+1,p)
+  }
+}
