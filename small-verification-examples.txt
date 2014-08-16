@@ -11,11 +11,15 @@ class DoubleCount {
   }
 }
 
-// illustrates sharing: can have two Share objects pointing to the same DoubleCount
+// illustrates sharing: can have two Share objects pointing to the same DoubleCount.
+// There might be multiple Share objects that point to the same DoubleCount.
+//So we don't need 1/2 d, we need k >0 d in the ShareCount predicate
 class Share {
   DoubleCount dc;
   
-  predicate ShareCount() = exists d: dc -> d CROSS 1/2 d in OK()
+  //predicate ShareCount() = exists d: dc -> d CROSS 1/2 d in OK()
+
+predicate ShareCount() = exists d:DoubleCount, k:int: dc -> d CROSS d k in OK()
   
 public void touch() {
     dc.increment();
