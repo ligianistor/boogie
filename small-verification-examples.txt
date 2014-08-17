@@ -7,17 +7,20 @@ class DoubleCount {
   
   void increment() {
     val = val + 1;
-	dbl = dbl + 1;
+	dbl = dbl + 2;
   }
 }
 
 // illustrates sharing: can have two Share objects pointing to the same DoubleCount.
 // There might be multiple Share objects that point to the same DoubleCount.
 //So we don't need 1/2 d, we need k >0 d in the ShareCount predicate
+//predicate ShareCount() = exists d: dc -> d CROSS 1/2 d in OK()
 class Share {
   DoubleCount dc;
-  
-  //predicate ShareCount() = exists d: dc -> d CROSS 1/2 d in OK()
+
+
+//there are two predicates that have keys to dc
+predicate ConstructShare(dc_:DoubleCount) = this.dc -> dc_
 
 predicate ShareCount() = exists d:DoubleCount, k:int: dc -> d CROSS d k in OK()
   
