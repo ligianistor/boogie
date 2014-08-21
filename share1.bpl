@@ -94,16 +94,24 @@ assume fracOKP[dc[share1]] > 0;
 call PackShareCount(share1);
 packed[share1, ShareCountP] := true;
 assert packed[share1, ShareCountP];
-assert (fracShareCountP[share1] > 0);
+assume (fracShareCountP[share1] > 0);
 
 call touch(share1);
 
 assume fracOKP[dc[share2]] > 0;
+//why do we need this assume
+//they could be aliased and the proof should still work
+//assume dc[share2]!=dc[share1];
+assert (packed[dc[share2], OKP]);
+
 call PackShareCount(share2);
 packed[share2, ShareCountP] := true;
 
 assert packed[share2, ShareCountP];
-assert (fracShareCountP[share2] > 0);
+//this is part of creating the
+//object proposition
+//share2@k ShareCount
+assume (fracShareCountP[share2] > 0);
 call touch(share2);
 
 }
