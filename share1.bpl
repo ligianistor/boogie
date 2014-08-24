@@ -57,7 +57,12 @@ procedure touch(this: Ref)
 modifies val, dbl, packed, fracOKP, fracShareCountP;
 requires packed[this, ShareCountP] && (fracShareCountP[this] > 0);
 ensures packed[this, ShareCountP] && (fracShareCountP[this] > 0);
-free ensures (forall x : Ref, y : PredicateTypes :: ((x!=this) || (y!=ShareCountP) ==> (packed[x,y]==old(packed[x,y]))));
+free ensures (forall x : Ref, y : PredicateTypes :: 
+(
+!((x==this) && (y==ShareCountP))
+==> (packed[x,y]==old(packed[x,y]))
+)
+);
 {
 call UnpackShareCount(this);
 packed[this, ShareCountP]:=false;
