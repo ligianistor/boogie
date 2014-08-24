@@ -57,6 +57,7 @@ procedure touch(this: Ref)
 modifies val, dbl, packed, fracOKP, fracShareCountP;
 requires packed[this, ShareCountP] && (fracShareCountP[this] > 0);
 ensures packed[this, ShareCountP] && (fracShareCountP[this] > 0);
+ensures forall x : Ref, y : PredicateTypes :: ((x!=this) && (y!=ShareCountP) ==> (packed[x,y]==old(packed[x,y])));
 {
 call UnpackShareCount(this);
 packed[this, ShareCountP]:=false;
@@ -81,27 +82,30 @@ modifies val, dbl, packed, fracOKP, fracShareCountP;
 {
 var dc0 : Ref;
 var share1, share2 : Ref;
-//need to state that dc satisfies the OK predicate
+//need to state that dc0 satisfies the OK predicate
 assume packed[dc0, OKP];
 call ConstructShare(share1, dc0);
+assert dc[share1] == dc0;
 
 call ConstructShare(share2, dc0);
+assert dc[share2] == dc0;
 
 //this assume is for the dc of share1,
 //to say that we put it in the OK predicate
 
 assume fracOKP[dc[share1]] > 0;
+assert (packed[dc[share1], OKP]);
 call PackShareCount(share1);
 packed[share1, ShareCountP] := true;
 assert packed[share1, ShareCountP];
 assume (fracShareCountP[share1] > 0);
 
 call touch(share1);
+assert (packed[dc[share1], OKP]);
 
 assume fracOKP[dc[share2]] > 0;
-//why do we need this assume
-//they could be aliased and the proof should still work
-//assume dc[share2]!=dc[share1];
+
+//actually dc[share2]==dc[share1];
 assert (packed[dc[share2], OKP]);
 
 call PackShareCount(share2);
