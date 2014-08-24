@@ -57,7 +57,7 @@ procedure touch(this: Ref)
 modifies val, dbl, packed, fracOKP, fracShareCountP;
 requires packed[this, ShareCountP] && (fracShareCountP[this] > 0);
 ensures packed[this, ShareCountP] && (fracShareCountP[this] > 0);
-ensures forall x : Ref, y : PredicateTypes :: ((x!=this) && (y!=ShareCountP) ==> (packed[x,y]==old(packed[x,y])));
+free ensures (forall x : Ref, y : PredicateTypes :: ((x!=this) || (y!=ShareCountP) ==> (packed[x,y]==old(packed[x,y]))));
 {
 call UnpackShareCount(this);
 packed[this, ShareCountP]:=false;
@@ -101,11 +101,13 @@ assert packed[share1, ShareCountP];
 assume (fracShareCountP[share1] > 0);
 
 call touch(share1);
+//This assertion might not hold.
+//Might have to tell Boogie some extra things about which objects are the 
+//same and which are not. It is related to aliasing.
+//assert share1!=dc[share1];
 assert (packed[dc[share1], OKP]);
 
 assume fracOKP[dc[share2]] > 0;
-
-//actually dc[share2]==dc[share1];
 assert (packed[dc[share2], OKP]);
 
 call PackShareCount(share2);
@@ -117,6 +119,5 @@ assert packed[share2, ShareCountP];
 //share2@k ShareCount
 assume (fracShareCountP[share2] > 0);
 call touch(share2);
-
 }
 
