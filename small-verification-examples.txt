@@ -4,6 +4,13 @@ class DoubleCount {
   int dbl;
   
   predicate OK() = exists v,d: val -> v CROSS dbl -> d CROSS d == v*2
+
+//I might need a few constructors 
+//depending on the specific invariant 
+//that I want my initial object to satisfy
+  public DoubleCount() {
+
+}
   
   void increment() {
     val = val + 1;
@@ -30,7 +37,7 @@ public void touch() {
 }
 
 main() {
-DoubleCount dc;
+DoubleCount dc = new DoubleCount();
 Share s1 = new Share(dc);
 Share s2 = new Share(dc);
 s1.touch();
@@ -66,7 +73,7 @@ class Pair {
 	// now have 1.0 this in Paired(v,p)
 	// unpack 1.0 this in Paired(v,p)
 	val = val + 1;
-	// pack 1.0 this in Paired(v,p)
+	// pack 1.0 p in Paired(v,this)
 	p.increment2();
 	// pack OK
   }
