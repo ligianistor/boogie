@@ -13,9 +13,12 @@ var next: [Ref]Ref;
 const unique PredValP: PredicateTypes;
 const unique PredNextP: PredicateTypes;
 
-//constructor for SimpleCell
+//constructor for SimpleCell that ensures PredVal.
+//another constructor that ensures another predicate will
+//have another number of arguments
 procedure ConstructSimpleCell(this: Ref, i: int, obj: Ref);
-ensures (val[this] == i) && (next[this] == obj);
+	ensures (val[this] == i) && (next[this] == obj)
+  		&& (packed[this, PredValP]) && (fracPredValP[this] >= 100);
 
 procedure PackPredVal(this: Ref);
 requires val[this] < 15;
