@@ -108,12 +108,14 @@ procedure main()
 	//We add 1 to fracPredValP because PredNext contains a fraction of 
 	//at least 1 to next[a]. 
 	fracPredValP[next[a]] := fracPredValP[next[a]]+1;
+	packed[a,PredNextP] := false;
 	//We do not neex the assert below.
 	//I put it in for clarity.
 	//assert next[a] == c;
 
 	call UnpackPredNext(b);
 	fracPredValP[next[b]] := fracPredValP[next[b]]+1;
+	packed[b,PredNextP] := false;
 	//We do not neex the assert below.
 	//I put it in for clarity.
 	//assert next[b] == c;
