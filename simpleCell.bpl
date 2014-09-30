@@ -13,50 +13,112 @@ var next: [Ref]Ref;
 const unique PredValP: PredicateTypes;
 const unique PredNextP: PredicateTypes;
 
-//constructor for SimpleCell that ensures PredVal.
-//another constructor that ensures another predicate will
-//have another number of arguments
-procedure ConstructSimpleCell(this: Ref, i: int, obj: Ref);
-	ensures (val[this] == i) && (next[this] == obj)
-  		&& (packed[this, PredValP]) && (fracPredValP[this] >= 100);
+//Constructor for SimpleCell that ensures PredVal.
+//Another constructor that ensures another predicate will
+//have another number of arguments.
+//This constructor packs to PredVal
+procedure ConstructSimpleCell0(this: Ref, i: int, obj: Ref);
+	ensures (val[this] == i) && 
+		(next[this] == obj) && 
+		(packed[this, PredValP]) && 
+		(fracPredValP[this] >= 100);
+
+//This constructor packs to PredNext.
+//The difference between this constructor and
+//the one above is only the number of arguments.
+procedure ConstructSimpleCell1(this: Ref, i: int, obj: Ref);
+	requires fracPredValP[obj] >= 1;
+	ensures (val[this] == i) && 
+		(next[this] == obj) && 
+		(packed[this, PredNextP]) && 
+		(fracPredNextP[this] >= 100);			
 
 procedure PackPredVal(this: Ref);
-requires val[this] < 15;
+	requires (packed[this, PredValP] == false) && 
+		(val[this] < 15);
 
 procedure UnpackPredVal(this: Ref);
-requires packed[this, PredValP];
-ensures val[this] < 15;
+	requires packed[this, PredValP] &&
+		(fracPredValP[this] > 0);
+	ensures val[this] < 15;
 
 procedure PackPredNext(this: Ref);
-requires packed[next[this], PredValP] && (fracPredValP[next[this]] >= 34);
+	requires (packed[this, PredNextP] == false) &&
+		packed[next[this], PredValP] && 
+		(fracPredValP[next[this]] >= 1);
 
 procedure UnpackPredNext(this: Ref);
-requires packed[this, PredNextP];
-ensures packed[next[this], PredValP] && (fracPredValP[next[this]] >= 34);
+	requires packed[this, PredNextP] &&
+		(fracPredNextP[this] > 0);
+	ensures packed[next[this], PredValP] && 
+		(fracPredValP[next[this]] >= 1);
 
 procedure ChangeVal(this: Ref, r: int)
-modifies val;
-//the requires has to state that r is <15
-requires packed[this, PredValP] && (fracPredValP >= 100);
-ensures packed[this, PredValP] && (fracPredValP >= 100);
+	modifies val;
+	//The requires has to state that r is < 15.
+	requires packed[this, PredValP] && 
+		(fracPredValP[this] >= 100);
+	ensures packed[this, PredValP] &&
+		 (fracPredValP[this] >= 100);
 {
-val[this] := r;
+	val[this] := r;
 }
 
 
 procedure main()
-modifies val, packed, fracPredValP;
+	modifies val, packed, fracPredValP;
 {
-var a, b, c : Ref;
+	var a, b, c : Ref;
 
-call ConstructSimpleCell(c, 2, null);
+	call ConstructSimpleCell0(c, 2, null);
+	//Pi now has c@100 PredVal().
+	//The asserts below are just to make things clearer, they are 
+	//not needed in the proof.
+	assert (packed[c, PredValP]) && 
+		(fracPredValP[c] >= 100);
 
-call ConstructSimpleCell(a, 2, c);
+	//This constructor consumes a fraction of the predicate PredVal() to c.
+	//We can see this by looking at the requires.
 
-call ConstructSimpleCell(b, 3, c);
+	call ConstructSimpleCell1(a, 2, c);
+	//Pi now has c@100 PredVal() && a@100 PredNext().
+	assert (val[a] == 2) && 
+		(next[a] == c);
+	assert (packed[a, PredNextP]) && 
+		(fracPredNextP[a] >= 100);
+		fracPredValP[c] := fracPredValP[c]-1;
+	//Because of the assert above we can call UnpackPredNext(a).
 
-call ChangeVal(c, 4);
+	call ConstructSimpleCell1(b, 3, c);
+	//Pi now has c@100 PredVal() && a@100 PredNext() && b@100 PredNext().
+	assert (val[b] == 3) && 
+		(next[b] == c);
+	assert (packed[b, PredNextP]) && 
+		(fracPredNextP[b] >= 100);
+    	//This is the way we keep track of fractions.
+    	//A fraction of 1 was consumed so we subtract it from fracPredValP
+   	fracPredValP[c] := fracPredValP[c]-1;
+   
+ 
+	//We need to figure out which object propositions to unpack from Pi,
+	//in an automatic way.
+	//I have a procedure for this.
 
+	call UnpackPredNext(a);
+	//We add 1 to fracPredValP because PredNext contains a fraction of 
+	//at least 1 to next[a]. 
+	fracPredValP[next[a]] := fracPredValP[next[a]]+1;
+	//We do not neex the assert below.
+	//I put it in for clarity.
+	//assert next[a] == c;
+
+	call UnpackPredNext(b);
+	fracPredValP[next[b]] := fracPredValP[next[b]]+1;
+	//We do not neex the assert below.
+	//I put it in for clarity.
+	//assert next[b] == c;
+
+	call ChangeVal(c, 4);
 }
 
 
