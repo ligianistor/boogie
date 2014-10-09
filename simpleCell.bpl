@@ -39,7 +39,7 @@ procedure PackPredVal(this: Ref);
 
 procedure UnpackPredVal(this: Ref);
 	requires packed[this, PredValP] &&
-		(fracPredValP[this] > 0);
+		(fracPredValP[this] >= 1);
 	ensures val[this] < 15;
 
 procedure PackPredNext(this: Ref);
@@ -49,7 +49,7 @@ procedure PackPredNext(this: Ref);
 
 procedure UnpackPredNext(this: Ref);
 	requires packed[this, PredNextP] &&
-		(fracPredNextP[this] > 0);
+		(fracPredNextP[this] >= 1);
 	ensures packed[next[this], PredValP] && 
 		(fracPredValP[next[this]] >= 1);
 
@@ -114,6 +114,7 @@ procedure main()
 	//assert next[a] == c;
 
 	call UnpackPredNext(b);
+	//We make the modification to frac after the call to the resp. procedure.
 	fracPredValP[next[b]] := fracPredValP[next[b]]+1;
 	packed[b,PredNextP] := false;
 	//We do not neex the assert below.

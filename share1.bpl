@@ -26,16 +26,16 @@ procedure PackOk(this:Ref);
 
 procedure UnpackOk(this:Ref);
 	requires packed[this, OKP] &&
-		(fracOKP[this] > 0);
+		(fracOKP[this] >= 1);
 	ensures (dbl[this]==val[this]*2);
 
 
 procedure increment(this: Ref)
 	modifies val, dbl, packed, fracOKP;
 	requires packed[this, OKP]  && 
-		(fracOKP[this] > 0);
+		(fracOKP[this] >= 1);
 	ensures  packed[this, OKP] && 
-		(fracOKP[this] > 0);
+		(fracOKP[this] >= 1);
 {
 	call UnpackOk(this);
 	packed[this, OKP]:=false;
@@ -60,21 +60,25 @@ procedure ConstructShare0(this:Ref, dc_:Ref);
 		(packed[this, ShareCountP]) && 
 		(fracShareCountP[this] >= 100);
 
+//Use >= instead of > when writing about frac.
+//It will be easier for the Oprop plugin to find the lower bound.
 procedure PackShareCount(this:Ref);
 	requires (packed[dc[this], OKP] && 
-		(fracOKP[dc[this]] > 0));
+		(fracOKP[dc[this]] >= 1));
 
+//The Pack and Unpack for a predicate must have the same lower bound for 
+//frac..[same object].
 procedure UnpackShareCount(this:Ref);
 	requires packed[this, ShareCountP];
 	ensures (packed[dc[this], OKP] && 
-		(fracOKP[dc[this]] > 0));
+		(fracOKP[dc[this]] >= 1));
 
 procedure touch(this: Ref)
 	modifies val, dbl, packed, fracOKP;
 	requires packed[this, ShareCountP] && 
-		(fracShareCountP[this] > 0);
+		(fracShareCountP[this] >= 1);
 	ensures packed[this, ShareCountP] &&
-		(fracShareCountP[this] > 0);
+		(fracShareCountP[this] >= 1);
 	//The way we automatically write this "free ensures" is described in point 4
 	//in my email.
 	free ensures (forall x : Ref, y : PredicateTypes :: 
@@ -87,9 +91,9 @@ procedure touch(this: Ref)
 	call UnpackShareCount(this);
 	packed[this, ShareCountP]:=false;
 
-	assert (fracShareCountP[this] > 0);
+	assert (fracShareCountP[this] >= 1);
 	call increment(dc[this]) ;
-	assert (fracShareCountP[this] > 0);
+	assert (fracShareCountP[this] >= 1);
 	call PackShareCount(this);
 	packed[this, ShareCountP]:=true;
 }
@@ -99,38 +103,42 @@ procedure main()
 	//that are being modified, by this method,
 	//or transitively by all methods that are called in 
 	//this procedure
-	modifies val, dbl, packed, fracOKP;
+	modifies val, dbl, packed, fracOKP, fracShareCountP;
 {
 	//dc0 also needs to be constructed
-var dc0 : Ref;
-var share1, share2 : Ref;
-//Need to state that dc0 satisfies the OK predicate.
-//By calling the constructorwe state the invariant for dc0.
-call ConstructDoubleCount0(dc0, 2, 4);
+	var dc0 : Ref;
+	var share1, share2 : Ref;
+	//Need to state that dc0 satisfies the OK predicate.
+	//By calling the constructorwe state the invariant for dc0.
+	call ConstructDoubleCount0(dc0, 2, 4);
 
 
-//By calling this constructorfor share1,
-//we say that we put it in the Share predicate.
-call ConstructShare0(share1, dc0);
+	//By calling this constructorfor share1,
+	//we say that we put it in the Share predicate.
+	call ConstructShare0(share1, dc0);
 
 
-call ConstructShare0(share2, dc0);
+	call ConstructShare0(share2, dc0);
 
 
-//the 3 lines below are for creating the
-//object proposition
-//share1@k ShareCount
-call PackShareCount(share1);
-packed[share1, ShareCountP] := true;
+	//The 2 lines below are for creating the
+	//object proposition
+	//share1@k ShareCount.
+	call PackShareCount(share1);
+	packed[share1, ShareCountP] := true;
+	fracOKP[dc[share1]] := fracOKP[dc[share1]] - 1;
 
-//the 3 lines below are for creating the
-//object proposition
-//share2@k ShareCount
-call PackShareCount(share2);
-packed[share2, ShareCountP] := true;
+	//The 2 lines below are for creating the
+	//object proposition
+	//share2@k ShareCount.
+	call PackShareCount(share2);
+	packed[share2, ShareCountP] := true;
+	fracOKP[dc[share2]] := fracOKP[dc[share2]] - 1;
 
-call touch(share1);
+	call touch(share1);
+	fracShareCountP[share1] := fracShareCountP[share1] -1;
 
-call touch(share2);
+	call touch(share2);
+	fracShareCountP[share2] := fracShareCountP[share2] -1;
 }
 

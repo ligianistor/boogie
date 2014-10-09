@@ -26,16 +26,16 @@ procedure PackOk(this:Ref);
 
 procedure UnpackOk(this:Ref);
 	requires packed[this, OKP] &&
-		(fracOKP[this] > 0);
+		(fracOKP[this] >= 1);
 	ensures (dbl[this]==val[this]*2);
 
 
 procedure increment(this: Ref)
 	modifies val, dbl, packed, fracOKP;
 	requires packed[this, OKP]  && 
-		(fracOKP[this] > 0);
+		(fracOKP[this] >= 1);
 	ensures  packed[this, OKP] && 
-		(fracOKP[this] > 0);
+		(fracOKP[this] >= 1);
 {
 	call UnpackOk(this);
 	packed[this, OKP]:=false;
