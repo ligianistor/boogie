@@ -84,3 +84,77 @@ class Pair {
 	// pack 1.0 this in Paired(v+1,p)
   }
 }
+------------------------------
+Example used for reachability static analysis for the finalizers' problem.
+Taken from 
+https://secweb.cs.odu.edu/~zeil/cs361/web/website/Lectures/garbageCollection/pages/ar01s01s03.html
+
+import java.util.HashMap;
+import java.util.Map;
+
+class Airport
+{
+   String airportName;
+   Airport[] hasFlightsTo;
+   int numberConnections;
+
+public void setNumberConnections(int newconn) {
+numberConnections = newconn;
+}
+
+}
+
+
+class AirLine {
+   String name;
+   Map<String , Airport> hubs = new HashMap<String, Airport>();
+}
+
+
+
+public static void main()
+{
+//create example from webpage
+Airport boston = new Airport("Boston", new Airport[5], 0);
+Airport washdc = new Airport("WashingtonDC", new Airport[5], 0);
+Airport ny = new Airport("N.Y.", new Airport[5], 0);
+Aiport raleigh = new Airport("Raleigh", new Airport[5], 0);
+Airport norfolk = new Airport("Norfolk", new Airport[5], 0);
+
+Airline myHub = new Airline("Starbucks", ); 
+
+
+
+}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
