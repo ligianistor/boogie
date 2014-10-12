@@ -1,7 +1,7 @@
 //type Ref is intended to represent object references
 type Ref;
 type PredicateTypes;
-type FractionType = [Ref, PredicateTypes] int;
+type FractionType = [Ref] int;
 type PackedType = [Ref, PredicateTypes] bool;
 
 const null:Ref;
@@ -10,7 +10,7 @@ const unique RangeP:PredicateTypes;
 var val: [Ref]int;
 var next: [Ref]Ref;
 
-var frac: FractionType;
+var fracRangeP: FractionType;
 var packed: PackedType;
 
 //global variables that keep track of the parameters of the Range predicate
@@ -21,6 +21,10 @@ var yRangePred: [Ref] int;
 //after calling procedures PackRangeNextNull, any kind 
 //of Pack procedures, I have to do
 //packed[this, rangeP]:=true
+
+//Boogie code needs to be much closer to the Java code. 
+//We do not want PackRangeNextNull and PackRangeNextNotNull.
+//We only want one PackRange.
 
 procedure PackRangeNextNull(this:Ref, x:int, y:int);
 requires (this != null) &&  (next[this] == null) && (val[this] >= x) && (val[this] <= y);
@@ -65,14 +69,14 @@ modifies val, packed, xRangePred;
 requires this!=null;
 //requires x>=0;
 //this could be 100 here
-//requires frac[this, RangeP]>=50;
+//requires fracRangeP[this]>=50;
 requires xRangePred[this]==0; 
 requires yRangePred[this]==10;
 requires packed[this, RangeP];
 ensures packed[this, RangeP];
 ensures xRangePred[this]==0; 
 ensures yRangePred[this]==10;
-//ensures frac[this, RangeP]>=50;
+//ensures fracRangeP[this]>=50;
 {
 call UnpackRange(this, 0, 10);
 packed[this, RangeP]:=false;
