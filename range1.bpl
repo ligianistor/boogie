@@ -80,7 +80,9 @@ procedure addModulo11(this: Ref, x:int)
 modifies val, packed, xRangePred, fracRangeP;
 //need to put this in for modulo 
 requires this!=null;
-//requires x>=0;
+//This is so that we are in the right case in the modulo 
+//procedure.
+requires x >= 0;
 //this could be 100 here
 requires fracRangeP[this] >= 1;
 requires xRangePred[this] == 0; 
@@ -90,42 +92,56 @@ ensures packed[this, RangeP];
 ensures xRangePred[this] == 0; 
 ensures yRangePred[this] == 10;
 ensures fracRangeP[this] >= 1;
+//This "free ensures" illustrates another idea: 
+//in the modifies clause of addModulo11 only add exactly 
+//what is being assigned to, not also what is 
+//being transitively modified.
+free ensures (forall a : Ref :: 
+	(!(a==this) ==> (val[a]==old(val[a])))
+	);
+//I might need to put in a free ensures about fracRangeP.
+//This is why I'm not sure if I should assign to fracRangeP[next[this]].
 {
 //We need to be careful about assumes.
 //And use them sparingly.
 call UnpackRange(this, 0, 10);
  packed[this, RangeP] := false;
- //We need to put this assume in.
- //Maybe we need to state this as a precondition of the method.
+//We need to put this assume in.
+//Maybe we need to state this as a precondition of the method.
 //Can state in paper that we learned things like these.
 assume this != next[this];
-assert (this != null);
-assert (val[this] >= 0);
-assert (val[this] <= 10); 
-assert ( (next[this] == null) || 
-		 	(packed[next[this], RangeP] &&
-			(fracRangeP[next[this]] >= 1) &&
-			(xRangePred[next[this]] == 0) && 
-			(yRangePred[next[this]] == 10))
-		 ) ;
-   
 
 val[this] := modulo((val[this]+x),11);
 
 if (next[this] != null )
   { 
-assert next[this] != null;
-assert fracRangeP[next[this]] >= 1;
-assert xRangePred[next[this]] == 0; 
-assert yRangePred[next[this]] == 10;
-assert packed[next[this], RangeP];
 
 call addModulo11(next[this], x);
+//This is because there is a reference to fracRangeP both in 
+//the requires and in the ensures of addModulo11.
+//I'm not sure if I have to do the following two assignments.
+fracRangeP[next[this]] := fracRangeP[next[this]] - 1;
+fracRangeP[next[this]] := fracRangeP[next[this]] + 1;
   }
+
+assert (this != null); 
+assume this != next[this];
 
   //val[this] was not modified
   //but Boogie does not know that
 
+//assume val[this] == old(val[this]);
+//assume fracRangeP[this] == old(fracRangeP[this]);
+
 call PackRange(this, 0, 10);
-packed[this,RangeP]:=true;
+packed[this,RangeP] := true;
+//This is because of the ensures of PackRange.
+//But it's only for the case when next[this] != null!!!!
+//So I need to add some condition here.
+fracRangeP[this] := fracRangeP[this] + 1;
+
+assert packed[this, RangeP];
+assert xRangePred[this] == 0; 
+assert yRangePred[this] == 10;
+
   }
