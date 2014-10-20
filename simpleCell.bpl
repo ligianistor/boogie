@@ -99,7 +99,6 @@ procedure main()
     	//A fraction of 1 was consumed so we subtract it from fracPredValP
    	fracPredValP[c] := fracPredValP[c]-1;
    
- 
 	//We need to figure out which object propositions to unpack from Pi,
 	//in an automatic way.
 	//I have a procedure for this.
@@ -109,7 +108,7 @@ procedure main()
 	//at least 1 to next[a]. 
 	fracPredValP[next[a]] := fracPredValP[next[a]]+1;
 	packed[a,PredNextP] := false;
-	//We do not neex the assert below.
+	//We do not need the assert below.
 	//I put it in for clarity.
 	//assert next[a] == c;
 
@@ -117,11 +116,9 @@ procedure main()
 	//We make the modification to frac after the call to the resp. procedure.
 	fracPredValP[next[b]] := fracPredValP[next[b]]+1;
 	packed[b,PredNextP] := false;
-	//We do not neex the assert below.
+	//We do not need the assert below.
 	//I put it in for clarity.
 	//assert next[b] == c;
 
 	call ChangeVal(c, 4);
 }
-
-

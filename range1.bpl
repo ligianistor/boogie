@@ -135,10 +135,6 @@ assume this != next[this];
 
 call PackRange(this, 0, 10);
 packed[this,RangeP] := true;
-//This is because of the ensures of PackRange.
-//But it's only for the case when next[this] != null!!!!
-//So I need to add some condition here.
-fracRangeP[this] := fracRangeP[this] + 1;
 
 assert packed[this, RangeP];
 assert xRangePred[this] == 0; 
