@@ -99,6 +99,11 @@ ensures fracRangeP[this] >= 1;
 free ensures (forall a : Ref :: 
 	(!(a==this) ==> (val[a]==old(val[a])))
 	);
+
+//This free ensures is for the fractions.
+free ensures (forall b : Ref :: 
+	(!(b==next[this]) ==> (fracRangeP[b]==old(fracRangeP[b])))
+	);
 //I might need to put in a free ensures about fracRangeP.
 //This is why I'm not sure if I should assign to fracRangeP[next[this]].
 {
@@ -109,10 +114,20 @@ call UnpackRange(this, 0, 10);
 //We need to put this assume in.
 //Maybe we need to state this as a precondition of the method.
 //Can state in paper that we learned things like these.
-assume this != next[this];
+//These assumes say that the list is not circular.
+//We only need the second one.
+//What happens when the list is actually circular and there are
+//two cells only, with next[next[this]] == this?
+//This code goes into an infinite loop if the scenario above happens.
+//We assume termination in our examples so maybe it is OK to make this assumption and
+//bake it into the definition of the predicate.
+//Or need to change the actual code.
+//assume this != next[this];
+assume this != next[next[this]];
+
 
 val[this] := modulo((val[this]+x),11);
-
+assert fracRangeP[this] >= 1;
 if (next[this] != null )
   { 
 
@@ -123,7 +138,7 @@ call addModulo11(next[this], x);
 fracRangeP[next[this]] := fracRangeP[next[this]] - 1;
 fracRangeP[next[this]] := fracRangeP[next[this]] + 1;
   }
-
+assert fracRangeP[this] >= 1;
 assert (this != null); 
 assume this != next[this];
 
@@ -139,5 +154,4 @@ packed[this,RangeP] := true;
 assert packed[this, RangeP];
 assert xRangePred[this] == 0; 
 assert yRangePred[this] == 10;
-
   }
