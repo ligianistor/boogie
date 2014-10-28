@@ -1,0 +1,157 @@
+//type Ref is intended to represent object references
+type Ref;
+type PredicateTypes;
+type FractionType = [Ref, PredicateTypes] int;
+type PackedType = [Ref, PredicateTypes] bool;
+
+const null:Ref;
+const unique RangeP:PredicateTypes;
+
+var val: [Ref]int;
+var next: [Ref]Ref;
+
+var frac: FractionType;
+var packed: PackedType;
+
+//global variables that keep track of the parameters of the Range predicate
+//that are not values of fields
+var xRangePred: [Ref] int;
+var yRangePred: [Ref] int;
+
+procedure ConstructRange0(this: Ref, v: int, n: Ref);
+	ensures (val[this] == v) && 
+		(next[this] == n) && 
+		(packed[this, RangeP]) && 
+		(frac[this, RangeP] >= 100);
+
+//after calling procedures PackRangeNextNull, any kind 
+//of Pack procedures, I have to do
+//packed[this, rangeP]:=true
+
+//Boogie code needs to be much closer to the Java code. 
+//We do not want PackRangeNextNull and PackRangeNextNotNull.
+//We only want one PackRange.
+
+//Isn't this != null implied?
+procedure PackRange(this:Ref, x:int, y:int);
+	requires (this != null) && 
+		 (val[this] >= x) &&
+		 (val[this] <= y) &&
+		 ( (next[this] == null) || 
+		 	(packed[next[this], RangeP] &&
+			(frac[next[this], RangeP] >= 1) &&
+			(xRangePred[next[this]] == x) && 
+			(yRangePred[next[this]] == y))
+		 );
+	ensures (xRangePred[this]==x) && (yRangePred[this]==y);
+	//Might need to do the above ensures in an assignment instead?
+
+
+procedure UnpackRange(this:Ref, x:int, y:int);
+	requires packed[this, RangeP] && 
+		(xRangePred[this] == x) &&
+		(yRangePred[this] == y) &&
+		(frac[this, RangeP] >= 1);
+	ensures (this != null) && 
+		 (val[this] >= x) &&
+		 (val[this] <= y) &&
+		 ( (next[this] == null) || 
+		 	(packed[next[this], RangeP] &&
+			(frac[next[this], RangeP] >= 1) &&
+			(xRangePred[next[this]] == x) && 
+			(yRangePred[next[this]] == y))
+		 );
+ 
+
+//modulo is not implemented in Boogie
+//so its properties have to be described  
+function modulo(x:int, y:int) returns (int);
+  axiom (forall x:int, y:int :: {modulo(x,y)} 
+    ((0 <= x) &&(0 < y) ==> (0 <= modulo(x,y) ) && (modulo(x,y) < y) )
+    &&
+    ((0 <= x) &&(y < 0) ==> (0 <= modulo(x,y) ) && (modulo(x,y) < -y) )
+    &&
+    ((x <= 0) &&(0 < y) ==> (-y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
+    &&
+    ((x <= 0) &&(y < 0) ==> (y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
+   );    
+
+procedure addModulo11(this: Ref, x:int) 
+modifies val, packed, xRangePred, frac;
+//need to put this in for modulo 
+requires this!=null;
+//This is so that we are in the right case in the modulo 
+//procedure.
+requires x >= 0;
+//this could be 100 here
+requires frac[this, RangeP] >= 1;
+requires xRangePred[this] == 0; 
+requires yRangePred[this] == 10;
+requires packed[this, RangeP];
+ensures packed[this, RangeP];
+ensures xRangePred[this] == 0; 
+ensures yRangePred[this] == 10;
+ensures frac[this, RangeP] >= 1;
+//This "free ensures" illustrates another idea: 
+//in the modifies clause of addModulo11 only add exactly 
+//what is being assigned to, not also what is 
+//being transitively modified.
+free ensures (forall a : Ref :: 
+	(!(a==this) ==> (val[a]==old(val[a])))
+	);
+
+//This free ensures is for the fractions.
+free ensures (forall b : Ref :: 
+	(!(b==next[this]) ==> (frac[b, RangeP]==old(frac[b, RangeP])))
+	);
+//I might need to put in a free ensures about frac.
+//This is why I'm not sure if I should assign to frac[next[this, RangeP]].
+{
+//We need to be careful about assumes.
+//And use them sparingly.
+call UnpackRange(this, 0, 10);
+ packed[this, RangeP] := false;
+//We need to put this assume in.
+//Maybe we need to state this as a precondition of the method.
+//Can state in paper that we learned things like these.
+//These assumes say that the list is not circular.
+//We only need the second one.
+//What happens when the list is actually circular and there are
+//two cells only, with next[next[this]] == this?
+//This code goes into an infinite loop if the scenario above happens.
+//We assume termination in our examples so maybe it is OK to make this assumption and
+//bake it into the definition of the predicate.
+//Or need to change the actual code.
+//assume this != next[this];
+assume this != next[next[this]];
+
+
+val[this] := modulo((val[this]+x),11);
+assert frac[this, RangeP] >= 1;
+if (next[this] != null )
+  { 
+
+call addModulo11(next[this], x);
+//This is because there is a reference to frac both in 
+//the requires and in the ensures of addModulo11.
+//I'm not sure if I have to do the following two assignments.
+frac[next[this], RangeP] := frac[next[this], RangeP] - 1;
+frac[next[this], RangeP] := frac[next[this], RangeP] + 1;
+  }
+assert frac[this, RangeP] >= 1;
+assert (this != null); 
+assume this != next[this];
+
+  //val[this] was not modified
+  //but Boogie does not know that
+
+//assume val[this] == old(val[this]);
+//assume frac[this, RangeP] == old(frac[this, RangeP]);
+
+call PackRange(this, 0, 10);
+packed[this,RangeP] := true;
+
+assert packed[this, RangeP];
+assert xRangePred[this] == 0; 
+assert yRangePred[this] == 10;
+  }
