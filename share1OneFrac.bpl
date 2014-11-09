@@ -36,6 +36,8 @@ procedure increment(this: Ref)
 		(frac[this, OKP] >= 1);
 	ensures  packed[this, OKP] && 
 		(frac[this, OKP] >= 1);
+  ensures (forall x:Ref :: ((x!=this) ==> (packed[x, OKP] == old(packed[x, OKP]))));
+  ensures (forall x:Ref :: (packed[x, ShareCountP] == old(packed[x, ShareCountP])));
 {
 	call UnpackOk(this);
 	packed[this, OKP]:=false;
@@ -78,16 +80,8 @@ procedure touch(this: Ref)
 	requires (frac[this, ShareCountP] >= 1);
 	ensures packed[this, ShareCountP] &&
 		(frac[this, ShareCountP] >= 1);
-	//The way we automatically write this "free ensures" is described in point 4
-	//in my email.
-	free ensures (forall x : Ref, y : PredicateTypes :: 
-		(
-		!((x==this) && (y==ShareCountP))
-		==> (packed[x,y]==old(packed[x,y]))
-		)
-	);
-
-
+  ensures (forall x:Ref :: ((x!=dc[this]) ==> (packed[x, OKP] == old(packed[x, OKP]))));
+  ensures (forall x:Ref :: ((x!=this) ==> (packed[x, ShareCountP] == old(packed[x, ShareCountP]))));
 {
 	call UnpackShareCount(this);
 	packed[this, ShareCountP]:=false;
