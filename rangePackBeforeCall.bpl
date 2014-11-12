@@ -26,14 +26,14 @@ procedure ConstructRange(this: Ref, v: int, n: Ref);
 		(next[this] == n);
 
 procedure PackRange(this:Ref, x:int, y:int);
-	requires (this != null);
 	requires (val[this] >= x);
 	requires (val[this] <= y);
-	requires ( (next[this] == null) || 
-		 	(packed[next[this], RangeP] &&
-			(frac[next[this], RangeP] >= 1) &&
-			(xRangePred[next[this]] == x) && 
-			(yRangePred[next[this]] == y))
+	requires ((next[this] == null) || 
+		  (next[this] == this) ||
+		  (packed[next[this], RangeP] &&
+		  (frac[next[this], RangeP] >= 1) &&
+		  (xRangePred[next[this]] == x) && 
+		  (yRangePred[next[this]] == y))
 		 );
 	ensures (xRangePred[this]==x) && (yRangePred[this]==y);
 
@@ -42,14 +42,14 @@ procedure UnpackRange(this:Ref, x:int, y:int);
 	requires (xRangePred[this] == x);
 	requires (yRangePred[this] == y);
 	requires (frac[this, RangeP] >= 1);
-	ensures (this != null) && 
-		 (val[this] >= x) &&
+	ensures  (val[this] >= x) &&
 		 (val[this] <= y) &&
-		 ( (next[this] == null) || 
-		 	(packed[next[this], RangeP] &&
-			(frac[next[this], RangeP] >= 1) &&
-			(xRangePred[next[this]] == x) && 
-			(yRangePred[next[this]] == y))
+		 ((next[this] == null) || 
+		  (next[this] == this) ||
+		  (packed[next[this], RangeP] &&
+		  (frac[next[this], RangeP] >= 1) &&
+		  (xRangePred[next[this]] == x) && 
+		  (yRangePred[next[this]] == y))
 		 );
   
 function modulo(x:int, y:int) returns (int);
@@ -61,11 +61,10 @@ axiom (forall x:int, y:int :: {modulo(x,y)}
     ((x <= 0) &&(0 < y) ==> (-y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
     &&
     ((x <= 0) &&(y < 0) ==> (y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
-   );    
+   ); 
 
 procedure addModulo11(this: Ref, x:int) 
 	modifies val, packed, frac;
-	requires this!=null;
 	requires x >= 0;
 	requires frac[this, RangeP] >= 1;
 	requires xRangePred[this] == 0; 
@@ -79,7 +78,7 @@ procedure addModulo11(this: Ref, x:int)
 	ensures (forall y:Ref :: (frac[y, RangeP] == old(frac[y, RangeP])) );
 {
 	//there are no cycles condition
-	assume (forall link:Ref :: (this != next[link]));
+	//assume (forall link:Ref :: (this != next[link]));
 
 	call UnpackRange(this, 0, 10);
 	packed[this, RangeP] := false;
