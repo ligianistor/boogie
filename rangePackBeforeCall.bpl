@@ -28,8 +28,8 @@ procedure ConstructRange(this: Ref, v: int, n: Ref);
 procedure PackRange(this:Ref, x:int, y:int);
 	requires (val[this] >= x);
 	requires (val[this] <= y);
-	requires ((next[this] == null) || 
-		  (next[this] == this) ||
+	requires ((next[this] == this) || 
+		  (next[this] == null) ||
 		  (packed[next[this], RangeP] &&
 		  (frac[next[this], RangeP] >= 1) &&
 		  (xRangePred[next[this]] == x) && 
@@ -44,8 +44,8 @@ procedure UnpackRange(this:Ref, x:int, y:int);
 	requires (frac[this, RangeP] >= 1);
 	ensures  (val[this] >= x) &&
 		 (val[this] <= y) &&
-		 ((next[this] == null) || 
-		  (next[this] == this) ||
+		 ((next[this] == this) || 
+		  (next[this] == null) ||
 		  (packed[next[this], RangeP] &&
 		  (frac[next[this], RangeP] >= 1) &&
 		  (xRangePred[next[this]] == x) && 
