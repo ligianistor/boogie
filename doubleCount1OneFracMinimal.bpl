@@ -1,46 +1,49 @@
 type Ref;
-type PredicateTypes;
-type FractionType = [Ref, PredicateTypes] int;
-type PackedType = [Ref, PredicateTypes] bool;
-var packed: PackedType;
-var frac: FractionType;
+type FractionType = [Ref] int;
+type PackedType = [Ref] bool;
+//divide packed for each PredicateType
+//In Boogie it is always better for things to be as separate as 
+//possible because of the modifies.
+var packedOK: PackedType;
+var fracOK: FractionType;
 const null: Ref;
 
 var val: [Ref]int;
 var dbl: [Ref]int;
-const unique OKP: PredicateTypes;
 
 procedure ConstructDoubleCountOKP(val1: int, dbl1: int, this: Ref);
 	ensures (val[this] == val1) && 
 		(dbl[this] == dbl1) && 
-		(packed[this, OKP]) && 
-		(frac[this, OKP] >= 100);
+		(packedOK[this]) && 
+		(fracOK[this] >= 100);
 
 procedure ConstructDoubleCount(val1: int, dbl1: int, this: Ref);
 	ensures (val[this] == val1) && 
 		(dbl[this] == dbl1);
 
 procedure PackOK(this:Ref);
-	requires (packed[this, OKP] == false) && 
+	requires (packedOK[this] == false) && 
 		(dbl[this]==val[this]*2);
 
 procedure UnpackOK(this:Ref);
-	requires packed[this, OKP] &&
-		(frac[this, OKP] >= 1);
+	requires packedOK[this] &&
+		(fracOK[this] >= 1);
 	ensures (dbl[this]==val[this]*2);
 
 
 procedure increment(this: Ref)
-	modifies val, dbl, packed, frac;
-	requires packed[this, OKP]  && 
-		(frac[this, OKP] >= 1);
-	ensures  packed[this, OKP] && 
-		(frac[this, OKP] >= 1);
+	modifies val, dbl, packedOK;
+	requires packedOK[this]  && 
+		(fracOK[this] >= 1);
+	ensures  packedOK[this] && 
+		(fracOK[this] >= 1);
+	ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
+
 {
 	call UnpackOK(this);
-	packed[this, OKP]:=false;
+	packedOK[this]:=false;
 	val[this]:= val[this]+1;
 	dbl[this]:= dbl[this]+2;
 	call PackOK(this);
-	packed[this, OKP]:=true;
+	packedOK[this]:=true;
 }

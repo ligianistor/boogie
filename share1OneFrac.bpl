@@ -1,93 +1,95 @@
-//type Ref represents object references
 type Ref;
-type PredicateTypes;
-type FractionType = [Ref, PredicateTypes] int;
-type PackedType = [Ref, PredicateTypes] bool;
-var packed: PackedType;
-var frac: FractionType;
+type FractionType = [Ref] int;
+type PackedType = [Ref] bool;
+//divide packed for each PredicateType
+//In Boogie it is always better for things to be as separate as 
+//possible because of the modifies.
+var packedOK: PackedType;
+var fracOK: FractionType;
 const null: Ref;
 
 var val: [Ref]int;
 var dbl: [Ref]int;
 
-const unique OKP: PredicateTypes;
+procedure ConstructDoubleCountOK(val1: int, dbl1: int, this: Ref);
+	ensures (val[this] == val1) && 
+		(dbl[this] == dbl1) && 
+		(packedOK[this]) && 
+		(fracOK[this] >= 100);
 
-//Constructor for DoubleCount that ensures OK.
-//Might need to add a ConstructDoubleCount for the default constructor.
-procedure ConstructDoubleCount0(this: Ref, v: int, d: int);
-	ensures (val[this] == v) && 
-		(dbl[this] == d) && 
-		(packed[this, OKP]) && 
-		(frac[this, OKP] >= 100);
+procedure ConstructDoubleCount(val1: int, dbl1: int, this: Ref);
+	ensures (val[this] == val1) && 
+		(dbl[this] == dbl1);
 
-procedure PackOk(this:Ref);
-	requires (packed[this, OKP] == false) && 
+procedure PackOK(this:Ref);
+	requires (packedOK[this] == false) && 
 		(dbl[this]==val[this]*2);
 
-procedure UnpackOk(this:Ref);
-	requires packed[this, OKP] &&
-		(frac[this, OKP] >= 1);
+procedure UnpackOK(this:Ref);
+	requires packedOK[this] &&
+		(fracOK[this] >= 1);
 	ensures (dbl[this]==val[this]*2);
 
 
 procedure increment(this: Ref)
-	modifies val, dbl, packed;
-	requires packed[this, OKP]  && 
-		(frac[this, OKP] >= 1);
-	ensures  packed[this, OKP] && 
-		(frac[this, OKP] >= 1);
-  ensures (forall x:Ref :: ((x!=this) ==> (packed[x, OKP] == old(packed[x, OKP]))));
-  ensures (forall x:Ref :: (packed[x, ShareCountP] == old(packed[x, ShareCountP])));
+	modifies val, dbl, packedOK;
+	requires packedOK[this]  && 
+		(fracOK[this] >= 1);
+	ensures  packedOK[this] && 
+		(fracOK[this] >= 1);
+	ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
+
 {
-	call UnpackOk(this);
-	packed[this, OKP]:=false;
+	call UnpackOK(this);
+	packedOK[this]:=false;
 	val[this]:= val[this]+1;
 	dbl[this]:= dbl[this]+2;
-	call PackOk(this);
-	packed[this, OKP]:=true;
+	call PackOK(this);
+	packedOK[this]:=true;
 }
-
 //----------------------------------
 //class Share
 
+var packedShareCount: PackedType;
+var fracShareCount: FractionType;
+
 var dc: [Ref]Ref;
 
-const unique ShareCountP: PredicateTypes;
 
 //Constructor for Share
 //that packs to ShareCount
 procedure ConstructShare0(this:Ref, dc_:Ref);
 	ensures (dc[this] == dc_) &&
-		(packed[this, ShareCountP]) && 
-		(frac[this, ShareCountP] >= 100);
+		(packedShareCount[this]) && 
+		(fracShareCount[this] >= 100);
 
 //Use >= instead of > when writing about frac.
 //It will be easier for the Oprop plugin to find the lower bound.
 procedure PackShareCount(this:Ref);
-	requires (packed[dc[this], OKP] && 
-		(frac[dc[this], OKP] >= 1));
+	requires (packedOK[dc[this]] && 
+		(fracOK[dc[this]] >= 1));
 
 //The Pack and Unpack for a predicate must have the same lower bound for 
 //frac..[same object].
 procedure UnpackShareCount(this:Ref);
-	requires packed[this, ShareCountP];
-	ensures (packed[dc[this], OKP] && 
-		(frac[dc[this], OKP] >= 1));
+	requires packedShareCount[this];
+	ensures (packedOK[dc[this]] && 
+		(fracOK[dc[this]] >= 1));
 
 procedure touch(this: Ref)
-	modifies val, dbl, packed;
-	requires packed[this, ShareCountP];
-	requires (frac[this, ShareCountP] >= 1);
-	ensures packed[this, ShareCountP] &&
-		(frac[this, ShareCountP] >= 1);
-  ensures (forall x:Ref :: ((x!=dc[this]) ==> (packed[x, OKP] == old(packed[x, OKP]))));
-  ensures (forall x:Ref :: ((x!=this) ==> (packed[x, ShareCountP] == old(packed[x, ShareCountP]))));
+	modifies val, dbl, packedShareCount, packedOK;
+	requires packedShareCount[this];
+	requires (fracShareCount[this] >= 1);
+	ensures packedShareCount[this] &&
+		(fracShareCount[this] >= 1);
+  ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
+  ensures (forall x:Ref :: (packedShareCount[x] == old(packedShareCount[x])));
 {
 	call UnpackShareCount(this);
-	packed[this, ShareCountP]:=false;
+	packedShareCount[this]:=false;
 	call increment(dc[this]) ;
 	call PackShareCount(this);
-	packed[this, ShareCountP]:=true;
+	packedShareCount[this]:=true;
 }
 
 procedure main()
@@ -95,14 +97,14 @@ procedure main()
 	//that are being modified, by this method,
 	//or transitively by all methods that are called in 
 	//this procedure
-	modifies val, dbl, packed, frac;
+	modifies val, dbl, packedShareCount, packedOK, fracOK, fracShareCount;
 {
 	//dc0 also needs to be constructed
 	var dc0 : Ref;
 	var share1, share2 : Ref;
 	//Need to state that dc0 satisfies the OK predicate.
 	//By calling the constructorwe state the invariant for dc0.
-	call ConstructDoubleCount0(dc0, 2, 4);
+	call ConstructDoubleCountOK(2, 4, dc0);
 
 
 	//By calling this constructorfor share1,
@@ -116,20 +118,20 @@ procedure main()
 	//object proposition
 	//share1@k ShareCount.
 	call PackShareCount(share1);
-	packed[share1, ShareCountP] := true;
-	frac[dc[share1], OKP] := frac[dc[share1], OKP] - 1;
+	packedShareCount[share1] := true;
+	fracOK[dc[share1]] := fracOK[dc[share1]] - 1;
 
 	//The 2 lines below are for creating the
 	//object proposition
 	//share2@k ShareCount.
 	call PackShareCount(share2);
-	packed[share2, ShareCountP] := true;
-	frac[dc[share2], OKP] := frac[dc[share2], OKP] - 1;
+	packedShareCount[share2] := true;
+	fracOK[dc[share2]] := fracOK[dc[share2]] - 1;
 
 	call touch(share1);
-	frac[share1, ShareCountP] := frac[share1, ShareCountP] -1;
+	fracShareCount[share1] := fracShareCount[share1] -1;
 
 	call touch(share2);
-	frac[share2, ShareCountP] := frac[share2, ShareCountP] -1;
+	fracShareCount[share2] := fracShareCount[share2] -1;
 }
 
