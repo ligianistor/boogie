@@ -10,7 +10,7 @@ var fracShareCount: FractionType;
 
 var dc: [Ref]Ref;
 
-procedure ConstructShare0(this:Ref, dc_:Ref);
+procedure ConstructShareCount(this:Ref, dc_:Ref);
 	ensures (dc[this] == dc_) &&
 		(packedShareCount[this]) && 
 		(fracShareCount[this] == 1.0);
@@ -48,17 +48,10 @@ procedure main()
 
 	call ConstructDoubleCountOK(2, 4, dc0);
 
-	call ConstructShare0(share1, dc0);
-
-
-	call ConstructShare0(share2, dc0);
-
-	call PackShareCount(share1);
-	packedShareCount[share1] := true;
+	call ConstructShareShareCount(share1, dc0);
 	fracOK[dc[share1]] := fracOK[dc[share1]] * 2.0;
 
-	call PackShareCount(share2);
-	packedShareCount[share2] := true;
+	call ConstructShareShareCount(share2, dc0);
 	fracOK[dc[share2]] := fracOK[dc[share2]] * 2.0;
 
 	call touch(share1);
