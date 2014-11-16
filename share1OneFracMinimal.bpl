@@ -1,5 +1,5 @@
 type Ref;
-type FractionType = [Ref] int;
+type FractionType = [Ref] real;
 type PackedType = [Ref] bool;
 var packed: PackedType;
 var frac: FractionType;
@@ -13,23 +13,23 @@ var dc: [Ref]Ref;
 procedure ConstructShare0(this:Ref, dc_:Ref);
 	ensures (dc[this] == dc_) &&
 		(packedShareCount[this]) && 
-		(fracShareCount[this] >= 100);
+		(fracShareCount[this] == 1.0);
 
 procedure PackShareCount(this:Ref);
 	requires (packedOK[dc[this]] && 
-		(fracOK[dc[this]] >= 1));
+		(fracOK[dc[this]] > 0.0));
 
 procedure UnpackShareCount(this:Ref);
 	requires packedShareCount[this];
 	ensures (packedOK[dc[this]] && 
-		(fracOK[dc[this]] >= 1));
+		(fracOK[dc[this]] > 0.0));
 
 procedure touch(this: Ref)
 	modifies val, dbl, packedShareCount, packedOK;
 	requires packedShareCount[this];
-	requires (fracShareCount[this] >= 1);
+	requires (fracShareCount[this] > 0.0);
 	ensures packedShareCount[this] &&
-		(fracShareCount[this] >= 1);
+		(fracShareCount[this] > 0.0);
   ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
   ensures (forall x:Ref :: (packedShareCount[x] == old(packedShareCount[x])));
 {
@@ -45,24 +45,26 @@ procedure main()
 {
 	var dc0 : Ref;
 	var share1, share2 : Ref;
+
 	call ConstructDoubleCountOK(2, 4, dc0);
 
 	call ConstructShare0(share1, dc0);
+
 
 	call ConstructShare0(share2, dc0);
 
 	call PackShareCount(share1);
 	packedShareCount[share1] := true;
-	fracOK[dc[share1]] := fracOK[dc[share1]] - 1;
+	fracOK[dc[share1]] := fracOK[dc[share1]] * 2.0;
 
 	call PackShareCount(share2);
 	packedShareCount[share2] := true;
-	fracOK[dc[share2]] := fracOK[dc[share2]] - 1;
+	fracOK[dc[share2]] := fracOK[dc[share2]] * 2.0;
 
 	call touch(share1);
-	fracShareCount[share1] := fracShareCount[share1] -1;
+	fracShareCount[share1] := fracShareCount[share1] * 2.0;
 
 	call touch(share2);
-	fracShareCount[share2] := fracShareCount[share2] -1;
+	fracShareCount[share2] := fracShareCount[share2] * 2.0;
 }
 

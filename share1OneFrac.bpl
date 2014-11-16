@@ -1,5 +1,5 @@
 type Ref;
-type FractionType = [Ref] int;
+type FractionType = [Ref] real;
 type PackedType = [Ref] bool;
 //divide packed for each PredicateType
 //In Boogie it is always better for things to be as separate as 
@@ -15,7 +15,7 @@ procedure ConstructDoubleCountOK(val1: int, dbl1: int, this: Ref);
 	ensures (val[this] == val1) && 
 		(dbl[this] == dbl1) && 
 		(packedOK[this]) && 
-		(fracOK[this] >= 100);
+		(fracOK[this] == 1.0);
 
 procedure ConstructDoubleCount(val1: int, dbl1: int, this: Ref);
 	ensures (val[this] == val1) && 
@@ -27,16 +27,16 @@ procedure PackOK(this:Ref);
 
 procedure UnpackOK(this:Ref);
 	requires packedOK[this] &&
-		(fracOK[this] >= 1);
+		(fracOK[this] > 0.0);
 	ensures (dbl[this]==val[this]*2);
 
 
 procedure increment(this: Ref)
 	modifies val, dbl, packedOK;
 	requires packedOK[this]  && 
-		(fracOK[this] >= 1);
+		(fracOK[this] > 0.0);
 	ensures  packedOK[this] && 
-		(fracOK[this] >= 1);
+		(fracOK[this] > 0.0);
 	ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
 
 {
@@ -61,27 +61,27 @@ var dc: [Ref]Ref;
 procedure ConstructShare0(this:Ref, dc_:Ref);
 	ensures (dc[this] == dc_) &&
 		(packedShareCount[this]) && 
-		(fracShareCount[this] >= 100);
+		(fracShareCount[this] == 1.0);
 
 //Use >= instead of > when writing about frac.
 //It will be easier for the Oprop plugin to find the lower bound.
 procedure PackShareCount(this:Ref);
 	requires (packedOK[dc[this]] && 
-		(fracOK[dc[this]] >= 1));
+		(fracOK[dc[this]] > 0.0));
 
 //The Pack and Unpack for a predicate must have the same lower bound for 
 //frac..[same object].
 procedure UnpackShareCount(this:Ref);
 	requires packedShareCount[this];
 	ensures (packedOK[dc[this]] && 
-		(fracOK[dc[this]] >= 1));
+		(fracOK[dc[this]] > 0.0));
 
 procedure touch(this: Ref)
 	modifies val, dbl, packedShareCount, packedOK;
 	requires packedShareCount[this];
-	requires (fracShareCount[this] >= 1);
+	requires (fracShareCount[this] > 0.0);
 	ensures packedShareCount[this] &&
-		(fracShareCount[this] >= 1);
+		(fracShareCount[this] > 0.0);
   ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
   ensures (forall x:Ref :: (packedShareCount[x] == old(packedShareCount[x])));
 {
@@ -119,19 +119,19 @@ procedure main()
 	//share1@k ShareCount.
 	call PackShareCount(share1);
 	packedShareCount[share1] := true;
-	fracOK[dc[share1]] := fracOK[dc[share1]] - 1;
+	fracOK[dc[share1]] := fracOK[dc[share1]] * 2.0;
 
 	//The 2 lines below are for creating the
 	//object proposition
 	//share2@k ShareCount.
 	call PackShareCount(share2);
 	packedShareCount[share2] := true;
-	fracOK[dc[share2]] := fracOK[dc[share2]] - 1;
+	fracOK[dc[share2]] := fracOK[dc[share2]] * 2.0;
 
 	call touch(share1);
-	fracShareCount[share1] := fracShareCount[share1] -1;
+	fracShareCount[share1] := fracShareCount[share1] * 2.0;
 
 	call touch(share2);
-	fracShareCount[share2] := fracShareCount[share2] -1;
+	fracShareCount[share2] := fracShareCount[share2] * 2.0;
 }
 
