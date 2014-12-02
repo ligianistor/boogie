@@ -119,19 +119,19 @@ procedure main()
 	//share1@k ShareCount.
 	call PackShareCount(share1);
 	packedShareCount[share1] := true;
-	fracOK[dc[share1]] := fracOK[dc[share1]] * 2.0;
+	fracOK[dc[share1]] := fracOK[dc[share1]] / 2.0;
 
 	//The 2 lines below are for creating the
 	//object proposition
 	//share2@k ShareCount.
 	call PackShareCount(share2);
 	packedShareCount[share2] := true;
-	fracOK[dc[share2]] := fracOK[dc[share2]] * 2.0;
+	fracOK[dc[share2]] := fracOK[dc[share2]] / 2.0;
 
 	call touch(share1);
-	fracShareCount[share1] := fracShareCount[share1] * 2.0;
+	fracShareCount[share1] := fracShareCount[share1] / 2.0;
 
 	call touch(share2);
-	fracShareCount[share2] := fracShareCount[share2] * 2.0;
+	fracShareCount[share2] := fracShareCount[share2] / 2.0;
 }
 

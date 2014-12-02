@@ -1,8 +1,8 @@
 type Ref;
 type FractionType = [Ref] real;
 type PackedType = [Ref] bool;
-var packed: PackedType;
-var frac: FractionType;
+var packedOK: PackedType;
+var fracOK: FractionType;
 const null: Ref;
 
 var packedShareCount: PackedType;
@@ -49,15 +49,15 @@ procedure main()
 	call ConstructDoubleCountOK(2, 4, dc0);
 
 	call ConstructShareShareCount(share1, dc0);
-	fracOK[dc[share1]] := fracOK[dc[share1]] * 2.0;
+	fracOK[dc[share1]] := fracOK[dc[share1]] / 2.0;
 
 	call ConstructShareShareCount(share2, dc0);
-	fracOK[dc[share2]] := fracOK[dc[share2]] * 2.0;
+	fracOK[dc[share2]] := fracOK[dc[share2]] / 2.0;
 
 	call touch(share1);
-	fracShareCount[share1] := fracShareCount[share1] * 2.0;
+	fracShareCount[share1] := fracShareCount[share1] / 2.0;
 
 	call touch(share2);
-	fracShareCount[share2] := fracShareCount[share2] * 2.0;
+	fracShareCount[share2] := fracShareCount[share2] / 2.0;
 }
 
