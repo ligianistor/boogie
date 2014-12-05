@@ -57,14 +57,18 @@ var dc: [Ref]Ref;
 
 
 //Constructor for Share
-//that packs to ShareCount
+//that packs to ShareCount.
+//When we construct to a certain predicate,
+//it is as if we pack to that predicate, so we need to put the
+//same "requires" in the "procedure Construct".
+
 procedure ConstructShare0(this:Ref, dc_:Ref);
+	requires (packedOK[dc_] && 
+		(fracOK[dc_] > 0.0));
 	ensures (dc[this] == dc_) &&
 		(packedShareCount[this]) && 
 		(fracShareCount[this] == 1.0);
 
-//Use >= instead of > when writing about frac.
-//It will be easier for the Oprop plugin to find the lower bound.
 procedure PackShareCount(this:Ref);
 	requires (packedOK[dc[this]] && 
 		(fracOK[dc[this]] > 0.0));
@@ -101,32 +105,21 @@ procedure main()
 {
 	//dc0 also needs to be constructed
 	var dc0 : Ref;
-	var share1, share2 : Ref;
+	var share1 : Ref;
+	var share2 : Ref;
 	//Need to state that dc0 satisfies the OK predicate.
 	//By calling the constructorwe state the invariant for dc0.
 	call ConstructDoubleCountOK(2, 4, dc0);
 
-
 	//By calling this constructorfor share1,
 	//we say that we put it in the Share predicate.
 	call ConstructShare0(share1, dc0);
-
-
-	call ConstructShare0(share2, dc0);
-
-	//The 2 lines below are for creating the
-	//object proposition
-	//share1@k ShareCount.
-	call PackShareCount(share1);
-	packedShareCount[share1] := true;
 	fracOK[dc[share1]] := fracOK[dc[share1]] / 2.0;
 
-	//The 2 lines below are for creating the
-	//object proposition
-	//share2@k ShareCount.
-	call PackShareCount(share2);
-	packedShareCount[share2] := true;
+	
+	call ConstructShare0(share2, dc0);
 	fracOK[dc[share2]] := fracOK[dc[share2]] / 2.0;
+	
 
 	call touch(share1);
 	fracShareCount[share1] := fracShareCount[share1] / 2.0;

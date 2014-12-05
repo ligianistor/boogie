@@ -1,5 +1,5 @@
 type Ref;
-type FractionType = [Ref] int;
+type FractionType = [Ref] real;
 type PackedType = [Ref] bool;
 //divide packed for each PredicateType
 //In Boogie it is always better for things to be as separate as 
@@ -11,11 +11,11 @@ const null: Ref;
 var val: [Ref]int;
 var dbl: [Ref]int;
 
-procedure ConstructDoubleCountOKP(val1: int, dbl1: int, this: Ref);
+procedure ConstructDoubleCountOK(val1: int, dbl1: int, this: Ref);
 	ensures (val[this] == val1) && 
 		(dbl[this] == dbl1) && 
 		(packedOK[this]) && 
-		(fracOK[this] >= 100);
+		(fracOK[this] == 1.0);
 
 procedure ConstructDoubleCount(val1: int, dbl1: int, this: Ref);
 	ensures (val[this] == val1) && 
@@ -27,16 +27,16 @@ procedure PackOK(this:Ref);
 
 procedure UnpackOK(this:Ref);
 	requires packedOK[this] &&
-		(fracOK[this] >= 1);
+		(fracOK[this] > 0.0);
 	ensures (dbl[this]==val[this]*2);
 
 
 procedure increment(this: Ref)
 	modifies val, dbl, packedOK;
 	requires packedOK[this]  && 
-		(fracOK[this] >= 1);
+		(fracOK[this] > 0.0);
 	ensures  packedOK[this] && 
-		(fracOK[this] >= 1);
+		(fracOK[this] > 0.0);
 	ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
 
 {
