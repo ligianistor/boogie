@@ -59,12 +59,10 @@ var dc: [Ref]Ref;
 //Constructor for Share
 //that packs to ShareCount.
 //When we construct to a certain predicate,
-//it is as if we pack to that predicate, so we need to put the
-//same "requires" in the "procedure Construct".
+//it is as if we pack to that predicate, so we need to look
+//at the requires of the corresponding "Pack" procedure
 
 procedure ConstructShare0(this:Ref, dc_:Ref);
-	requires (packedOK[dc_] && 
-		(fracOK[dc_] > 0.0));
 	ensures (dc[this] == dc_) &&
 		(packedShareCount[this]) && 
 		(fracShareCount[this] == 1.0);
@@ -81,7 +79,7 @@ procedure UnpackShareCount(this:Ref);
 		(fracOK[dc[this]] > 0.0));
 
 procedure touch(this: Ref)
-	modifies val, dbl, packedShareCount, packedOK;
+	modifies val, dbl, packedShareCount, packedOK, fracOK;
 	requires packedShareCount[this];
 	requires (fracShareCount[this] > 0.0);
 	ensures packedShareCount[this] &&
@@ -92,6 +90,8 @@ procedure touch(this: Ref)
 	call UnpackShareCount(this);
 	packedShareCount[this]:=false;
 	call increment(dc[this]) ;
+	fracOK[dc[this]] := fracOK[dc[this]] / 2.0;
+	fracOK[dc[this]] := fracOK[dc[this]] * 2.0;
 	call PackShareCount(this);
 	packedShareCount[this]:=true;
 }
@@ -108,10 +108,10 @@ procedure main()
 	var share1 : Ref;
 	var share2 : Ref;
 	//Need to state that dc0 satisfies the OK predicate.
-	//By calling the constructorwe state the invariant for dc0.
+	//By calling the constructor we state the invariant for dc0.
 	call ConstructDoubleCountOK(2, 4, dc0);
 
-	//By calling this constructorfor share1,
+	//By calling this constructor for share1,
 	//we say that we put it in the Share predicate.
 	call ConstructShare0(share1, dc0);
 	fracOK[dc[share1]] := fracOK[dc[share1]] / 2.0;
@@ -123,8 +123,11 @@ procedure main()
 
 	call touch(share1);
 	fracShareCount[share1] := fracShareCount[share1] / 2.0;
+	fracShareCount[share1] := fracShareCount[share1] * 2.0;
+	
 
 	call touch(share2);
 	fracShareCount[share2] := fracShareCount[share2] / 2.0;
+	fracShareCount[share2] := fracShareCount[share2] * 2.0;
 }
 

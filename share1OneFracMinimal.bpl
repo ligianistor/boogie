@@ -25,7 +25,7 @@ procedure UnpackShareCount(this:Ref);
 		(fracOK[dc[this]] > 0.0));
 
 procedure touch(this: Ref)
-	modifies val, dbl, packedShareCount, packedOK;
+	modifies val, dbl, packedShareCount, packedOK, fracOK;
 	requires packedShareCount[this];
 	requires (fracShareCount[this] > 0.0);
 	ensures packedShareCount[this] &&
@@ -36,6 +36,8 @@ procedure touch(this: Ref)
 	call UnpackShareCount(this);
 	packedShareCount[this]:=false;
 	call increment(dc[this]) ;
+	fracOK[dc[this]] := fracOK[dc[this]] / 2.0;
+	fracOK[dc[this]] := fracOK[dc[this]] * 2.0;
 	call PackShareCount(this);
 	packedShareCount[this]:=true;
 }
@@ -56,8 +58,10 @@ procedure main()
 
 	call touch(share1);
 	fracShareCount[share1] := fracShareCount[share1] / 2.0;
+	fracShareCount[share1] := fracShareCount[share1] * 2.0;
+	
 
 	call touch(share2);
 	fracShareCount[share2] := fracShareCount[share2] / 2.0;
+	fracShareCount[share2] := fracShareCount[share2] * 2.0;
 }
-
