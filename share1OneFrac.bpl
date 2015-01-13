@@ -62,7 +62,7 @@ var dc: [Ref]Ref;
 //it is as if we pack to that predicate, so we need to look
 //at the requires of the corresponding "Pack" procedure
 
-procedure ConstructShare0(this:Ref, dc_:Ref);
+procedure ConstructShareShareCount(this:Ref, dc_:Ref);
 	ensures (dc[this] == dc_) &&
 		(packedShareCount[this]) && 
 		(fracShareCount[this] == 1.0);
@@ -88,6 +88,8 @@ procedure touch(this: Ref)
   ensures (forall x:Ref :: (packedShareCount[x] == old(packedShareCount[x])));
 {
 	call UnpackShareCount(this);
+// We only need to call the unpack here because we want to get to the predicate OK,
+// not because we are modifying dc[this] or because we are calling a method on it.
 	packedShareCount[this]:=false;
 	call increment(dc[this]) ;
 	fracOK[dc[this]] := fracOK[dc[this]] / 2.0;
@@ -113,11 +115,11 @@ procedure main()
 
 	//By calling this constructor for share1,
 	//we say that we put it in the Share predicate.
-	call ConstructShare0(share1, dc0);
+	call ConstructShareShareCount(share1, dc0);
 	fracOK[dc[share1]] := fracOK[dc[share1]] / 2.0;
 
 	
-	call ConstructShare0(share2, dc0);
+	call ConstructShareShareCount(share2, dc0);
 	fracOK[dc[share2]] := fracOK[dc[share2]] / 2.0;
 	
 

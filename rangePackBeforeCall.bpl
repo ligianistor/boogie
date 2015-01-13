@@ -1,7 +1,8 @@
+//The name of this class is Link.
 type Ref;
 type PredicateTypes;
-type FractionType = [Ref, PredicateTypes] real;
-type PackedType = [Ref, PredicateTypes] bool;
+type FractionType = [Ref] real;
+type PackedType = [Ref] bool;
 
 const null : Ref;
 const unique RangeP : PredicateTypes;
@@ -9,40 +10,42 @@ const unique RangeP : PredicateTypes;
 var val : [Ref]int;
 var next : [Ref]Ref;
 
-var frac : FractionType;
-var packed : PackedType;
+var fracRange : FractionType;
+var packedRange : PackedType;
 
 var xRangePred : [Ref] int;
 var yRangePred : [Ref] int;
 
-procedure ConstructRange0(this: Ref, v: int, n: Ref);
+procedure ConstructLinkRange(rangeMin: int, rangeMax:int, v: int, n: Ref, this: Ref);
 	ensures (val[this] == v) && 
 		(next[this] == n) && 
-		(packed[this, RangeP]) && 
-		(frac[this, RangeP] == 1.0);
+		(xRangePred[this] == rangeMin) &&
+		(yRangePred[this] == rangeMax) &&
+		(packedRange[this]) && 
+		(fracRange[this] == 1.0);
 
-procedure ConstructRange(this: Ref, v: int, n: Ref);
+procedure ConstructLink(v: int, n: Ref, this: Ref);
 	ensures (val[this] == v) && 
 		(next[this] == n);
 
-procedure PackRange(this:Ref, x:int, y:int);
+procedure PackRange(x:int, y:int, this:Ref);
 	requires (val[this] >= x);
 	requires (val[this] <= y);
 	requires ((next[this] == null) ||
-		  (frac[next[this], RangeP] > 0.0) 
+		  (fracRange[next[this]] > 0.0) 
 		   );
 	ensures (xRangePred[this]==x) && (yRangePred[this]==y);
 
-procedure UnpackRange(this:Ref, x:int, y:int);
-	requires packed[this, RangeP];
+procedure UnpackRange(x:int, y:int, this:Ref);
+	requires packedRange[this];
 	requires (xRangePred[this] == x);
 	requires (yRangePred[this] == y);
-	requires (frac[this, RangeP] > 0.0);
+	requires (fracRange[this] > 0.0);
 	ensures  (val[this] >= x) &&
 		 (val[this] <= y) &&
 		 ((next[this] == null) ||
-		  (packed[next[this], RangeP] &&
-		  (frac[next[this], RangeP] > 0.0) &&
+		  (packedRange[next[this]] &&
+		  (fracRange[next[this]] > 0.0) &&
 		  (xRangePred[next[this]] == x) && 
 		  (yRangePred[next[this]] == y))
 		 );
@@ -58,40 +61,61 @@ axiom (forall x:int, y:int :: {modulo(x,y)}
     ((x <= 0) &&(y < 0) ==> (y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
    ); 
 
-procedure addModulo11(this: Ref, x:int) 
-	modifies val, packed, frac;
+procedure addModulo11(x:int, this: Ref) 
+	modifies val, packedRange, fracRange;
 	requires x >= 0;
-	requires frac[this, RangeP] > 0.0;
+	requires fracRange[this] > 0.0;
 	requires xRangePred[this] == 0; 
 	requires yRangePred[this] == 10;
-	requires packed[this, RangeP];
-	ensures packed[this, RangeP];
+	requires packedRange[this];
+	ensures packedRange[this];
 	ensures xRangePred[this] == 0; 
 	ensures yRangePred[this] == 10;
-	ensures frac[this, RangeP] > 0.0;
-	ensures (forall y:Ref :: (packed[y, RangeP] == old(packed[y, RangeP])) );
+	ensures fracRange[this] > 0.0;
+	ensures (forall y:Ref :: (packedRange[y] == old(packedRange[y])) );
 	//maybe this should be
-	//ensures (forall y:Ref :: (frac[y, RangeP] > 0.0) );
-	ensures (forall y:Ref :: (frac[y, RangeP] == old(frac[y, RangeP])) );
+	//ensures (forall y:Ref :: (fracRange[y] > 0.0) );
+	ensures (forall y:Ref :: (fracRange[y] == old(fracRange[y])) );
 {
 	//there are no cycles condition
 	//assume (forall link:Ref :: (this != next[link]));
 
-	call UnpackRange(this, 0, 10);
-	packed[this, RangeP] := false;
+	call UnpackRange(0, 10, this);
+	packedRange[this] := false;
 
 	val[this] := modulo((val[this]+x),11);
   
-	frac[next[this], RangeP] := frac[next[this], RangeP] * 2.0;
+	fracRange[next[this]] := fracRange[next[this]] * 2.0;
 
-  	call PackRange(this, 0, 10);
-	packed[this,RangeP] := true;
+  	call PackRange(0, 10, this);
+	packedRange[this] := true;
 	
 	if (next[this] != null )
 	{ 
-		call addModulo11(next[this], x);
-		frac[next[this], RangeP] := frac[next[this], RangeP] * 2.0;
-		frac[next[this], RangeP] := frac[next[this], RangeP] / 2.0;
+		call addModulo11(x, next[this]);
+		fracRange[next[this]] := fracRange[next[this]] * 2.0;
+		fracRange[next[this]] := fracRange[next[this]] / 2.0;
 	}
-	frac[next[this], RangeP] := frac[next[this], RangeP] / 2.0;
+	fracRange[next[this]] := fracRange[next[this]] / 2.0;
 }
+
+
+procedure main()
+	modifies val, packedRange, fracRange;
+{
+	var l1 : Ref;
+	var l2 : Ref;
+	var l3 : Ref;
+	//Need to state that l1 satisfies the Range predicate.
+	//TODO need to add fraction manipulation
+	call ConstructLinkRange(0, 10, 3, null, l1);
+
+	call ConstructLinkRange(0, 10, 4, l1, l2);
+
+	call ConstructLinkRange(0, 10, 5, l2, l3);
+
+	call addModulo11(20, l3); 
+}
+
+
+
