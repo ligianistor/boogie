@@ -1,28 +1,22 @@
 //The name of this class is Link.
 type Ref;
-type PredicateTypes;
-type FractionType = [Ref] real;
-type PackedType = [Ref] bool;
+type FractionRangeType = [Ref, int, int] real;
+type PackedRangeType = [Ref, int, int] bool;
 
 const null : Ref;
-const unique RangeP : PredicateTypes;
 
 var val : [Ref]int;
 var next : [Ref]Ref;
 
-var fracRange : FractionType;
-var packedRange : PackedType;
+var fracRange : FractionRangeType;
+var packedRange : PackedRangeType;
 
-var xRange : [Ref] int;
-var yRange : [Ref] int;
 
 procedure ConstructLinkRange(x: int, y:int, v: int, n: Ref, this: Ref);
 	ensures (val[this] == v) && 
 		(next[this] == n) && 
-		(xRange[this] == x) &&
-		(yRange[this] == y) &&
-		(packedRange[this]) && 
-		(fracRange[this] == 1.0);
+		(packedRange[this,x,y]) && 
+		(fracRange[this,x,y] == 1.0);
 
 procedure ConstructLink(v: int, n: Ref, this: Ref);
 	ensures (val[this] == v) && 
@@ -32,60 +26,52 @@ procedure PackRange(x:int, y:int, this:Ref);
 	requires (val[this] >= x);
 	requires (val[this] <= y);
 	requires ((next[this] == null) ||
-		  (fracRange[next[this]] > 0.0) 
+		  (fracRange[next[this],x,y] > 0.0) 
 		   );
-	ensures (xRange[this]==x) && (yRange[this]==y);
 
 procedure UnpackRange(x:int, y:int, this:Ref);
-	requires packedRange[this];
-	requires (xRange[this] == x);
-	requires (yRange[this] == y);
-	requires (fracRange[this] > 0.0);
+	requires packedRange[this,x,y];
+	requires (fracRange[this,x,y] > 0.0);
 	ensures  (val[this] >= x) &&
 		 (val[this] <= y) &&
 		 ((next[this] == null) ||
-		  (packedRange[next[this]] &&
-		  (fracRange[next[this]] > 0.0) &&
-		  (xRange[next[this]] == x) && 
-		  (yRange[next[this]] == y))
+		  (packedRange[next[this],x,y] &&
+		  (fracRange[next[this],x,y] > 0.0) )
 		 );
   
 procedure addModulo11(x:int, this: Ref) 
 	modifies val, packedRange, fracRange;
 	requires x >= 0;
-	requires fracRange[this] > 0.0;
-	requires xRange[this] == 0; 
-	requires yRange[this] == 10;
-	requires packedRange[this];
-	ensures packedRange[this];
-	ensures xRange[this] == 0; 
-	ensures yRange[this] == 10;
-	ensures fracRange[this] > 0.0;
-	ensures (forall y:Ref :: (packedRange[y] == old(packedRange[y])) );
+	requires fracRange[this,0,10] > 0.0;
+
+	requires packedRange[this,0,10];
+	ensures packedRange[this,0,10];
+	ensures fracRange[this,0,10] > 0.0;
+	ensures (forall y:Ref :: (packedRange[y,0,10] == old(packedRange[y,0,10])) );
 	//maybe this should be
 	//ensures (forall y:Ref :: (fracRange[y] > 0.0) );
-	ensures (forall y:Ref :: (fracRange[y] == old(fracRange[y])) );
+	ensures (forall y:Ref :: (fracRange[y,0,10] == old(fracRange[y,0,10])) );
 {
 	//there are no cycles condition
 	//assume (forall link:Ref :: (this != next[link]));
 
 	call UnpackRange(0, 10, this);
-	packedRange[this] := false;
+	packedRange[this,0,10] := false;
 
 	val[this] := modulo((val[this]+x),11);
   
-	fracRange[next[this]] := fracRange[next[this]] * 2.0;
+	fracRange[next[this],0,10] := fracRange[next[this],0,10] * 2.0;
 
   	call PackRange(0, 10, this);
-	packedRange[this] := true;
+	packedRange[this,0,10] := true;
 	
 	if (next[this] != null )
 	{ 
 		call addModulo11(x, next[this]);
-		fracRange[next[this]] := fracRange[next[this]] * 2.0;
-		fracRange[next[this]] := fracRange[next[this]] / 2.0;
+		fracRange[next[this],0,10] := fracRange[next[this],0,10] * 2.0;
+		fracRange[next[this],0,10] := fracRange[next[this],0,10] / 2.0;
 	}
-	fracRange[next[this]] := fracRange[next[this]] / 2.0;
+	fracRange[next[this],0,10] := fracRange[next[this],0,10] / 2.0;
 }
 
 function modulo(x:int, y:int) returns (int);
