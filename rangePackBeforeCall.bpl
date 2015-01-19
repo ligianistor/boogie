@@ -13,14 +13,14 @@ var next : [Ref]Ref;
 var fracRange : FractionType;
 var packedRange : PackedType;
 
-var xRangePred : [Ref] int;
-var yRangePred : [Ref] int;
+var xRange : [Ref] int;
+var yRange : [Ref] int;
 
-procedure ConstructLinkRange(rangeMin: int, rangeMax:int, v: int, n: Ref, this: Ref);
+procedure ConstructLinkRange(x: int, y:int, v: int, n: Ref, this: Ref);
 	ensures (val[this] == v) && 
 		(next[this] == n) && 
-		(xRangePred[this] == rangeMin) &&
-		(yRangePred[this] == rangeMax) &&
+		(xRange[this] == x) &&
+		(yRange[this] == y) &&
 		(packedRange[this]) && 
 		(fracRange[this] == 1.0);
 
@@ -34,43 +34,32 @@ procedure PackRange(x:int, y:int, this:Ref);
 	requires ((next[this] == null) ||
 		  (fracRange[next[this]] > 0.0) 
 		   );
-	ensures (xRangePred[this]==x) && (yRangePred[this]==y);
+	ensures (xRange[this]==x) && (yRange[this]==y);
 
 procedure UnpackRange(x:int, y:int, this:Ref);
 	requires packedRange[this];
-	requires (xRangePred[this] == x);
-	requires (yRangePred[this] == y);
+	requires (xRange[this] == x);
+	requires (yRange[this] == y);
 	requires (fracRange[this] > 0.0);
 	ensures  (val[this] >= x) &&
 		 (val[this] <= y) &&
 		 ((next[this] == null) ||
 		  (packedRange[next[this]] &&
 		  (fracRange[next[this]] > 0.0) &&
-		  (xRangePred[next[this]] == x) && 
-		  (yRangePred[next[this]] == y))
+		  (xRange[next[this]] == x) && 
+		  (yRange[next[this]] == y))
 		 );
   
-function modulo(x:int, y:int) returns (int);
-axiom (forall x:int, y:int :: {modulo(x,y)} 
-    ((0 <= x) &&(0 < y) ==> (0 <= modulo(x,y) ) && (modulo(x,y) < y) )
-    &&
-    ((0 <= x) &&(y < 0) ==> (0 <= modulo(x,y) ) && (modulo(x,y) < -y) )
-    &&
-    ((x <= 0) &&(0 < y) ==> (-y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
-    &&
-    ((x <= 0) &&(y < 0) ==> (y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
-   ); 
-
 procedure addModulo11(x:int, this: Ref) 
 	modifies val, packedRange, fracRange;
 	requires x >= 0;
 	requires fracRange[this] > 0.0;
-	requires xRangePred[this] == 0; 
-	requires yRangePred[this] == 10;
+	requires xRange[this] == 0; 
+	requires yRange[this] == 10;
 	requires packedRange[this];
 	ensures packedRange[this];
-	ensures xRangePred[this] == 0; 
-	ensures yRangePred[this] == 10;
+	ensures xRange[this] == 0; 
+	ensures yRange[this] == 10;
 	ensures fracRange[this] > 0.0;
 	ensures (forall y:Ref :: (packedRange[y] == old(packedRange[y])) );
 	//maybe this should be
@@ -98,6 +87,17 @@ procedure addModulo11(x:int, this: Ref)
 	}
 	fracRange[next[this]] := fracRange[next[this]] / 2.0;
 }
+
+function modulo(x:int, y:int) returns (int);
+axiom (forall x:int, y:int :: {modulo(x,y)} 
+    ((0 <= x) &&(0 < y) ==> (0 <= modulo(x,y) ) && (modulo(x,y) < y) )
+    &&
+    ((0 <= x) &&(y < 0) ==> (0 <= modulo(x,y) ) && (modulo(x,y) < -y) )
+    &&
+    ((x <= 0) &&(0 < y) ==> (-y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
+    &&
+    ((x <= 0) &&(y < 0) ==> (y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
+   ); 
 
 
 procedure main()
