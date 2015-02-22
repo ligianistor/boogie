@@ -38,14 +38,13 @@ procedure increment(this: Ref)
 	ensures  packedOK[this] && 
 		(fracOK[this] > 0.0);
 	ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
-
 {
 	call UnpackOK(this);
-	packedOK[this]:=false;
-	val[this]:= val[this]+1;
-	dbl[this]:= dbl[this]+2;
+	packedOK[this] := false;
+	val[this] := val[this]+1;
+	dbl[this] := dbl[this]+2;
 	call PackOK(this);
-	packedOK[this]:=true;
+	packedOK[this] := true;
 }
 //----------------------------------
 //class Share
@@ -55,28 +54,28 @@ var fracShareCount: FractionType;
 
 var dc: [Ref]Ref;
 
-
 //Constructor for Share
 //that packs to ShareCount.
 //When we construct to a certain predicate,
 //it is as if we pack to that predicate, so we need to look
 //at the requires of the corresponding "Pack" procedure
 
-procedure ConstructShareShareCount(this:Ref, dc_:Ref);
-	ensures (dc[this] == dc_) &&
+procedure ConstructShareShareCount(dc1:Ref, this:Ref);
+	ensures (dc[this] == dc1) &&
 		(packedShareCount[this]) && 
 		(fracShareCount[this] == 1.0);
 
 procedure PackShareCount(this:Ref);
-	requires (packedOK[dc[this]] && 
-		(fracOK[dc[this]] > 0.0));
+	requires (packedShareCount[this] == false) &&
+		packedOK[dc[this]] && 
+		(fracOK[dc[this]] > 0.0) ;
 
 //The Pack and Unpack for a predicate must have the same lower bound for 
 //frac..[same object].
 procedure UnpackShareCount(this:Ref);
 	requires packedShareCount[this];
-	ensures (packedOK[dc[this]] && 
-		(fracOK[dc[this]] > 0.0));
+	ensures packedOK[dc[this]] && 
+		(fracOK[dc[this]] > 0.0);
 
 procedure touch(this: Ref)
 	modifies val, dbl, packedShareCount, packedOK, fracOK;
@@ -107,27 +106,24 @@ procedure main()
 {
 	//dc0 also needs to be constructed
 	var dc0 : Ref;
-	var share1 : Ref;
-	var share2 : Ref;
 	//Need to state that dc0 satisfies the OK predicate.
 	//By calling the constructor we state the invariant for dc0.
 	call ConstructDoubleCountOK(2, 4, dc0);
 
+	var share1 : Ref;
 	//By calling this constructor for share1,
 	//we say that we put it in the Share predicate.
 	call ConstructShareShareCount(share1, dc0);
 	fracOK[dc[share1]] := fracOK[dc[share1]] / 2.0;
 
-	
+	var share2 : Ref;
 	call ConstructShareShareCount(share2, dc0);
 	fracOK[dc[share2]] := fracOK[dc[share2]] / 2.0;
-	
 
 	call touch(share1);
 	fracShareCount[share1] := fracShareCount[share1] / 2.0;
 	fracShareCount[share1] := fracShareCount[share1] * 2.0;
 	
-
 	call touch(share2);
 	fracShareCount[share2] := fracShareCount[share2] / 2.0;
 	fracShareCount[share2] := fracShareCount[share2] * 2.0;

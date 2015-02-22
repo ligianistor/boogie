@@ -12,28 +12,35 @@ var fracRange : FractionRangeType;
 var packedRange : PackedRangeType;
 
 
-procedure ConstructLinkRange(x: int, y:int, v: int, n: Ref, this: Ref);
-	ensures (val[this] == v) && 
-		(next[this] == n) && 
+procedure ConstructLinkRange(x: int, y:int, val1: int, next1: Ref, this: Ref);
+	ensures (val[this] == val1) && 
+		(next[this] == next1) && 
 		(packedRange[x,y,this]) && 
 		(fracRange[x,y,this] == 1.0);
 
-procedure ConstructLink(v: int, n: Ref, this: Ref);
-	ensures (val[this] == v) && 
-		(next[this] == n);
+procedure ConstructLink(val1: int, next1: Ref, this: Ref);
+	ensures (val[this] == val1) && 
+		(next[this] == next1);
 
 
 // We assume that packedRange[x,y, next[this]] holds
 // because it is the invariant
 // so we do not need to add it in the requires of PackRange.
 // How do we know that this is the invariant for next[this]?
+// We do not need to have packedRange[x,y,next[this]]
+// in the requires.
 procedure PackRange(x:int, y:int, this:Ref);
 	requires (val[this] >= x);
 	requires (val[this] <= y);
 	requires ((next[this] == null) ||
+		  (fracRange[x,y,next[this]] > 0.0) );
+
+procedure PackRangeNotInv(x:int, y:int, this:Ref);
+	requires (val[this] >= x);
+	requires (val[this] <= y);
+	requires ((next[this] == null) ||
 		  (packedRange[x,y,next[this]] &&
-		  (fracRange[x,y,next[this]] > 0.0) )
-		   );
+		 (fracRange[x,y,next[this]] > 0.0)) );
 
 procedure UnpackRange(x:int, y:int, this:Ref);
 	requires packedRange[x,y,this];
@@ -53,6 +60,7 @@ procedure addModulo11(x:int, this: Ref)
 	requires packedRange[0,10,this];
 	ensures packedRange[0,10,this];
 	ensures fracRange[0,10,this] > 0.0;
+	//This says that Range is an invariant of all the objects in this method.
 	ensures (forall y:Ref :: (packedRange[0,10,y] == old(packedRange[0,10,y])) );
 	//maybe this should be
 	//ensures (forall y:Ref :: (fracRange[y] > 0.0) );
@@ -64,13 +72,13 @@ procedure addModulo11(x:int, this: Ref)
 
 	call UnpackRange(0, 10, this);
 	packedRange[0,10,this] := false;
+	fracRange[0,10,next[this]] := fracRange[0,10,next[this]] * 2.0;
 
 	val[this] := modulo((val[this]+x),11);
   
-	//fracRange[0,10,next[this]] := fracRange[0,10,next[this]] * 2.0;
-
   	call PackRange(0, 10, this);
 	packedRange[0,10,this] := true;
+	fracRange[0,10,next[this]] := fracRange[0,10,next[this]] / 2.0;
 	
 	if (next[this] != null )
 	{ 
@@ -105,8 +113,10 @@ procedure main()
 	call ConstructLinkRange(0, 10, 3, null, l1);
 
 	call ConstructLinkRange(0, 10, 4, l1, l2);
+	fracRange[0,10,l1] := fracRange[0,10,l1] / 2.0;
 
 	call ConstructLinkRange(0, 10, 5, l2, l3);
+	fracRange[0,10,l2] := fracRange[0,10,l2] / 2.0;
 
 	call addModulo11(20, l3); 
 }

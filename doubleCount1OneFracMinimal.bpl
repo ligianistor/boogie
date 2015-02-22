@@ -38,12 +38,11 @@ procedure increment(this: Ref)
 	ensures  packedOK[this] && 
 		(fracOK[this] > 0.0);
 	ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
-
 {
 	call UnpackOK(this);
-	packedOK[this]:=false;
-	val[this]:= val[this]+1;
-	dbl[this]:= dbl[this]+2;
+	packedOK[this] := false;
+	val[this] := val[this]+1;
+	dbl[this] := dbl[this]+2;
 	call PackOK(this);
-	packedOK[this]:=true;
+	packedOK[this] := true;
 }

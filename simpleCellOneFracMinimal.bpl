@@ -1,81 +1,86 @@
 type Ref;
-type PredicateTypes;
-type FractionType = [Ref, PredicateTypes]int;
-type PackedType = [Ref, PredicateTypes] bool;
-var packed: PackedType;
-var frac: FractionType;
- 
 const null: Ref;
 
 var val: [Ref]int;
 var next: [Ref]Ref;
-const unique PredValP: PredicateTypes;
-const unique PredNextP: PredicateTypes;
+type FractionType = [Ref] real;
+type PackedType = [Ref] bool;
+var packedPredNext: [Ref] bool;
+var fracPredNext: [Ref] real;
 
-procedure ConstructSimpleCell0(this: Ref, i: int, obj: Ref);
-	ensures (val[this] == i) && 
-		(next[this] == obj) && 
-		(packed[this, PredValP]) && 
-		(frac[this, PredValP] >= 100);
+var packedPredVal: [Ref] bool;
+var fracPredVal: [Ref] real;
+ 
+procedure ConstructSimpleCellPredNext(val1: int, next1: Ref, this: Ref);
+	ensures (val[this] == val1) && 
+		(next[this] == next1) && 
+		(packedPredNext[this]) && 
+ 	 	(fracPredNext[this] == 1.0);
 
-procedure ConstructSimpleCell1(this: Ref, i: int, obj: Ref);
-	requires frac[obj, PredValP] >= 1;
-	ensures (val[this] == i) && 
-		(next[this] == obj) && 
-		(packed[this, PredNextP]) && 
-		(frac[this, PredNextP] >= 100);			
+procedure ConstructSimpleCellPredVal(val1: int, next1: Ref, this: Ref);
+	ensures (val[this] == val1) && 
+		(next[this] == next1) && 
+		(packedPredVal[this]) && 
+		(fracPredVal[this] == 1.0);			
 
 procedure PackPredVal(this: Ref);
-	requires (packed[this, PredValP] == false) && 
+	requires (packedPredVal[this] == false) && 
 		(val[this] < 15);
 
 procedure UnpackPredVal(this: Ref);
-	requires packed[this, PredValP] &&
-		(frac[this, PredValP] >= 1);
+	requires packedPredVal[this] &&
+		(fracPredVal[this] > 0.0);
 	ensures val[this] < 15;
 
 procedure PackPredNext(this: Ref);
-	requires (packed[this, PredNextP] == false) &&
-		packed[next[this], PredValP] && 
-		(frac[next[this], PredValP] >= 1);
+	requires (packedPredVal[next[this]]) && 
+		(fracPredVal[next[this]] == 0.34) &&
+		(packedPredNext[this] == false);
 
 procedure UnpackPredNext(this: Ref);
-	requires packed[this, PredNextP] &&
-		(frac[this, PredNextP] >= 1);
-	ensures packed[next[this], PredValP] && 
-		(frac[next[this], PredValP] >= 1);
+	requires packedPredNext[this] &&
+		(fracPredNext[this] > 0.0);
+	ensures packedPredVal[next[this]] && 
+		(fracPredVal[next[this]] == 0.34);
 
-procedure ChangeVal(this: Ref, r: int)
-	modifies val;
-	requires packed[this, PredValP] && 
-		(frac[this, PredValP] >= 100);
-	ensures packed[this, PredValP] &&
-		 (frac[this, PredValP] >= 100);
+procedure changeVal(this: Ref, r: int)
+	modifies packedPredVal,val;
+	requires packedPredVal[this] && 
+		(fracPredVal[this] == 1.0) &&
+		(r < 15);
+	ensures packedPredVal[this] &&
+		(fracPredVal[this] == 1.0);
+	ensures (forall x:Ref :: (packedPredVal[x] == old(packedPredVal[x])));
 {
+	call UnpackPredVal(this);
+	packedPredVal[this] := false;
 	val[this] := r;
+	call PackPredVal(this);
+	packedPredVal[this]:=true;
 }
 
 procedure main()
-	modifies val, packed, frac;
+	modifies val, packedPredNext, packedPredVal, fracPredVal;
 {
-	var a, b, c : Ref;
+	var c : Ref;
+	var a : Ref;
+	var b : Ref;
 
-	call ConstructSimpleCell0(c, 2, null);
+	call ConstructSimpleCellPredVal(2,null,c);
 
-	call ConstructSimpleCell1(a, 2, c);
-
-	call ConstructSimpleCell1(b, 3, c);
-
-   	frac[c, PredValP] := frac[c, PredValP]-1;
+	call ConstructSimpleCellPredNext(2,c,a);
+	fracPredVal[c] := fracPredVal[c] - 0.34;
+	
+	call ConstructSimpleCellPredNext(3,c,b);
+	fracPredVal[c] := fracPredVal[c] - 0.34;
 
 	call UnpackPredNext(a);
-	frac[next[a], PredValP] := frac[next[a], PredValP]+1;
-	packed[a,PredNextP] := false;
+	packedPredNext[a] := false;
 
 	call UnpackPredNext(b);
+	packedPredNext[b] := false;
 
-	frac[next[b], PredValP] := frac[next[b], PredValP]+1;
-	packed[b,PredNextP] := false;
+	fracPredVal[c] := fracPredVal[c]+0.34+0.34;
 
-	call ChangeVal(c, 4);
+	call changeVal(c, 4);
 }
