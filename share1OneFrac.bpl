@@ -59,7 +59,6 @@ procedure ConstructShare(dc1:Ref, this:Ref);
 
 procedure PackShareCount(this:Ref);
 	requires (packedShareCount[this] == false) &&
-		packedOK[dc[this]] && 
 		(fracOK[dc[this]] > 0.0) ;
 
 //The Pack and Unpack for a predicate must have the same lower bound for 
