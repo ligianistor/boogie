@@ -11,12 +11,6 @@ const null: Ref;
 var val: [Ref]int;
 var dbl: [Ref]int;
 
-procedure ConstructDoubleCountOK(val1: int, dbl1: int, this: Ref);
-	ensures (val[this] == val1) && 
-		(dbl[this] == dbl1) && 
-		(packedOK[this]) && 
-		(fracOK[this] == 1.0);
-
 procedure ConstructDoubleCount(val1: int, dbl1: int, this: Ref);
 	ensures (val[this] == val1) && 
 		(dbl[this] == dbl1);
@@ -60,10 +54,8 @@ var dc: [Ref]Ref;
 //it is as if we pack to that predicate, so we need to look
 //at the requires of the corresponding "Pack" procedure
 
-procedure ConstructShareShareCount(dc1:Ref, this:Ref);
-	ensures (dc[this] == dc1) &&
-		(packedShareCount[this]) && 
-		(fracShareCount[this] == 1.0);
+procedure ConstructShare(dc1:Ref, this:Ref);
+	ensures (dc[this] == dc1);
 
 procedure PackShareCount(this:Ref);
 	requires (packedShareCount[this] == false) &&
@@ -106,19 +98,26 @@ procedure main()
 {
 	//dc0 also needs to be constructed
 	var dc0 : Ref;
+	var share1 : Ref;
+	var share2 : Ref;
+
 	//Need to state that dc0 satisfies the OK predicate.
 	//By calling the constructor we state the invariant for dc0.
-	call ConstructDoubleCountOK(2, 4, dc0);
-
-	var share1 : Ref;
+	call ConstructDoubleCount(2, 4, dc0);
+  packedOK[dc0] := true;
+  fracOK[dc0] := 1.0;
+	
 	//By calling this constructor for share1,
 	//we say that we put it in the Share predicate.
-	call ConstructShareShareCount(share1, dc0);
+	call ConstructShare(share1, dc0);
 	fracOK[dc[share1]] := fracOK[dc[share1]] / 2.0;
-
-	var share2 : Ref;
-	call ConstructShareShareCount(share2, dc0);
+  packedShareCount[share1] := true;
+  fracShareCount[share1] := 1.0;
+	
+	call ConstructShare(share2, dc0);
 	fracOK[dc[share2]] := fracOK[dc[share2]] / 2.0;
+  packedShareCount[share2] := true;
+  fracShareCount[share2] := 1.0;
 
 	call touch(share1);
 	fracShareCount[share1] := fracShareCount[share1] / 2.0;
@@ -128,4 +127,5 @@ procedure main()
 	fracShareCount[share2] := fracShareCount[share2] / 2.0;
 	fracShareCount[share2] := fracShareCount[share2] * 2.0;
 }
+
 
