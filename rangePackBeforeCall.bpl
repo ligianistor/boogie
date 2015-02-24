@@ -37,7 +37,7 @@ procedure UnpackRange(x:int, y:int, this:Ref);
 	ensures  (val[this] >= x) &&
 		 (val[this] <= y) &&
 		 ((next[this] == null) ||
-		  (packedRange[x,y,next[this]] &&
+		  (
 		  (fracRange[x,y,next[this]] > 0.0) )
 		 );
   
@@ -45,8 +45,7 @@ procedure addModulo11(x:int, this: Ref)
 	modifies val, packedRange, fracRange;
 	requires x >= 0;
 	requires fracRange[0,10,this] > 0.0;
-
-	requires packedRange[0,10,this];
+  requires (forall y:Ref :: (packedRange[0,10,y] == true));
 	ensures packedRange[0,10,this];
 	ensures fracRange[0,10,this] > 0.0;
 	//This says that Range is an invariant of all the objects in this method.
@@ -57,7 +56,7 @@ procedure addModulo11(x:int, this: Ref)
 {
 	//There are no cycles condition below.
 	//But even if there is a cycle, the verification should work by default.
-	//assume (forall link:Ref :: (this != next[link]));
+	//
 
 	call UnpackRange(0, 10, this);
 	packedRange[0,10,this] := false;
@@ -71,6 +70,7 @@ procedure addModulo11(x:int, this: Ref)
 	
 	if (next[this] != null )
 	{ 
+    
 		call addModulo11(x, next[this]);
 		fracRange[0,10,next[this]] := fracRange[0,10,next[this]] * 2.0;
 		fracRange[0,10,next[this]] := fracRange[0,10,next[this]] / 2.0;
@@ -93,6 +93,7 @@ axiom (forall x:int, y:int :: {modulo(x,y)}
 
 procedure main()
 	modifies val, packedRange, fracRange;
+   requires (forall y:Ref :: (packedRange[0,10,y] == true));
 {
 	var l1 : Ref;
 	var l2 : Ref;
