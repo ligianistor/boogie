@@ -65,13 +65,14 @@ procedure PackShareCount(this:Ref);
 //frac..[same object].
 procedure UnpackShareCount(this:Ref);
 	requires packedShareCount[this];
-	ensures packedOK[dc[this]] && 
-		(fracOK[dc[this]] > 0.0);
+	ensures (fracOK[dc[this]] > 0.0);
 
 procedure touch(this: Ref)
 	modifies val, dbl, packedShareCount, packedOK, fracOK;
 	requires packedShareCount[this];
 	requires (fracShareCount[this] > 0.0);
+  requires (forall x:Ref :: packedOK[x]);
+  requires (forall x:Ref :: packedShareCount[x]);
 	ensures packedShareCount[this] &&
 		(fracShareCount[this] > 0.0);
   ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
@@ -94,6 +95,8 @@ procedure main()
 	//or transitively by all methods that are called in 
 	//this procedure
 	modifies val, dbl, packedShareCount, packedOK, fracOK, fracShareCount;
+    requires (forall x:Ref :: packedOK[x]);
+  requires (forall x:Ref :: packedShareCount[x]);
 {
 	//dc0 also needs to be constructed
 	var dc0 : Ref;
