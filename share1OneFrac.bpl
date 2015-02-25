@@ -29,6 +29,7 @@ procedure increment(this: Ref)
 	modifies val, dbl, packedOK;
 	requires packedOK[this]  && 
 		(fracOK[this] > 0.0);
+	requires (forall x:Ref :: packedOK[x]);
 	ensures  packedOK[this] && 
 		(fracOK[this] > 0.0);
 	ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
@@ -71,12 +72,12 @@ procedure touch(this: Ref)
 	modifies val, dbl, packedShareCount, packedOK, fracOK;
 	requires packedShareCount[this];
 	requires (fracShareCount[this] > 0.0);
-  requires (forall x:Ref :: packedOK[x]);
-  requires (forall x:Ref :: packedShareCount[x]);
+	requires (forall x:Ref :: packedOK[x]);
+  	requires (forall x:Ref :: packedShareCount[x]);
 	ensures packedShareCount[this] &&
 		(fracShareCount[this] > 0.0);
-  ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
-  ensures (forall x:Ref :: (packedShareCount[x] == old(packedShareCount[x])));
+  	ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
+  	ensures (forall x:Ref :: (packedShareCount[x] == old(packedShareCount[x])));
 {
 	call UnpackShareCount(this);
 // We only need to call the unpack here because we want to get to the predicate OK,

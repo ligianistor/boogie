@@ -11,11 +11,6 @@ const null: Ref;
 var val: [Ref]int;
 var dbl: [Ref]int;
 
-procedure ConstructDoubleCountOK(val1: int, dbl1: int, this: Ref);
-	ensures (val[this] == val1) && 
-		(dbl[this] == dbl1) && 
-		(packedOK[this]) && 
-		(fracOK[this] == 1.0);
 
 procedure ConstructDoubleCount(val1: int, dbl1: int, this: Ref);
 	ensures (val[this] == val1) && 
@@ -30,11 +25,11 @@ procedure UnpackOK(this:Ref);
 		(fracOK[this] > 0.0);
 	ensures (dbl[this]==val[this]*2);
 
-
 procedure increment(this: Ref)
 	modifies val, dbl, packedOK;
 	requires packedOK[this]  && 
 		(fracOK[this] > 0.0);
+	requires (forall x:Ref :: packedOK[x]);
 	ensures  packedOK[this] && 
 		(fracOK[this] > 0.0);
 	ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));

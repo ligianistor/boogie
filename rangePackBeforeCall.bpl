@@ -41,23 +41,17 @@ procedure UnpackRange(x:int, y:int, this:Ref);
 		  (fracRange[x,y,next[this]] > 0.0) )
 		 );
   
-procedure addModulo11(x:int, this: Ref) 
+procedure addModulo11(x:int, this: Ref);
 	modifies val, packedRange, fracRange;
 	requires x >= 0;
 	requires fracRange[0,10,this] > 0.0;
-  requires (forall y:Ref :: (packedRange[0,10,y] == true));
+  	requires (forall y:Ref :: (packedRange[0,10,y] == true));
 	ensures packedRange[0,10,this];
 	ensures fracRange[0,10,this] > 0.0;
 	//This says that Range is an invariant of all the objects in this method.
 	ensures (forall y:Ref :: (packedRange[0,10,y] == old(packedRange[0,10,y])) );
-	//maybe this should be
-	//ensures (forall y:Ref :: (fracRange[y] > 0.0) );
 	ensures (forall y:Ref :: (fracRange[0,10,y] == old(fracRange[0,10,y])) );
 {
-	//There are no cycles condition below.
-	//But even if there is a cycle, the verification should work by default.
-	//
-
 	call UnpackRange(0, 10, this);
 	packedRange[0,10,this] := false;
 	fracRange[0,10,next[this]] := fracRange[0,10,next[this]] * 2.0;
@@ -70,13 +64,10 @@ procedure addModulo11(x:int, this: Ref)
 	
 	if (next[this] != null )
 	{ 
-    
-		call addModulo11(x, next[this]);
+    		call addModulo11(x, next[this]);
 		fracRange[0,10,next[this]] := fracRange[0,10,next[this]] * 2.0;
 		fracRange[0,10,next[this]] := fracRange[0,10,next[this]] / 2.0;
 	}
-	// I don't know why this is here.
-	//fracRange[0,10,next[this]] := fracRange[0,10,next[this]] / 2.0;
 }
 
 function modulo(x:int, y:int) returns (int);
@@ -93,7 +84,7 @@ axiom (forall x:int, y:int :: {modulo(x,y)}
 
 procedure main()
 	modifies val, packedRange, fracRange;
-   requires (forall y:Ref :: (packedRange[0,10,y] == true));
+   	requires (forall y:Ref :: (packedRange[0,10,y] == true));
 {
 	var l1 : Ref;
 	var l2 : Ref;
