@@ -3,11 +3,8 @@ const null: Ref;
 
 var val: [Ref]int;
 var next: [Ref]Ref;
-type FractionType = [Ref] real;
-type PackedType = [Ref] bool;
 var packedPredNext: [Ref] bool;
 var fracPredNext: [Ref] real;
-
 var packedPredVal: [Ref] bool;
 var fracPredVal: [Ref] real;
  
