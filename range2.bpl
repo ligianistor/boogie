@@ -54,7 +54,7 @@ procedure UnpackUniRange(x:int, y:int, this:Ref);
 //We either don't allow predicates that are that variable
 //or we accept that we can say that we pack to a certain predicate,
 //but we do not know the exact parameters
-//and when the programmer write unpack(params)
+//and when the programmer writes unpack(params)
 //we assume that those parameters are right.
 procedure add(z:int, x:int, y:int, this: Ref)
 	modifies val, packedUniRange, fracUniRange, paramxUniRange, paramyUniRange;
