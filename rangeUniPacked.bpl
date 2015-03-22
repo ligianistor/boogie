@@ -21,6 +21,7 @@ procedure PackUniRange(x:int, y:int, this:Ref);
 	requires ((next[this] == null) ||
 		(
 		(fracUniRange[next[this]] == 1.0) &&
+    packedUniRange[next[this]] &&
 		(paramxUniRange[next[this]] == x) &&
 		(paramyUniRange[next[this]] == y)
 		)
@@ -35,43 +36,44 @@ procedure UnpackUniRange(x:int, y:int, this:Ref);
 		 (val[this] <= y) &&
 		 ((next[this] == null) ||
 		  ((fracUniRange[next[this]] == 1.0) &&
+         packedUniRange[next[this]] &&
 		(paramxUniRange[next[this]] == x) &&
 		(paramyUniRange[next[this]] == y)
 ) 
 		 );
-//We either don't allow predicates that are that variable
-//or we accept that we can say that we pack to a certain predicate,
-//but we do not know the exact parameters
-//and when the programmer writes unpack(params)
-//we assume that those parameters are right.
+
+
 procedure add(z:int, x:int, y:int, this: Ref)
 	modifies val, packedUniRange, fracUniRange, paramxUniRange, paramyUniRange;
 	requires x < y;
 	requires fracUniRange[this] == 1.0;
-  	requires (forall x0:Ref :: packedUniRange[x0]);
+  	requires packedUniRange[this];
 	requires paramxUniRange[this] == x;
 	requires paramyUniRange[this] == y;
 	ensures packedUniRange[this];
 	ensures paramxUniRange[this] == x+z;
 	ensures paramyUniRange[this] == y+z;
-	ensures fracUniRange[this] == 1.0;
-	ensures (forall x0:Ref :: packedUniRange[x0]);
+	ensures packedUniRange[this];
+  	ensures fracUniRange[this] == 1.0;
 {
 	call UnpackUniRange(x, y, this);
+
 	packedUniRange[this] := false;
 
 	val[this] := val[this]+z;
 
-  	fracUniRange[next[this]] := 1.0;
-  	call PackUniRange(x+z, y+z, this);
-	packedUniRange[this] := true;
-	fracUniRange[next[this]] :=  1.0;
-	paramxUniRange[this] := x+z;
-	paramyUniRange[this] := y+z;
-	
+    	assume (this != next[this]);
 	if (next[this] != null )
 	{ 
-    		call add(z, x, y, next[this]);
+    	call add(z, x, y, next[this]);
+    	assume (val[this]==old(val[this])+z);
 	}
+  
+  	call PackUniRange(x+z, y+z, this);
+	packedUniRange[this] := true;
+	fracUniRange[this] :=  1.0;
+	paramxUniRange[this] := x+z;
+	paramyUniRange[this] := y+z;
+
 }
 
