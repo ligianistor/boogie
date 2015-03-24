@@ -21,7 +21,7 @@ procedure PackUniRange(x:int, y:int, this:Ref);
 	requires ((next[this] == null) ||
 		(
 		(fracUniRange[next[this]] == 1.0) &&
-    packedUniRange[next[this]] &&
+    		packedUniRange[next[this]] &&
 		(paramxUniRange[next[this]] == x) &&
 		(paramyUniRange[next[this]] == y)
 		)
@@ -35,8 +35,8 @@ procedure UnpackUniRange(x:int, y:int, this:Ref);
 	ensures  (val[this] >= x) &&
 		 (val[this] <= y) &&
 		 ((next[this] == null) ||
-		  ((fracUniRange[next[this]] == 1.0) &&
-         packedUniRange[next[this]] &&
+		((fracUniRange[next[this]] == 1.0) &&
+         	packedUniRange[next[this]] &&
 		(paramxUniRange[next[this]] == x) &&
 		(paramyUniRange[next[this]] == y)
 ) 
@@ -62,9 +62,12 @@ procedure add(z:int, x:int, y:int, this: Ref)
 
 	val[this] := val[this]+z;
 
-    	assume (this != next[this]);
 	if (next[this] != null )
 	{ 
+//The assume is better right before the call because
+//there is a rationale for putting it here. 
+//Same for the assume right after the call.
+	assume (this != next[this]);
     	call add(z, x, y, next[this]);
     	assume (val[this]==old(val[this])+z);
 	}
