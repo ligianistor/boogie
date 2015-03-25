@@ -39,13 +39,7 @@ procedure PackUniRange(x:int, y:int, this:Ref);
 	requires (val[this] >= x);
 	requires (val[this] <= y);
 	requires ((next[this] == null) ||
-		(
-		(fracUniRange[next[this]] == 1.0) &&
-    		packedUniRange[next[this]] &&
-		(paramxUniRange[next[this]] == x) &&
-		(paramyUniRange[next[this]] == y)
-		)
-);
+		  (fracUniRange[next[this]] == 1.0));
 
 procedure UnpackUniRange(x:int, y:int, this:Ref);
 	requires packedUniRange[this];
@@ -55,50 +49,40 @@ procedure UnpackUniRange(x:int, y:int, this:Ref);
 	ensures  (val[this] >= x) &&
 		 (val[this] <= y) &&
 		 ((next[this] == null) ||
-		((fracUniRange[next[this]] == 1.0) &&
-         	packedUniRange[next[this]] &&
-		(paramxUniRange[next[this]] == x) &&
-		(paramyUniRange[next[this]] == y)
-) 
+		  (fracUniRange[next[this]] == 1.0) 
 		 );
 
 procedure add(z:int, x:int, y:int, this: Ref)
 	modifies val, packedUniRange, fracUniRange, paramxUniRange, paramyUniRange;
 	requires x < y;
 	requires fracUniRange[this] == 1.0;
-  	requires packedUniRange[this];
+  	requires (forall x0:Ref :: packedUniRange[x0]);
 	requires paramxUniRange[this] == x;
 	requires paramyUniRange[this] == y;
 	ensures packedUniRange[this];
 	ensures paramxUniRange[this] == x+z;
 	ensures paramyUniRange[this] == y+z;
-	ensures packedUniRange[this];
-  	ensures fracUniRange[this] == 1.0;
+	ensures fracUniRange[this] == 1.0;
+	ensures (forall x0:Ref :: packedUniRange[x0]);
 {
 	call UnpackUniRange(x, y, this);
-
 	packedUniRange[this] := false;
 
 	val[this] := val[this]+z;
 
-	if (next[this] != null )
-	{ 
-//The assume is better right before the call because
-//there is a rationale for putting it here. 
-//Same for the assume right after the call.
-	assume (this != next[this]);
-    	call add(z, x, y, next[this]);
-    	assume (val[this]==old(val[this])+z);
-	}
-  
+  	fracUniRange[next[this]] := 1.0;
   	call PackUniRange(x+z, y+z, this);
 	packedUniRange[this] := true;
-	fracUniRange[this] :=  1.0;
+	fracUniRange[next[this]] :=  1.0;
 	paramxUniRange[this] := x+z;
 	paramyUniRange[this] := y+z;
-
+	
+	if (next[this] != null )
+	{ 
+    		call add(z, x, y, next[this]);
+	}
 }
-
+  
 procedure addModulo11(x:int, this: Ref) 
 	modifies val, packedRange, fracRange, paramxRange, paramyRange;
 	requires x >= 0;
