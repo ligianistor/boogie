@@ -55,7 +55,7 @@ procedure addModulo11(x:int, this: Ref)
 	modifies val, packedRange, fracRange;
 	requires x >= 0;
 	requires fracRange[0,10,this] > 0.0;
-  requires (forall y:Ref :: (packedRange[0,10,y] == true));
+  	requires (forall y:Ref :: (packedRange[0,10,y] == true));
 	ensures packedRange[0,10,this];
 	ensures fracRange[0,10,this] > 0.0;
 	ensures (forall y:Ref :: (packedRange[0,10,y] == old(packedRange[0,10,y])) );

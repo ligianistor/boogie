@@ -1,0 +1,119 @@
+Example used for reachability static analysis for the finalizers' problem.
+Taken from 
+https://secweb.cs.odu.edu/~zeil/cs361/web/website/Lectures/garbageCollection/pages/ar01s01s03.html
+
+
+class Airport
+{
+   String airportName;
+   Airport[] hasFlightsTo;
+   int numberConnections;
+
+public Airport(String s, Airport[] a, int i) {
+	airportName = s;
+	hasFlightsTo = a;
+	numberConnections = i;
+}
+
+public void increaseNrConnections() {
+numberConnections++;
+}
+
+public void decreaseNrConnections() {
+numberConnections--;
+}
+
+//Adds a connection airport to this.
+public void addConnAir(Airport connAir) {
+hasFlightsTo[numberConnections] = connAir;
+increaseNrConnections();
+}
+
+//This drops a connection to an airport.
+public void dropConnAir(Airport dropConn) {
+int i=0;
+while (i<numberConnections) {
+if (hasFlightsTo[i] == dropConn) {
+	for (int j=i;j<numberConnections-1;j++)
+		hasFlightsTo[j]=hasFlightsTo[j+1];
+i=numberConnections;
+decreaseNrConnections();
+}
+else {
+i++;
+}
+}
+
+}
+
+}
+
+
+------------------------
+
+
+import java.util.HashMap;
+import java.util.Map;
+
+class Airline {
+   String name;
+   Map<String , Airport> hubs;
+
+public Airline(String name0) {
+	name = name0;
+	hubs = new HashMap<String, Airport>(); 
+} 
+
+public void setHubs(String s, Airport a) {
+hubs.put(s, a);
+}
+
+public void dropHub(String s) {
+hubs.remove(s);
+}
+
+
+public static void main(String[] args)
+{
+//Create example from webpage.
+//Create airport objects.
+Airport boston = new Airport("Boston", new Airport[5], 0);
+Airport washdc = new Airport("WashingtonDC", new Airport[5], 0);
+Airport ny = new Airport("N.Y.", new Airport[5], 0);
+Airport raleigh = new Airport("Raleigh", new Airport[5], 0);
+Airport norfolk = new Airport("Norfolk", new Airport[5], 0);
+
+//Create connection airports.
+boston.addConnAir(ny);
+boston.addConnAir(washdc);
+
+washdc.addConnAir(boston);
+washdc.addConnAir(norfolk);
+washdc.addConnAir(ny);
+
+norfolk.addConnAir(raleigh);
+
+raleigh.addConnAir(ny);
+
+ny.addConnAir(boston);
+ny.addConnAir(washdc);
+
+Airline jetBlue = new Airline("JetBlue"); 
+jetBlue.setHubs("Boston", boston);
+jetBlue.setHubs("N.Y.", ny);
+jetBlue.setHubs("WashingtonDC", washdc);
+//Finished with setting up the airline.
+
+//Implement removal of nodes like in
+//https://secweb.cs.odu.edu/~zeil/cs361/web/website/Lectures/garbageCollection/pages/referenceCounting.html .
+
+jetBlue.dropHub("WashingtonDC");
+
+washdc.dropConnAir(norfolk);
+
+//This is just one example.
+//There is a second example that leaves a cycle of airports in.
+
+}
+
+}
