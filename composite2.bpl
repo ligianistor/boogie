@@ -7,15 +7,15 @@ var right : [Ref]Ref;
 var parent : [Ref]Ref;
 var count : [Ref]int;
 
-var packedCount : [Ref, int]bool;
-var packedLeft : [Ref, Ref, int]bool;
-var packedRight : [Ref, Ref, int]bool;
-var packedParent : [Ref]bool;
+var packedCount : [Ref, int] bool;
+var packedLeft : [Ref, int] bool;
+var packedRight : [Ref, int] bool;
+var packedParent : [Ref] bool;
 
-var fracCount : [Ref, int]real;
-var fracLeft : [Ref, Ref, int]real;
-var fracRight : [Ref, Ref, int]real;
-var fracParent : [Ref]real;
+var fracCount : [Ref, int] real;
+var fracLeft : [Ref, int] real;
+var fracRight : [Ref, int] real;
+var fracParent : [Ref] real;
 
 //axiom that shows there are no cycles in the tree, locally
 //this axiom describes the data structure, does not depend on whether 
