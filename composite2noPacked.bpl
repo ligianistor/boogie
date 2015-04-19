@@ -8,13 +8,13 @@ var parent : [Ref]Ref;
 var count : [Ref]int;
 
 var packedCount : [Ref, int] bool;
-var packedLeft : [Ref, int] bool;
-var packedRight : [Ref, int] bool;
+var packedLeft : [Ref, Ref, int] bool;
+var packedRight : [Ref, Ref, int] bool;
 var packedParent : [Ref] bool;
 
 var fracCount : [Ref, int] real;
-var fracLeft : [Ref, int] real;
-var fracRight : [Ref, int] real;
+var fracLeft : [Ref, Ref, int] real;
+var fracRight : [Ref, Ref, int] real;
 var fracParent : [Ref] real;
 
 //axiom that shows there are no cycles in the tree, locally
@@ -28,56 +28,60 @@ axiom (forall this: Ref, left: [Ref]Ref, right: [Ref]Ref, parent:[Ref]Ref::
     (this!=null) && (parent[this]!=null) ==>((this==right[parent[this]]) || (this==left[parent[this]]))
 );
 
-procedure PackLeftNotNull(this:Ref, lc:int);
-requires (packedLeft[this, lc] == false) &&
+procedure PackLeftNotNull(this:Ref, ol:Ref, lc:int);
+requires (packedLeft[this, ol, lc] == false) &&
 	 (left[this] != null) && 
-       packedCount[left[this], lc] &&
+	(left[this] == ol) &&
        (fracCount[left[this], lc] == 0.5);  
 
-procedure PackLeftNull(this:Ref, lc:int);
-requires (packedLeft[this, 0] == false) &&
+procedure PackLeftNull(this:Ref, ol:Ref, lc:int);
+requires (packedLeft[this, ol, 0] == false) &&
 	 (left[this] == null) && 
+	(left[this] == ol) &&
 	 (lc == 0);
 
-procedure UnpackLeftNull(this:Ref, lc:int);
-requires packedLeft[this, 0] && 
-	(fracLeft[this, 0] > 0.0) &&
+procedure UnpackLeftNull(this:Ref, ol:Ref, lc:int);
+requires packedLeft[this, ol, 0] && 
+	(fracLeft[this, ol, 0] > 0.0) &&
 	(lc == 0);
-ensures (left[this] == null);
+ensures (left[this] == null) &&
+	(left[this] == ol);
 
-procedure UnpackLeftNotNull(this:Ref, lc:int);
-requires packedLeft[this, lc] && 
-	 (fracLeft[this, lc] > 0.0) && 
+procedure UnpackLeftNotNull(this:Ref, ol:Ref, lc:int);
+requires packedLeft[this, ol, lc] && 
+	 (fracLeft[this, ol, lc] > 0.0) && 
 	 (left[this] != null);
-ensures  packedCount[left[this], lc] &&
-         (fracCount[left[this], lc] == 0.5);
+ensures  (fracCount[left[this], lc] == 0.5) &&
+	(left[this] == ol);
 
-procedure PackRightNotNull(this:Ref, rc:int);
+procedure PackRightNotNull(this:Ref, or:Ref, rc:int);
 requires (packedRight[this, rc] == false) &&
 	 (right[this] != null) && 
-	 packedCount[right[this], rc] &&
+	(right[this] == or) &&
          (fracCount[right[this], rc] == 0.5) ;
 
-procedure PackRightNull(this:Ref, rc:int);
-requires (packedRight[this, 0] == false) &&
+procedure PackRightNull(this:Ref, or:Ref, rc:int);
+requires (packedRight[this, or, 0] == false) &&
+	 (rc == 0) &&
+	(right[this] == or) &&
 	 (right[this] == null);
 
-procedure UnpackRightNull(this:Ref, rc:int);
-requires packedRight[this, 0] && 
-	(fracRight[this, 0] > 0.0);
-ensures (right[this] == null);
+procedure UnpackRightNull(this:Ref, or:Ref, rc:int);
+requires packedRight[this, or, 0] && 
+	(fracRight[this, or, 0] > 0.0);
+ensures (right[this] == null) && (rc == 0) && (right[this] == or);
 
-procedure UnpackRightNotNull(this:Ref, rc:int);
-requires packedRight[this, rc] && 
-	(fracRight[this, rc] > 0.0) && 
+procedure UnpackRightNotNull(this:Ref, or:Ref, rc:int);
+requires packedRight[this, or, rc] && 
+	(fracRight[this, or, rc] > 0.0) && 
+	(right[this] == or) &&
 	(right[this] != null);
-ensures  packedCount[right[this], rc] &&
-        (fracCount[right[this], rc] == 0.5);
+ensures (fracCount[right[this], rc] == 0.5);
 
 procedure PackCount(this:Ref, c:int);
 requires (packedCount[this, c] == false) &&
 	 (this!=null) && (
-  ( exists lc: int, rc:int ::
+  (exists lc: int, rc:int ::
    countPredFunc(this, count,  lc, rc, 
    packedLeft, fracLeft, packedRight, fracRight) ) 
 );
@@ -86,11 +90,11 @@ procedure UnpackCount(this:Ref, c:int);
 requires packedCount[this, c] && 
 	(fracCount[this, c] > 0.0);
 ensures (this!=null) && (
-  exists lc: int, rc:int ::
-  (packedLeft[this, lc] &&
- (fracLeft[this, lc] == 0.5) &&
- packedRight[this, rc] &&
- (fracRight[this, rc] == 0.5) && 
+  exists lc: int, rc:int,
+	ol:Ref, or:Ref ::
+(
+ (fracLeft[this, ol, lc] == 0.5) &&
+ (fracRight[this, or, rc] == 0.5) && 
  (count[this] == lc+rc+1))
 );
 
@@ -101,23 +105,20 @@ axiom (forall this:Ref,count: [Ref]int :: (this==null) ==> (count[this]==0)  );
 procedure PackParentNotNull(this:Ref);
 requires (packedParent[this] == false) &&
 	(parent[this] != this) &&
-	packedCount[this, count[this]] &&
      (fracCount[this, count[this]] == 0.5) &&
      (parent[this] != null) &&
-     packedParent[parent[this]] &&
+     (fracParent[parent[this]] > 0.0) &&
             (
-           ( packedLeft[parent[this], count[this]] &&
-            (fracLeft[parent[this], count[this]] == 0.5))
+           ((fracLeft[parent[this], this, count[this]] == 0.5))
              ||
-           ( packedRight[parent[this], count[this]] &&
-            (fracRight[parent[this], count[this]] == 0.5))
+           ((fracRight[parent[this], this, count[this]] == 0.5))
            );
 
 procedure PackParentNull(this:Ref);
 requires (packedParent[this] == false) &&
 	(parent[this] != this) &&
-        packedCount[this, count[this]] &&
    (fracCount[this, count[this]] == 1.0) &&
+    packedCount[this, count[this]] &&
    (parent[this]==null);
 
 procedure UnpackParent(this:Ref);
@@ -130,13 +131,13 @@ ensures (parent[this] != this)
      (fracCount[this, c] == 0.5)
      &&
      ((parent[this] != null) ==>
-            (packedParent[parent[this]] &&
-            (( packedLeft[parent[this], c] && (fracLeft[parent[this], c] == 0.5))
+            ((fracParent[parent[this]] > 0.0) &&
+            (((fracLeft[parent[this], this, c] == 0.5))
              ||
-           ( packedRight[parent[this], c] && (fracRight[parent[this], c] == 0.5))
+           ((fracRight[parent[this], this, c] == 0.5))
            ) ) )
      &&
-     ((parent[this]==null) ==> packedCount[this, c] && (fracCount[this,c] == 0.5) )  ) ));
+     ((parent[this]==null) ==> (fracCount[this,c] == 0.5) )  ) ));
 
 
 function countPredFunc(this: Ref, count: [Ref]int,  lc1:int, rc1:int, 
@@ -145,14 +146,12 @@ function countPredFunc(this: Ref, count: [Ref]int,  lc1:int, rc1:int,
 
 //axiom about existance of variable, but the other way of the implication
 axiom (forall this: Ref, left: [Ref]Ref, right: [Ref]Ref, count: [Ref]int,  lc1:int, rc1:int, 
-      packedLeft: [Ref, int]bool, fracLeft: [Ref, int]real, 
-      packedRight: [Ref, int]bool, fracRight: [Ref, int]real ::
+      packedLeft: [Ref, Ref, int]bool, fracLeft: [Ref, Ref, int]real, 
+      packedRight: [Ref, Ref, int]bool, fracRight: [Ref, Ref, int]real ::
     (
 (
-  ( packedLeft[this, lc1] && 
-  (fracLeft[this, lc1] == 0.5) &&
-  packedRight[this, rc1] &&
-(fracRight[this, rc1] == 0.5) && 
+  ((fracLeft[this, left[this], lc1] == 0.5) &&
+(fracRight[this, right[this], rc1] == 0.5) && 
  (count[this] == lc1+rc1+1) )
 )
  ==> countPredFunc(this, count,  lc1, rc1, 
@@ -171,15 +170,16 @@ procedure updateCount(this: Ref)
 	fracCount, fracLeft, fracRight;
 
  requires this != null;
- requires ( packedLeft[this, count[left[this]]] &&
- 	  packedRight[this, count[right[this]]] &&
- 	  (fracLeft[this, count[left[this]]] == 0.5) && 
-	 (fracRight[this, count[right[this]]] == 0.5) && 
-	(fracCount[this, count[this]] == 1.0) );
+ requires (exists c:int, c1:int, c2:int, ol:Ref, or:Ref ::
+	 (packedLeft[this, ol, c1] &&
+ 	 packedRight[this, or, c2] &&
+ 	 (fracLeft[this, ol, c1] == 0.5) && 
+	 (fracRight[this, or, c2] == 0.5) && 
+	 (fracCount[this, c] == 1.0) ) );
 // Might put count[this] instead of c here.        
-// ensures ( exists c:int :: packedCount[this, c] && (fracCount[this, c] == 1.0));  
-ensures (packedCount[this, count[this]] && 
-	(fracCount[this, count[this]] == 1.0)); 
+ensures ( exists c:int :: packedCount[this, c] && (fracCount[this, c] == 1.0));  
+//ensures (packedCount[this, count[this]] && 
+//	(fracCount[this, count[this]] == 1.0)); 
 {
    var newc:int;
    newc := 1;
