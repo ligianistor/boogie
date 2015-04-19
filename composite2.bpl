@@ -339,21 +339,20 @@ requires packedParent[l];
 requires (forall r:Ref:: packedCount[r, count[r]]);
 ensures packedParent[this];
  {
+if (parent[l] == null) {
+	packedParent[this]:=false;
 
-packedParent[this]:=false;
+   	parent[l]:=this;
+   	left[this]:=l;
 
+	packedLeft[this, count[left[this]]] := true;
 
-   parent[l]:=this;
-   left[this]:=l;
+	packedRight[this, count[right[this]]] := true;
 
+	packedCount[this, count[this]] := false;
 
-packedLeft[this, count[left[this]]] := true;
-
-packedRight[this, count[right[this]]] := true;
-
-packedCount[this, count[this]] := false;
-
-call updateCountRec(this);
+	call updateCountRec(this);
+}
    
 }
 
