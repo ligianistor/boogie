@@ -173,46 +173,11 @@ axiom (forall this: Ref, left: [Ref]Ref, right: [Ref]Ref, count: [Ref]int,  lc1:
 ) 
 );
 
-
-procedure Composite(this:Ref)
-modifies left, right, parent, count, 
-	fracParent, fracLeft, fracRight, fracCount,
-	packedParent, packedLeft, packedRight, packedCount;
-requires this != null;
-ensures packedParent[this];
-ensures packedLeft[this,0];
-ensures packedRight[this, 0];
-ensures (fracParent[this] >= 0.5) && 
-	(fracLeft[this, 0] >= 0.5) && 
-	(fracRight[this, 0] >= 0.5) ;
-{
-
-  count[this] := 1;
-  left[this] := null;
-  right[this] := null;
-  parent[this] := null;
-call PackLeftNull(this, 0);
-packedLeft[this, 0] := true;
-fracLeft[this, 0] := 1.0;
-call PackRightNull(this,0);
-packedRight[this, 0] := true;
-fracRight[this, 0] := 1.0;
-
-//need to put in the assertions that are related to exists
-//Boogie does not know how to intantiate the exists but we know
-assert countPredFunc(this, count,  0, 0, 
-       packedLeft, fracLeft, packedRight, fracRight);
-
-call PackCount(this,1);
-packedCount[this, 1] := true;
-fracCount[this, 1] := 1.0;
-call PackParentNull(this);
-packedParent[this] := true;
-fracParent[this] := 1.0;
-}
-
-
-
+procedure ConstructComposite(this:Ref);
+	ensures (count[this] == 1) &&
+		(left[this] == null) &&
+		(right[this] == null) &&
+		(parent[this] == null);
  
  procedure updateCount(this: Ref)
  modifies count, packedCount, packedLeft, packedRight, 
