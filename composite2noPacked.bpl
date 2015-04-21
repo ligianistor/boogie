@@ -55,7 +55,7 @@ ensures  (fracCount[left[this], lc] == 0.5) &&
 	(left[this] == ol);
 
 procedure PackRightNotNull(this:Ref, or:Ref, rc:int);
-requires (packedRight[this, rc] == false) &&
+requires (packedRight[this, or, rc] == false) &&
 	 (right[this] != null) && 
 	(right[this] == or) &&
          (fracCount[right[this], rc] == 0.5) ;
@@ -141,8 +141,8 @@ ensures (parent[this] != this)
 
 
 function countPredFunc(this: Ref, count: [Ref]int,  lc1:int, rc1:int, 
-         packedLeft: [Ref, int]bool, fracLeft: [Ref, int]real, 
-	 packedRight: [Ref, int]bool, fracRight: [Ref, int]real) : bool;
+         packedLeft: [Ref, Ref, int]bool, fracLeft: [Ref, Ref, int]real, 
+	 packedRight: [Ref, Ref, int]bool, fracRight: [Ref, Ref, int]real) : bool;
 
 //axiom about existance of variable, but the other way of the implication
 axiom (forall this: Ref, left: [Ref]Ref, right: [Ref]Ref, count: [Ref]int,  lc1:int, rc1:int, 
@@ -187,8 +187,8 @@ ensures ( exists c:int :: packedCount[this, c] && (fracCount[this, c] == 1.0));
 
         if (left[this] != null)
            {
- 	call UnpackLeftNotNull(this, count[left[this]]);
-	packedLeft[this, count[left[this]]] := false;
+ 	call UnpackLeftNotNull(this, left[this], count[left[this]]);
+	packedLeft[this, left[this], count[left[this]]] := false;
 	call UnpackCount(left[this], count[left[this]]);
 	packedCount[left[this], count[left[this]]] := false; 
         newc := newc + count[left[this]];
@@ -198,16 +198,13 @@ ensures ( exists c:int :: packedCount[this, c] && (fracCount[this, c] == 1.0));
        
         if (right[this] != null)
              {
-         call UnpackRightNotNull(this, count[right[this]]);
-	 packedRight[this, count[right[this]]] := false;
+         call UnpackRightNotNull(this, right[this], count[right[this]]);
+	 packedRight[this, right[this], count[right[this]]] := false;
 	call UnpackCount(right[this], count[right[this]]);
-         newc := newc + count[right[this]];
-         
+         newc := newc + count[right[this]]; 
        }
-        
+
     count[this] := newc;   
-       
- 
     packedCount[this, count[this]]:=true;
     
 }
@@ -220,23 +217,23 @@ requires (this != null);
 requires packedParent[this] == false;
 requires (parent[this] != null) ==> (fracParent[parent[this]] > 0.0);
 requires (parent[this] != null) && (this==right[parent[this]]) ==> 
-	(fracRight[parent[this], count[right[parent[this]]]] == 0.5);
+	(fracRight[parent[this], this, count[right[parent[this]]]] == 0.5);
 requires (parent[this] != null) && (this==left[parent[this]]) ==> 
-	(fracLeft[parent[this], count[left[parent[this]]]] == 0.5);
+	(fracLeft[parent[this], this, count[left[parent[this]]]] == 0.5);
 requires (parent[this] == null) ==> (fracCount[this, count[this]] == 0.5);
 requires (forall r:Ref :: (r!=this) ==> packedCount[r, count[this]]);
-requires packedLeft[this, count[left[this]]];
-requires packedRight[this, count[right[this]]];
-requires (fracLeft[this, count[left[this]]] == 0.5) && 
-	(fracRight[this, count[right[this]]] == 0.5);
+requires packedLeft[this, left[this], count[left[this]]];
+requires packedRight[this, right[this], count[right[this]]];
+requires (fracLeft[this, left[this], count[left[this]]] == 0.5) && 
+	(fracRight[this, right[this], count[right[this]]] == 0.5);
 requires (fracCount[this, count[this]] == 0.5);
 
 ensures   (packedParent[this]);    
 
 {
  var fracLocalCount: [Ref, int]real;
- var fracLocalRight: [Ref, int]real;
- var fracLocalLeft: [Ref, int]real;
+ var fracLocalRight: [Ref, Ref, int]real;
+ var fracLocalLeft: [Ref, Ref, int]real;
 
   if (parent[this] != null)
  {
@@ -257,28 +254,28 @@ fracLocalCount[parent[this], count[parent[this]]] := fracCount[parent[this], cou
 packedCount[parent[this], count[parent[this]]]:=false;
 
 //we can assume this because we just unpacked parent[this] from countP
-assume (fracLeft[this, count[left[this]]] == 0.5) && (fracRight[this, count[right[this]]] == 0.5);
-fracLocalRight[parent[this], count[right[parent[this]]]] := fracRight[parent[this],  count[right[parent[this]]]];
+assume (fracLeft[this, left[this], count[left[this]]] == 0.5) && (fracRight[this, right[this], count[right[this]]] == 0.5);
+fracLocalRight[parent[this], right[parent[this]], count[right[parent[this]]]] := fracRight[parent[this], right[parent[this]],  count[right[parent[this]]]];
 
 
 //we assume this is the right child of parent[this]
 //the other case is analogous
 assume this==right[parent[this]];
 
-fracLocalRight[parent[this], count[right[parent[this]]]] := 
-	fracLocalRight[parent[this], count[right[parent[this]]]] +
-	fracRight[parent[this], count[right[parent[this]]]];
+fracLocalRight[parent[this], right[parent[this]], count[right[parent[this]]]] := 
+	fracLocalRight[parent[this], right[parent[this]], count[right[parent[this]]]] +
+	fracRight[parent[this], right[parent[this]], count[right[parent[this]]]];
 
 //unpack parent[this] from rightP
-packedRight[parent[this], count[right[parent[this]]]] := false;
+packedRight[parent[this], right[parent[this]], count[right[parent[this]]]] := false;
 
 fracLocalCount[this, count[this]] := fracLocalCount[this, count[this]] + fracCount[this, count[this]];
 
 fracCount[this, count[this]] := fracLocalCount[this, count[this]];
 
-packedRight[this, count[right[this]]] := true;
+packedRight[this, right[this], count[right[this]]] := true;
 
-packedLeft[this, count[left[this]]] := true;
+packedLeft[this, left[this], count[left[this]]] := true;
       call updateCount(this);
 
 
@@ -287,19 +284,19 @@ packedParent[parent[this]] := false;
 assume parent[parent[this]] != null ==> ( fracParent[parent[parent[this]]] > 0.0);
 assume parent[parent[this]] == null ==> (fracCount[parent[this], count[parent[this]]] == 0.5);
 assume (parent[parent[this]] != null) && (this==right[parent[parent[this]]]) ==> 
-	(fracRight[parent[parent[this]], count[right[parent[parent[this]]]]] == 0.5);
+	(fracRight[parent[parent[this]], right[parent[parent[this]]], count[right[parent[parent[this]]]]] == 0.5);
 assume (parent[parent[this]] != null) && (this==left[parent[parent[this]]]) ==> 
-	(fracLeft[parent[parent[this]], count[left[parent[parent[this]]]]] == 0.5);
+	(fracLeft[parent[parent[this]], left[parent[parent[this]]], count[left[parent[parent[this]]]]] == 0.5);
 
 
-packedRight[parent[this], count[right[parent[this]]]] := true;
+packedRight[parent[this], right[parent[this]], count[right[parent[this]]]] := true;
 
 assume left[parent[this]] != null;
 
 assume packedCount[left[parent[this]], count[left[parent[this]]]] && 
 	(count[left[parent[this]]] == count[this]);
  
-packedLeft[parent[this],count[left[parent[this]]]] := true;
+packedLeft[parent[this], left[parent[this]], count[left[parent[this]]]] := true;
       call updateCountRec(parent[this]);
       }
     else
@@ -330,9 +327,9 @@ if (parent[l] == null) {
    	parent[l]:=this;
    	left[this]:=l;
 
-	packedLeft[this, count[left[this]]] := true;
+	packedLeft[this, left[this], count[left[this]]] := true;
 
-	packedRight[this, count[right[this]]] := true;
+	packedRight[this, right[this], count[right[this]]] := true;
 
 	packedCount[this, count[this]] := false;
 
