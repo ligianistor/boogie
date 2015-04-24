@@ -29,131 +29,131 @@ axiom (forall this: Ref, left: [Ref]Ref, right: [Ref]Ref, parent:[Ref]Ref::
 );
 
 procedure PackLeftNotNull(this:Ref, ol:Ref, lc:int);
-requires (packedLeft[this, ol, lc] == false) &&
-	 (left[this] != null) && 
-	(left[this] == ol) &&
-       (fracCount[ol, lc] == 0.5);  
+requires (packedLeft[this, ol, lc] == false);
+requires (left[this] != null);
+requires (left[this] == ol);
+requires (fracCount[ol, lc] == 0.5);  
 
 procedure PackLeftNull(this:Ref, ol:Ref, lc:int);
-requires (packedLeft[this, ol, lc] == false) &&
-	 (left[this] == null) && 
-	 (left[this] == ol) &&
-	 (lc == 0);
+requires (packedLeft[this, ol, lc] == false);
+requires (left[this] == null);
+requires (left[this] == ol);
+requires (lc == 0);
 
 procedure UnpackLeftNull(this:Ref, ol:Ref, lc:int);
-requires packedLeft[this, ol, lc] && 
-	(fracLeft[this, ol, lc] > 0.0) &&
-	(left[this] == null);
-ensures (left[this] == ol) &&
-	(lc == 0);
+requires packedLeft[this, ol, lc];
+requires (fracLeft[this, ol, lc] > 0.0);
+requires (left[this] == null);
+ensures (left[this] == ol);
+ensures	(lc == 0);
 
 procedure UnpackLeftNotNull(this:Ref, ol:Ref, lc:int);
-requires packedLeft[this, ol, lc] && 
-	 (fracLeft[this, ol, lc] > 0.0) && 
-	 (left[this] != null);
-ensures  (fracCount[ol, lc] == 0.5) &&
-	(left[this] == ol);
+requires packedLeft[this, ol, lc];
+requires (fracLeft[this, ol, lc] > 0.0);
+requires (left[this] != null);
+ensures  (fracCount[ol, lc] == 0.5);
+ensures	(left[this] == ol);
 
 procedure PackRightNotNull(this:Ref, or:Ref, rc:int);
-requires (packedRight[this, or, rc] == false) &&
-	 (right[this] != null) && 
-	(right[this] == or) &&
-         (fracCount[or, rc] == 0.5) ;
+requires (packedRight[this, or, rc] == false);
+requires (right[this] != null);
+requires (right[this] == or);
+requires (fracCount[or, rc] == 0.5) ;
 
 procedure PackRightNull(this:Ref, or:Ref, rc:int);
-requires (packedRight[this, or, rc] == false) &&
-	 (rc == 0) &&
-	 (right[this] == or) &&
-	 (right[this] == null);
+requires (packedRight[this, or, rc] == false);
+requires (rc == 0);
+requires (right[this] == or);
+requires (right[this] == null);
 
 procedure UnpackRightNull(this:Ref, or:Ref, rc:int);
-requires packedRight[this, or, rc] && 
-	(fracRight[this, or, rc] > 0.0) && 
-	(right[this] == null);
-ensures (rc == 0) && (right[this] == or);
+requires packedRight[this, or, rc];
+requires (fracRight[this, or, rc] > 0.0);
+requires (right[this] == null);
+ensures (rc == 0);
+ensures (right[this] == or);
 
 procedure UnpackRightNotNull(this:Ref, or:Ref, rc:int);
-requires packedRight[this, or, rc] && 
-	(fracRight[this, or, rc] > 0.0) && 
-	(right[this] != null);
-ensures (fracCount[or, rc] == 0.5) && (right[this] == or);
+requires packedRight[this, or, rc];
+requires (fracRight[this, or, rc] > 0.0);
+requires (right[this] != null);
+ensures (fracCount[or, rc] == 0.5);
+ensures  (right[this] == or);
 
 procedure PackCount(this:Ref, c:int, ol: Ref, or:Ref, lc:int, rc:int);
-requires (packedCount[this, c] == false) &&
-	 (this!=null) && 
-	(count[this] == c) &&
-	(fracLeft[this, ol, lc] == 0.5) &&
-	(fracRight[this, or, rc] == 0.5) && 
- 	(c == lc + rc + 1);
+requires (packedCount[this, c] == false);
+requires (this!=null);
+requires (count[this] == c);
+requires (fracLeft[this, ol, lc] == 0.5);
+requires (fracRight[this, or, rc] == 0.5);
+requires (c == lc + rc + 1);
 
 procedure UnpackCount(this:Ref, c:int, ol: Ref, or:Ref, lc:int, rc:int);
 requires packedCount[this, c];
 requires (fracCount[this, c] > 0.0);
-ensures (this!=null) && 
-	(count[this] == c) &&
- (fracLeft[this, ol, lc] == 0.5) &&
- (fracRight[this, or, rc] == 0.5) && 
- (c == lc + rc + 1);
+ensures (this!=null);
+ensures	(count[this] == c);
+ensures (fracLeft[this, ol, lc] == 0.5);
+ensures (fracRight[this, or, rc] == 0.5);
+ensures (c == lc + rc + 1);
 
 
 //maybe we do not need this axiom now
 axiom (forall this:Ref,count: [Ref]int :: (this==null) ==> (count[this]==0)  );
 
 procedure PackParentNotNull(this:Ref, c:int);
-requires (packedParent[this] == false) &&
-	(parent[this] != this) &&
-     (fracCount[this, c] == 0.5) &&
-     (parent[this] != null) &&
-     (fracParent[parent[this]] > 0.0) &&
-            (
-           ((fracLeft[parent[this], this, c] == 0.5))
+requires (packedParent[this] == false);
+requires (parent[this] != this);
+requires (fracCount[this, c] == 0.5);
+requires (parent[this] != null);
+requires (fracParent[parent[this]] > 0.0);
+requires  (fracLeft[parent[this], this, c] == 0.5)
              ||
-           ((fracRight[parent[this], this, c] == 0.5))
-           );
+           (fracRight[parent[this], this, c] == 0.5);
 
 procedure PackParentNull(this:Ref, c:int);
-requires (packedParent[this] == false) &&
-	(parent[this] != this) &&
-   (fracCount[this, c] == 1.0) &&
-    packedCount[this, c] &&
-   (parent[this]==null);
+requires (packedParent[this] == false);
+requires (parent[this] != this);
+requires (fracCount[this, c] == 1.0);
+requires packedCount[this, c];
+requires (parent[this]==null);
 
 procedure UnpackParent(this:Ref, c:int);
-requires packedParent[this] &&
-	(fracParent[this] > 0.0);
-ensures (parent[this] != this)
-       &&        
-     (( packedCount[this,c] &&
-     (fracCount[this, c] == 0.5)
-     &&
-     ((parent[this] != null) ==>
-            ((fracParent[parent[this]] > 0.0) &&
-            (((fracLeft[parent[this], this, c] == 0.5))
+requires packedParent[this];
+requires (fracParent[this] > 0.0);
+ensures (parent[this] != this);
+ensures packedCount[this,c];
+ensures (fracCount[this, c] == 0.5);
+ensures (parent[this] != null) ==>
+            (
+	   (fracParent[parent[this]] > 0.0) &&
+            (
+	   (fracLeft[parent[this], this, c] == 0.5)
              ||
-           ((fracRight[parent[this], this, c] == 0.5))
-           ) ) )
-     &&
-     ((parent[this]==null) ==> (fracCount[this,c] == 0.5) )  ) );
+           (fracRight[parent[this], this, c] == 0.5)
+           ) 
+	   );
+ensures (parent[this]==null) ==> (fracCount[this,c] == 0.5);
 
+//---start of methods
 
 procedure ConstructComposite(this:Ref);
-	ensures (count[this] == 1) &&
-		(left[this] == null) &&
-		(right[this] == null) &&
-		(parent[this] == null);
+ensures (count[this] == 1);
+ensures	(left[this] == null);
+ensures	(right[this] == null);
+ensures	(parent[this] == null);
  
 procedure updateCount(this: Ref, c:int, c1:int, c2:int, ol:Ref, or:Ref)
- modifies count, packedCount, packedLeft, packedRight, 
+modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight;
 
- requires this != null;
- requires ( packedLeft[this, ol, c1] &&
- 	 packedRight[this, or, c2] &&
- 	 (fracLeft[this, ol, c1] == 0.5) && 
-	 (fracRight[this, or, c2] == 0.5) && 
-	 (fracCount[this, c] == 1.0) 
-
-) ;
+requires this != null;
+requires packedLeft[this, ol, c1];
+requires packedRight[this, or, c2];
+requires (fracLeft[this, ol, c1] == 0.5);
+requires (fracRight[this, or, c2] == 0.5); 
+requires (fracCount[this, c] == 1.0);
+requires (packedCount[this, c] == false);
        
 ensures ( exists c3:int :: packedCount[this, c3] && (fracCount[this, c3] == 1.0));  
 {
@@ -205,4 +205,3 @@ ensures ( exists c3:int :: packedCount[this, c3] && (fracCount[this, c3] == 1.0)
 //Maybe we need an axiom that ties newc with the c3 that the ensures exists expects.
     
 }
-
