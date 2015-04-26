@@ -67,6 +67,7 @@ requires (paramLeftLc[this] == lc);
 requires (fracLeft[this] > 0.0);
 requires (left[this] == null);
 ensures (left[this] == ol);
+ensures (paramCountC[ol] == lc);
 ensures	(lc == 0);
 
 procedure UnpackLeftNotNull(this:Ref, ol:Ref, lc:int);
@@ -76,6 +77,7 @@ requires (paramLeftLc[this] == lc);
 requires (fracLeft[this] > 0.0);
 requires (left[this] != null);
 ensures  (fracCount[ol] == 0.5);
+ensures (paramCountC[ol] == lc);
 ensures	(left[this] == ol);
 
 procedure PackRightNotNull(this:Ref, or:Ref, rc:int);
@@ -102,6 +104,7 @@ requires (fracRight[this] > 0.0);
 requires (right[this] == null);
 ensures (rc == 0);
 ensures (right[this] == or);
+ensures (paramCountC[or] == rc);
 
 procedure UnpackRightNotNull(this:Ref, or:Ref, rc:int);
 requires packedRight[this];
@@ -111,6 +114,7 @@ requires (fracRight[this] > 0.0);
 requires (right[this] != null);
 ensures (fracCount[or] == 0.5);
 ensures  (right[this] == or);
+ensures (paramCountC[or] == rc);
 
 procedure PackCount(this:Ref, c:int, ol: Ref, or:Ref, lc:int, rc:int);
 requires (packedCount[this] == false);
@@ -203,7 +207,7 @@ ensures	(parent[this] == null);
  
 procedure updateCount(this: Ref, c:int, c1:int, c2:int, ol:Ref, or:Ref)
 modifies count, packedCount, packedLeft, packedRight, 
-	fracCount, fracLeft, fracRight;
+	fracCount, fracLeft, fracRight, paramCountC;
 
 requires this != null;
 requires packedLeft[this];
@@ -242,6 +246,7 @@ ensures ( exists c3:int :: packedCount[this] && (fracCount[this] == 1.0) && (par
 	packedLeft[this] := false;
 //This should be in a forall in the requires of the procedure.
 	packedCount[ol] := true;
+	
 	call UnpackCount(ol, c1, ol1, or1, lc1, rc1);
 	packedCount[ol] := false; 
         newc := newc + count[left[this]];
@@ -260,7 +265,10 @@ ensures ( exists c3:int :: packedCount[this] && (fracCount[this] == 1.0) && (par
          newc := newc + count[right[this]]; 
        }
 
-    count[this] := newc;   
+    count[this] := newc; 
+    //We update the corresponding paramCount for that field
+    //whenever we update a field.
+    paramCountC[this] := newc;  
 //Here it is difficult because this is the phase where we need to use what we know and 
 //instantiate the exists with the right values.
     call PackCount(this, newc, ol, or, c1, c2);
@@ -268,6 +276,7 @@ ensures ( exists c3:int :: packedCount[this] && (fracCount[this] == 1.0) && (par
 //Maybe we need an axiom that ties newc with the c3 that the ensures exists expects.
     
 }
+//TODO next procedure to prove
 
 procedure updateCountRec(this: Ref, opp: Ref, lcc:int, ol:Ref, or:Ref, lc:int, rc:int)
 modifies count, packedCount, packedLeft, packedRight, packedParent,
