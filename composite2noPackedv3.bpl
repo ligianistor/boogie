@@ -44,77 +44,41 @@ axiom (forall this: Ref, left: [Ref]Ref, right: [Ref]Ref, parent:[Ref]Ref::
     (this!=null) && (parent[this]!=null) ==>((this==right[parent[this]]) || (this==left[parent[this]]))
 );
 
-procedure PackLeftNotNull(this:Ref, ol:Ref, lc:int);
+procedure PackLeft(this:Ref, ol:Ref, lc:int);
 requires (packedLeft[this] == false);
 requires (paramLeftOl[this] == ol);
 requires (paramLeftLc[this] == lc);
-requires (left[this] != null);
 requires (left[this] == ol);
-requires (fracCount[ol] == 0.5);  
+requires (left[this] != null) ==> (fracCount[ol] == 0.5);
+requires (left[this] == null) ==> (lc == 0);
 
-procedure PackLeftNull(this:Ref, ol:Ref, lc:int);
-requires (packedLeft[this] == false);
-requires (paramLeftOl[this] == ol);
-requires (paramLeftLc[this] == lc);
-requires (left[this] == null);
-requires (left[this] == ol);
-requires (lc == 0);
-
-procedure UnpackLeftNull(this:Ref, ol:Ref, lc:int);
+procedure UnpackLeft(this:Ref, ol:Ref, lc:int);
 requires packedLeft[this];
 requires (paramLeftOl[this] == ol);
 requires (paramLeftLc[this] == lc);
 requires (fracLeft[this] > 0.0);
-requires (left[this] == null);
-ensures (left[this] == ol);
-ensures (paramCountC[ol] == lc);
-ensures	(lc == 0);
-
-procedure UnpackLeftNotNull(this:Ref, ol:Ref, lc:int);
-requires packedLeft[this];
-requires (paramLeftOl[this] == ol);
-requires (paramLeftLc[this] == lc);
-requires (fracLeft[this] > 0.0);
-requires (left[this] != null);
-ensures  (fracCount[ol] == 0.5);
-ensures (paramCountC[ol] == lc);
 ensures	(left[this] == ol);
+ensures (paramCountC[ol] == lc);
+ensures (left[this] == null) ==> (lc == 0);
+ensures (left[this] != null) ==> (fracCount[ol] == 0.5);
 
-procedure PackRightNotNull(this:Ref, or:Ref, rc:int);
+procedure PackRight(this:Ref, or:Ref, rc:int);
 requires (packedRight[this] == false);
 requires (paramRightOr[this] == or);
 requires (paramRightRc[this] == rc);
-requires (right[this] != null);
 requires (right[this] == or);
-requires (fracCount[or] == 0.5) ;
+requires (right[this] != null) ==> (fracCount[or] == 0.5);
+requires (right[this] == null) ==> (rc == 0);
 
-procedure PackRightNull(this:Ref, or:Ref, rc:int);
-requires (packedRight[this] == false);
-requires (paramRightOr[this] == or);
-requires (paramRightRc[this] == rc);
-requires (rc == 0);
-requires (right[this] == or);
-requires (right[this] == null);
-
-procedure UnpackRightNull(this:Ref, or:Ref, rc:int);
+procedure UnpackRight(this:Ref, or:Ref, rc:int);
 requires packedRight[this];
 requires (paramRightOr[this] == or);
 requires (paramRightRc[this] == rc);
 requires (fracRight[this] > 0.0);
-requires (right[this] == null);
-ensures (rc == 0);
 ensures (right[this] == or);
 ensures (paramCountC[or] == rc);
-
-procedure UnpackRightNotNull(this:Ref, or:Ref, rc:int);
-requires packedRight[this];
-requires (paramRightOr[this] == or);
-requires (paramRightRc[this] == rc);
-requires (fracRight[this] > 0.0);
-requires (right[this] != null);
-ensures (fracCount[or] == 0.5);
-ensures  (right[this] == or);
-ensures (paramCountC[or] == rc);
+ensures (right[this] == null) ==> (rc == 0);
+ensures (right[this] != null) ==> (fracCount[or] == 0.5);
 
 procedure PackCount(this:Ref, c:int, ol: Ref, or:Ref, lc:int, rc:int);
 requires (packedCount[this] == false);
@@ -237,13 +201,18 @@ ensures ( exists c3:int :: packedCount[this] && (fracCount[this] == 1.0) && (par
   var rc2:int;
 
    newc := 1;
+//In the source java code, the programmer can use 
+// unpack(ol#1/2 count(c1)), where ol appears in the exists
+//
+//We need to do the unpacking of left before the if
+//because we use left[this] in the condition of the if,
+//that is we access the field left of this.
+//For this we need the field to be accessible, unpacked.
+ 	call UnpackLeft(this, ol, c1);
+	packedLeft[this] := false;
 
         if (left[this] != null)
            {
-//In the source java code, the programmer can use 
-// unpack(ol#1/2 count(c1)), where ol appears in the exists
- 	call UnpackLeftNotNull(this, ol, c1);
-	packedLeft[this] := false;
 //This should be in a forall in the requires of the procedure.
 	packedCount[ol] := true;
 	
@@ -253,11 +222,13 @@ ensures ( exists c3:int :: packedCount[this] && (fracCount[this] == 1.0) && (par
 	call PackCount(ol, c1, ol1, or1, lc1, rc1);
 	packedCount[ol]:=true;
        }
-       
+   
+        call UnpackRight(this, or, c2);
+	packedRight[this] := false;
+    
         if (right[this] != null)
              {
-         call UnpackRightNotNull(this, or, c2);
-	 packedRight[this] := false;
+
 //Here it is easy to come up with ol2, or2, lc2, rc2 because they can be arbitrary.
 //Again, this should be in the requires of thsi procedure.
 	packedCount[or] := true;
