@@ -168,6 +168,15 @@ ensures (count[this] == 1);
 ensures	(left[this] == null);
 ensures	(right[this] == null);
 ensures	(parent[this] == null);
+
+
+function funcParamCountC(c3:int, this:Ref, paramCountC:[Ref]int) returns (bool);
+
+axiom ( forall c3:int, this:Ref,  paramCountC:[Ref]int ::
+(
+(paramCountC[this] == c3) ==> funcParamCountC(c3, this, paramCountC)
+)
+);
  
 procedure updateCount(this: Ref, c:int, c1:int, c2:int, ol:Ref, or:Ref)
 modifies count, packedCount, packedLeft, packedRight, 
@@ -185,8 +194,9 @@ requires (fracRight[this] == 0.5);
 requires (fracCount[this] == 1.0);
 requires (paramCountC[this] == c);
 requires (packedCount[this] == false);
-       
-ensures ( exists c3:int :: packedCount[this] && (fracCount[this] == 1.0) && (paramCountC[this] == c3));  
+ensures (fracCount[this] == 1.0);
+ensures packedCount[this];
+ensures (exists c3:int :: funcParamCountC(c3, this, paramCountC));  
 {
    var newc : int;
 //All variable declarations must be made before the code starts.
@@ -221,6 +231,7 @@ ensures ( exists c3:int :: packedCount[this] && (fracCount[this] == 1.0) && (par
         newc := newc + count[left[this]];
 	call PackCount(ol, c1, ol1, or1, lc1, rc1);
 	packedCount[ol]:=true;
+	assert newc == 1 + c1;
        }
    
         call UnpackRight(this, or, c2);
@@ -244,7 +255,12 @@ ensures ( exists c3:int :: packedCount[this] && (fracCount[this] == 1.0) && (par
 //instantiate the exists with the right values.
     call PackCount(this, newc, ol, or, c1, c2);
     packedCount[this]:=true;
-//Maybe we need an axiom that ties newc with the c3 that the ensures exists expects.
+
+//We need this assert otherwise Boogie does not know the value with which 
+//it should instantiate c3 from the post-condition.
+//TODO I need to find a way to generate this assert and the most likely value 
+//for c3.
+assert funcParamCountC(newc, this, paramCountC);
     
 }
 //TODO next procedure to prove
