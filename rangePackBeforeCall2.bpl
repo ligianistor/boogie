@@ -5,10 +5,14 @@ const null : Ref;
 var val : [Ref]int;
 var next : [Ref]Ref;
 
-var fracRange : [int, int, Ref] real;
-var packedRange : [int, int, Ref] bool;
-var fracUniRange : [int, int, Ref] real;
-var packedUniRange : [int, int, Ref] bool;
+var fracRange : [Ref] real;
+var paramRangex : [Ref]int;
+var paramRangey : [Ref]int; 
+var packedRange : [Ref] bool;
+var fracUniRange : [Ref] real;
+var paramUniRangex : [Ref]int;
+var paramUniRangey : [Ref]int; 
+var packedUniRange : [Ref] bool;
 
 
 procedure ConstructLink(x: int, y:int, val1: int, next1: Ref, this: Ref);
@@ -19,16 +23,24 @@ procedure PackRange(x:int, y:int, this:Ref);
 	requires (val[this] >= x);
 	requires (val[this] <= y);
 	requires ((next[this] == null) ||
-		  (fracRange[x,y,next[this]] > 0.0) );
+		  ((fracRange[next[this]] > 0.0) &&
+		(paramRangex[next[this]] == x) &&
+		(paramRangey[next[this]] == y)
+		)
+		);
 
 procedure UnpackRange(x:int, y:int, this:Ref);
-	requires packedRange[x,y,this];
-	requires (fracRange[x,y,this] > 0.0);
+	requires packedRange[this];
+	requires (paramRangex[this] == x);
+	requires (paramRangey[this] == y);
+	requires (fracRange[this] > 0.0);
 	ensures  (val[this] >= x) &&
 		 (val[this] <= y) &&
 		 ((next[this] == null) ||
-		  (
-		  (fracRange[x,y,next[this]] > 0.0) )
+		  ((fracRange[next[this]] > 0.0) &&
+		(paramRangex[next[this]] == x) &&
+		(paramRangey[next[this]] == y)
+		)
 		 );
 
 procedure PackUniRange(x:int, y:int, this:Ref);
@@ -36,47 +48,58 @@ procedure PackUniRange(x:int, y:int, this:Ref);
 	requires (val[this] <= y);
 	requires ((next[this] == null) ||
 		(
-		(fracUniRange[x,y,next[this]] == 1.0) &&
-    		packedUniRange[x,y,next[this]] 
+		(fracUniRange[next[this]] == 1.0) &&
+		(paramUniRangex[next[this]] == x) &&
+		(paramUniRangey[next[this]] == y) &&
+    		packedUniRange[next[this]] 
 		)
 );
 
 procedure UnpackUniRange(x:int, y:int, this:Ref);
-	requires packedUniRange[x,y,this];
-	requires (fracUniRange[x,y,this] > 0.0);
+	requires packedUniRange[this];
+	requires (fracUniRange[this] > 0.0);
+	requires (paramUniRangex[this] == x);
+	requires (paramUniRangey[this] == y);
 	ensures  (val[this] >= x) &&
 		 (val[this] <= y) &&
 		 ((next[this] == null) ||
-		((fracUniRange[x,y,next[this]] == 1.0) &&
-         	packedUniRange[x,y,next[this]] ) 
+		((fracUniRange[next[this]] == 1.0) &&
+		(paramUniRangex[next[this]] == x) &&
+		(paramUniRangey[next[this]] == y) &&
+         	packedUniRange[next[this]] ) 
 		 );
   
 procedure addModulo11(x:int, this: Ref) 
 	modifies val, packedRange, fracRange;
 	requires x >= 0;
-	requires fracRange[0,10,this] > 0.0;
-  	requires (forall y:Ref :: (packedRange[0,10,y] == true));
-	ensures packedRange[0,10,this];
-	ensures fracRange[0,10,this] > 0.0;
-	ensures (forall y:Ref :: (packedRange[0,10,y] == old(packedRange[0,10,y])) );
-	ensures (forall y:Ref :: (fracRange[0,10,y] == old(fracRange[0,10,y])) );
+	requires fracRange[this] > 0.0;
+	requires paramRangex[this] == 0;
+	requires paramRangey[this] == 10;
+  	requires (forall y:Ref :: (packedRange[y] == true));
+	ensures packedRange[this];
+	requires paramRangex[this] == 0;
+	requires paramRangey[this] == 10;
+	ensures fracRange[this] > 0.0;
+	//TODO might need to write about paramRangex and y
+	ensures (forall y:Ref :: (packedRange[y] == old(packedRange[y])) );
+	ensures (forall y:Ref :: (fracRange[y] == old(fracRange[y])) );
 {
 	call UnpackRange(0, 10, this);
-	packedRange[0,10,this] := false;
-	fracRange[0,10,next[this]] := fracRange[0,10,next[this]] * 2.0;
+	packedRange[this] := false;
+	fracRange[next[this]] := fracRange[next[this]] * 2.0;
 
 	val[this] := modulo((val[this]+x),11);
-  
+  	//TODO need to update the paramRangex and y
   	call PackRange(0, 10, this);
-	packedRange[0,10,this] := true;
-	fracRange[0,10,next[this]] := fracRange[0,10,next[this]] / 2.0;
+	packedRange[this] := true;
+	fracRange[next[this]] := fracRange[next[this]] / 2.0;
 	
 	if (next[this] != null )
 	{ 
     
 		call addModulo11(x, next[this]);
-		fracRange[0,10,next[this]] := fracRange[0,10,next[this]] * 2.0;
-		fracRange[0,10,next[this]] := fracRange[0,10,next[this]] / 2.0;
+		fracRange[next[this]] := fracRange[next[this]] * 2.0;
+		fracRange[next[this]] := fracRange[next[this]] / 2.0;
 	}
 }
 
@@ -92,18 +115,24 @@ axiom (forall x:int, y:int :: {modulo(x,y)}
    ); 
 
 procedure add(z:int, x:int, y:int, this: Ref)
-	modifies val, packedUniRange, fracUniRange;
+	modifies val, packedUniRange, fracUniRange,
+		paramUniRangex, paramUniRangey;
 	requires x < y;
-	requires fracUniRange[x,y,this] == 1.0;
-  	requires packedUniRange[x,y,this];
-	ensures packedUniRange[x+z,y+z,this];
-  	ensures fracUniRange[x+z,y+z,this] == 1.0;
+	requires fracUniRange[this] == 1.0;
+  	requires packedUniRange[this];
+	requires paramUniRangex[this] == x;
+	requires paramUniRangey[this] == y;
+	ensures packedUniRange[this];
+  	ensures fracUniRange[this] == 1.0;
+	requires paramUniRangex[this] == x+z;
+	requires paramUniRangey[this] == y+z;
 {
 	call UnpackUniRange(x, y, this);
 
-	packedUniRange[x,y,this] := false;
+	packedUniRange[this] := false;
 
 	val[this] := val[this]+z;
+	//TODO update params?
 
 	if (next[this] != null )
 	{ 
@@ -116,32 +145,42 @@ procedure add(z:int, x:int, y:int, this: Ref)
 	}
   
   	call PackUniRange(x+z, y+z, this);
-	packedUniRange[x+z,y+z,this] := true;
-	fracUniRange[x+z,y+z,this] :=  1.0;
+	packedUniRange[this] := true;
+	fracUniRange[this] :=  1.0;
+	paramUniRangex[this] := x+z;
+	paramUniRangey[this] := y+z;
 
 }
 
 
 procedure main()
-	modifies val, packedRange, fracRange;
-   requires (forall y:Ref :: (packedRange[0,10,y] == true));
+	modifies val, packedRange, fracRange,
+		paramRangex, paramRangey;
+//TODO might need to talk about paramRangex and y being 0 and 10
+   requires (forall y:Ref :: (packedRange[y] == true));
 {
 	var l1 : Ref;
 	var l2 : Ref;
 	var l3 : Ref;
 	call ConstructLink(0, 10, 3, null, l1);
-	packedRange[0,10,l1] := true;
-	fracRange[0,10,l1] := 1.0;
+	packedRange[l1] := true;
+	fracRange[l1] := 1.0;
+	paramRangex[l1] := 0;
+	paramRangey[l1] := 10;
 
 	call ConstructLink(0, 10, 4, l1, l2);
-	fracRange[0,10,l1] := fracRange[0,10,l1] / 2.0;
-	packedRange[0,10,l2] := true;
-	fracRange[0,10,l2] := 1.0;
+	fracRange[l1] := fracRange[l1] / 2.0;
+	packedRange[l2] := true;
+	fracRange[l2] := 1.0;
+	paramRangex[l2] := 0;
+	paramRangey[l2] := 10;
 
 	call ConstructLink(0, 10, 5, l2, l3);
-	fracRange[0,10,l2] := fracRange[0,10,l2] / 2.0;
-	packedRange[0,10,l3] := true;
-	fracRange[0,10,l3] := 1.0;
+	fracRange[l2] := fracRange[l2] / 2.0;
+	packedRange[l3] := true;
+	fracRange[l3] := 1.0;
+	paramRangex[l3] := 0;
+	paramRangey[l3] := 10;
 
 	call addModulo11(20, l3); 
 }

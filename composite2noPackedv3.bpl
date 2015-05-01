@@ -263,7 +263,6 @@ ensures (exists c3:int :: funcParamCountC(c3, this, paramCountC));
 assert funcParamCountC(newc, this, paramCountC);
     
 }
-//TODO next procedure to prove
 
 procedure updateCountRec(this: Ref, opp: Ref, lcc:int, ol:Ref, or:Ref, lc:int, rc:int)
 modifies count, packedCount, packedLeft, packedRight, packedParent,
@@ -308,13 +307,6 @@ ensures   (packedParent[this]);
 
 fracLocalCount[this] := fracCount[this];
 
-//we unpack parent[this] from parentP
-//might need to say that other objects are not unpacked for parentP
-packedParent[opp] := false;
-
-
-//we unpack parent[this] from countP
-packedCount[opp]:=false;
 
       call updateCountRec(parent[this]);
       }
@@ -324,6 +316,8 @@ packedCount[opp]:=false;
 
   }  
  }
+
+//TODO next procedure to prove
 
 procedure setLeft(this: Ref, l:Ref)
 modifies parent, left, count, packedCount, packedLeft, packedRight, packedParent,
