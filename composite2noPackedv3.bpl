@@ -178,7 +178,7 @@ axiom ( forall c3:int, this:Ref,  paramCountC:[Ref]int ::
 )
 );
  
-procedure updateCount(this: Ref, c:int, c1:int, c2:int, ol:Ref, or:Ref)
+procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, c1:int, c2:int)
 modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight, paramCountC;
 
@@ -264,12 +264,12 @@ assert funcParamCountC(newc, this, paramCountC);
     
 }
 
-procedure updateCountRec(this: Ref, opp: Ref, lcc:int, ol:Ref, or:Ref, lc:int, rc:int)
+procedure updateCountRec(this: Ref, opp: Ref, lcc: int, ol: Ref, or: Ref, lc: int, rc: int)
 modifies count, packedCount, packedLeft, packedRight, packedParent,
-	fracCount, fracParent, fracLeft, fracRight;
+	fracCount, fracParent, fracLeft, fracRight, paramCountC;
 requires (this != null);
 requires packedParent[this] == false;
-requires (opp == parent[this]);
+requires (parent[this] == opp);
 requires (fracParent[this] > 0.0);
 requires (opp != null) ==> (fracParent[opp] > 0.0) && 
 			   packedParent[opp];
@@ -283,7 +283,6 @@ requires (opp != null) && (this==left[opp]) ==>
 	(paramLeftLc[this] == lcc));
 requires (opp == null) ==> ((fracCount[this] == 0.5) && 
 			    (paramCountC[this] == lcc));
-requires (forall r:Ref :: (r!=this) ==> (packedCount[r] && (paramCountC[r] == count[this])));
 requires packedLeft[this];
 requires (paramLeftOl[this] == ol);
 requires (paramLeftLc[this] == lc);
@@ -298,24 +297,85 @@ requires (paramCountC[this] == lcc);
 ensures   (packedParent[this]);    
 
 {
- var fracLocalCount: [Ref]real;
- var fracLocalRight: [Ref]real;
- var fracLocalLeft: [Ref]real;
+var fracLocalCount : [Ref]real;
+var fracLocalRight : [Ref]real;
+var fracLocalLeft : [Ref]real;
+var fracLocalParent : [Ref]real; 
 
-  if (parent[this] != null)
- {
+// Existential variable for UnpackParent(opp, lccc)
+var lccc : int;
 
-fracLocalCount[this] := fracCount[this];
+// Existential variables for UnpackCount(opp, lccc)
+var oll : Ref;
+var orr : Ref;
+var llc : int;
+var rrc : int;
 
+// Existential variables used in the parameters of call updateCountRec()
+var oppp : Ref;
+var olpar : Ref;
+var lcpar : int; 
 
-      call updateCountRec(parent[this]);
-      }
-    else
-  { 
-         call updateCount(this);
+if (parent[this] != null) {
+	// Split the fraction k of opp in parent.
+	// fracLocalParent represents what is left over after the splitting
+	// and after half is used.
+	fracLocalParent[opp] := fracParent[opp]/2 ;
+	fracParent[opp] := fracParent[opp]/2;
 
-  }  
- }
+	call UnpackParent(opp, lccc);
+	packedParent[opp] := false;
+
+	call UnpackCount(opp, lccc, oll, orr, llc, rrc);
+	packedCount[opp] := false;
+
+	assume (this == right[opp]);
+	// Instantiate orr==this and rrc==lcc;
+	assume (orr == this);
+	assume (rrc == lcc);
+
+	fracRight[opp] := 2.0 * fracRight[opp];
+	
+	call UnpackRight(opp, this, lcc);
+	packedRight[opp] := false;
+	
+	// The last variables here should be inferred.
+	// I don't think they should be existentially quantified.
+	// They are the variables that are in the pre-condition of
+	// the updateCountRec function.
+	call PackCount(this, lcc, ol, or, lc, rc);
+	packedCount[this] := true;
+
+	fracCount[this] := fracCount[this] * 2.0;
+	
+	// We only unpack it again here because it needs to be unpacked 
+	// in the precondition of updateCount.
+	call UnpackCount(this, lcc, ol, or, lc, rc);
+	packedCount[this] := false;
+	call updateCount(this, lcc, ol, or, lc, rc);
+	
+	call PackRight(opp, this, lcc);
+	packedRight[opp] := true;
+	
+	// lccc == count[parent[this]]] from above
+	// TODO we might need to revise this
+	// or find a way to infer the parameters
+	call updateCountRec(parent[this], oppp, lccc, olpar, this, lcpar, lcc);
+	call PackParentNotNull(opp, lccc);
+	packedParent[opp] := true;
+
+	call PackParentNotNull(this, lcc);
+	packedParent[this] := true;
+	}
+	else { 
+		fracCount[this] := fracCount[this] * 2.0;
+        	call updateCount(this, lcc, ol, or, lc, rc);
+		fracLocalCount[this] := fracCount[this]/2.0;
+		fracCount[this] := fracCount[this] / 2.0;
+		call PackParentNull(this, lcc);
+		packedParent[this] := true; 
+	}  
+}
 
 //TODO next procedure to prove
 
