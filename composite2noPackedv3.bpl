@@ -377,8 +377,6 @@ if (parent[this] != null) {
 	}  
 }
 
-//TODO next procedure to prove
-
 procedure setLeft(this: Ref, l:Ref)
 modifies parent, left, count, packedCount, packedLeft, packedRight, packedParent,
 	fracCount, fracParent, fracLeft, fracRight;
@@ -387,13 +385,20 @@ requires this!=l;
 requires l!=null;
 requires packedParent[this];
 requires packedParent[l];
-requires (forall r:Ref:: packedCount[r] && (paramCountC[r] == count[r]));
 ensures packedParent[this];
  {
+// Existentially quantified variable for UnpackParent(l,lc)
+var lc : int;
+// Existentially quantified variable for UnpackParent(this,lcc)
+var lcc : int;
+call UnpackParent(l, lc);
+packedParent[l] := false;
 if (parent[l] == null) {
-	packedParent[l]:=false;
+	call UnpackParent(this, lcc);
+	packedParent[this] := false;
 
    	parent[l]:=this;
+
    	left[this]:=l;
 
 	call updateCountRec(this);
