@@ -391,11 +391,22 @@ ensures packedParent[this];
 var lc : int;
 // Existentially quantified variable for UnpackParent(this,lcc)
 var lcc : int;
+// Existentially quantified variables for UnpackCount(this,lcc)
+var ol : Ref;
+var or : Ref;
+var llc : int;
+var rc : int;
+
 call UnpackParent(l, lc);
 packedParent[l] := false;
 if (parent[l] == null) {
 	call UnpackParent(this, lcc);
 	packedParent[this] := false;
+	call UnpackCount(this, lcc, ol, or, llc, rc);
+	packedCount[this] := false;
+	// We instantiate ol and llc below.
+	assume (ol == null);
+	assume (llc == 0);
 
    	parent[l]:=this;
 
