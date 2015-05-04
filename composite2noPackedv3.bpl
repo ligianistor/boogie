@@ -293,6 +293,8 @@ requires (fracLeft[this] == 0.5);
 requires (fracRight[this] == 0.5);
 requires (fracCount[this] == 0.5);
 requires (paramCountC[this] == lcc);
+requires (packedCount[this] ==false);
+requires (count[this] == lcc);
 
 ensures   (packedParent[this]);    
 
@@ -320,8 +322,8 @@ if (parent[this] != null) {
 	// Split the fraction k of opp in parent.
 	// fracLocalParent represents what is left over after the splitting
 	// and after half is used.
-	fracLocalParent[opp] := fracParent[opp]/2 ;
-	fracParent[opp] := fracParent[opp]/2;
+	fracLocalParent[opp] := fracParent[opp] / 2 ;
+	fracParent[opp] := fracParent[opp] / 2;
 
 	call UnpackParent(opp, lccc);
 	packedParent[opp] := false;
@@ -335,24 +337,20 @@ if (parent[this] != null) {
 	assume (rrc == lcc);
 
 	fracRight[opp] := 2.0 * fracRight[opp];
-	
+
+	// This should be in a forall in the pre-condition.
+	packedRight[opp] := true;
 	call UnpackRight(opp, this, lcc);
 	packedRight[opp] := false;
-	
-	// The last variables here should be inferred.
-	// I don't think they should be existentially quantified.
-	// They are the variables that are in the pre-condition of
-	// the updateCountRec function.
-	call PackCount(this, lcc, ol, or, lc, rc);
-	packedCount[this] := true;
 
 	fracCount[this] := fracCount[this] * 2.0;
-	
-	// We only unpack it again here because it needs to be unpacked 
-	// in the precondition of updateCount.
-	call UnpackCount(this, lcc, ol, or, lc, rc);
-	packedCount[this] := false;
+
 	call updateCount(this, lcc, ol, or, lc, rc);
+
+	// Need to add foralls around procedures
+	// for cases like this, when we need to 
+	// have the old values of frac for different
+	// global variables unchanged.
 	
 	call PackRight(opp, this, lcc);
 	packedRight[opp] := true;
@@ -379,7 +377,7 @@ if (parent[this] != null) {
 
 procedure setLeft(this: Ref, l:Ref)
 modifies parent, left, count, packedCount, packedLeft, packedRight, packedParent,
-	fracCount, fracParent, fracLeft, fracRight;
+	fracCount, fracParent, fracLeft, fracRight, paramCountC;
 requires this!=null;
 requires this!=l;
 requires l!=null;
@@ -392,6 +390,7 @@ var lc : int;
 // Existentially quantified variable for UnpackParent(this,lcc)
 var lcc : int;
 // Existentially quantified variables for UnpackCount(this,lcc)
+// The variable rc is also used in the call to updateCountRec()
 var ol : Ref;
 var or : Ref;
 var llc : int;
@@ -400,6 +399,7 @@ var rc : int;
 call UnpackParent(l, lc);
 packedParent[l] := false;
 if (parent[l] == null) {
+   	parent[l] := this;
 	call UnpackParent(this, lcc);
 	packedParent[this] := false;
 	call UnpackCount(this, lcc, ol, or, llc, rc);
@@ -407,12 +407,16 @@ if (parent[l] == null) {
 	// We instantiate ol and llc below.
 	assume (ol == null);
 	assume (llc == 0);
+	fracLeft[this] := fracLeft[this] * 2.0;
+	call UnpackLeft(this, null, 0);
+	packedLeft[this] := false;
 
-   	parent[l]:=this;
+   	left[this] := l;
+	call PackLeft(this, l, lc);
+	packedLeft[this] := true;
 
-   	left[this]:=l;
-
-	call updateCountRec(this);
+	call updateCountRec(this, parent[this], lcc, l, right[this], lc, rc);
+	call PackParentNotNull(l, lc);
 }
    
 }
