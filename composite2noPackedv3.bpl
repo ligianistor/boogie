@@ -197,6 +197,9 @@ requires (packedCount[this] == false);
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
 ensures (exists c3:int :: funcParamCountC(c3, this, paramCountC));  
+ensures (forall y:Ref :: ((y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
+ensures (forall y:Ref :: (packedRight[y] == old(packedRight[y]) ) );
+ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
 {
    var newc : int;
 //All variable declarations must be made before the code starts.
@@ -233,6 +236,8 @@ ensures (exists c3:int :: funcParamCountC(c3, this, paramCountC));
 	packedCount[ol]:=true;
 	assert newc == 1 + c1;
        }
+ 	call PackLeft(this, ol, c1);
+	packedLeft[this] := true;
    
         call UnpackRight(this, or, c2);
 	packedRight[this] := false;
@@ -241,11 +246,15 @@ ensures (exists c3:int :: funcParamCountC(c3, this, paramCountC));
              {
 
 //Here it is easy to come up with ol2, or2, lc2, rc2 because they can be arbitrary.
-//Again, this should be in the requires of thsi procedure.
+//Again, this should be in the requires of this procedure.
 	packedCount[or] := true;
 	call UnpackCount(or, c2, ol2, or2, lc2, rc2);
          newc := newc + count[right[this]]; 
        }
+
+        call PackRight(this, or, c2);
+	packedRight[this] := true;
+    
 
     count[this] := newc; 
     //We update the corresponding paramCount for that field
@@ -253,6 +262,7 @@ ensures (exists c3:int :: funcParamCountC(c3, this, paramCountC));
     paramCountC[this] := newc;  
 //Here it is difficult because this is the phase where we need to use what we know and 
 //instantiate the exists with the right values.
+//Here we need to use the fraction to right(this).
     call PackCount(this, newc, ol, or, c1, c2);
     packedCount[this]:=true;
 
@@ -273,7 +283,7 @@ requires (parent[this] == opp);
 requires (fracParent[this] > 0.0);
 requires (opp != null) ==> (fracParent[opp] > 0.0) && 
 			   packedParent[opp];
-requires (opp != null) && (this==right[opp]) ==> 
+requires ((opp != null) && (this==right[opp])) ==> 
 	((fracRight[opp] == 0.5) && 
 	(paramRightOr[opp] == this) && 
 	(paramRightRc[this] == lcc));
@@ -335,8 +345,10 @@ if (parent[this] != null) {
 	// Instantiate orr==this and rrc==lcc;
 	assume (orr == this);
 	assume (rrc == lcc);
+	assert (fracRight[opp]==0.5);
 
 	fracRight[opp] := 2.0 * fracRight[opp];
+	
 
 	// This should be in a forall in the pre-condition.
 	packedRight[opp] := true;
@@ -352,6 +364,7 @@ if (parent[this] != null) {
 	// have the old values of frac for different
 	// global variables unchanged.
 	
+	assert (right[opp] != null);
 	call PackRight(opp, this, lcc);
 	packedRight[opp] := true;
 	
@@ -368,8 +381,6 @@ if (parent[this] != null) {
 	else { 
 		fracCount[this] := fracCount[this] * 2.0;
         	call updateCount(this, lcc, ol, or, lc, rc);
-		fracLocalCount[this] := fracCount[this]/2.0;
-		fracCount[this] := fracCount[this] / 2.0;
 		call PackParentNull(this, lcc);
 		packedParent[this] := true; 
 	}  
@@ -382,8 +393,11 @@ requires this!=null;
 requires this!=l;
 requires l!=null;
 requires packedParent[this];
+requires fracParent[this] > 0.0;
 requires packedParent[l];
+requires fracParent[l] > 0.0;
 ensures packedParent[this];
+ensures fracParent[this] > 0.0;
  {
 // Existentially quantified variable for UnpackParent(l,lc)
 var lc : int;
