@@ -200,6 +200,7 @@ ensures (exists c3:int :: funcParamCountC(c3, this, paramCountC));
 ensures (forall y:Ref :: ((y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
 ensures (forall y:Ref :: (packedRight[y] == old(packedRight[y]) ) );
 ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
+ensures (forall y:Ref :: (packedParent[y] == old(packedParent[y]) ) );
 {
    var newc : int;
 //All variable declarations must be made before the code starts.
@@ -279,10 +280,13 @@ modifies count, packedCount, packedLeft, packedRight, packedParent,
 	fracCount, fracParent, fracLeft, fracRight, paramCountC;
 requires (this != null);
 requires packedParent[this] == false;
+// We only have  these 2 object propositions unpacked at the same time
+requires (forall y:Ref :: ( ( (y!=this) && (y!=opp) ) ==> packedParent[y]));
+requires (forall y:Ref :: ( fracParent[y] > 0.0 )  );
 requires (parent[this] == opp);
 requires (fracParent[this] > 0.0);
-requires (opp != null) ==> (fracParent[opp] > 0.0) && 
-			   packedParent[opp];
+requires (opp != null) ==> (fracParent[opp] > 0.0); 
+requires (opp != null) ==> packedParent[opp];
 requires ((opp != null) && (this==right[opp])) ==> 
 	((fracRight[opp] == 0.5) && 
 	(paramRightOr[opp] == this) && 
@@ -354,24 +358,34 @@ if (parent[this] != null) {
 	packedRight[opp] := true;
 	call UnpackRight(opp, this, lcc);
 	packedRight[opp] := false;
-
+	assert (fracCount[opp] == 0.5);
 	fracCount[this] := fracCount[this] * 2.0;
-
 	call updateCount(this, lcc, ol, or, lc, rc);
 
 	// Need to add foralls around procedures
 	// for cases like this, when we need to 
 	// have the old values of frac for different
 	// global variables unchanged.
+  fracLocalCount[this] := fracCount[this] / 2.0;
+  fracCount[this] := fracCount[this] / 2.0;
 	
-	assert (right[opp] != null);
 	call PackRight(opp, this, lcc);
 	packedRight[opp] := true;
 	
 	// lccc == count[parent[this]]] from above
 	// TODO we might need to revise this
 	// or find a way to infer the parameters
-	call updateCountRec(parent[this], oppp, lccc, olpar, this, lcpar, lcc);
+  // Instead of parent[parent[this]] I had oppp but oppp is just a variable
+  // and it needs to satisfy the pre-condition oppp == parent[parent[this]]
+
+  // This assume says that there are no cycles in the tree.
+  // Maybe can state it as an axiom.
+  // Maybe the user needs to give a hint that
+  // there are no cycles.
+  
+  assume (parent[opp] != this) && (parent[opp] != opp);
+
+	call updateCountRec(opp, parent[opp], lccc, olpar, this, lcpar, lcc);
 	call PackParentNotNull(opp, lccc);
 	packedParent[opp] := true;
 
@@ -380,7 +394,7 @@ if (parent[this] != null) {
 	}
 	else { 
 		fracCount[this] := fracCount[this] * 2.0;
-        	call updateCount(this, lcc, ol, or, lc, rc);
+    call updateCount(this, lcc, ol, or, lc, rc);
 		call PackParentNull(this, lcc);
 		packedParent[this] := true; 
 	}  
