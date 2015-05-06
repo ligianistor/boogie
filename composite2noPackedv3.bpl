@@ -169,16 +169,7 @@ ensures	(left[this] == null);
 ensures	(right[this] == null);
 ensures	(parent[this] == null);
 
-
-function funcParamCountC(c3:int, this:Ref, paramCountC:[Ref]int) returns (bool);
-
-axiom ( forall c3:int, this:Ref,  paramCountC:[Ref]int ::
-(
-(paramCountC[this] == c3) ==> funcParamCountC(c3, this, paramCountC)
-)
-);
- 
-procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, c1:int, c2:int)
+procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, c1:int, c2:int, c3:int)
 modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight, paramCountC;
 
@@ -196,7 +187,7 @@ requires (paramCountC[this] == c);
 requires (packedCount[this] == false);
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
-ensures (exists c3:int :: funcParamCountC(c3, this, paramCountC));  
+ensures (paramCountC[this] == c3);  
 ensures (forall y:Ref :: ((y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
 ensures (forall y:Ref :: (packedRight[y] == old(packedRight[y]) ) );
 ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
@@ -266,12 +257,6 @@ ensures (forall y:Ref :: (packedParent[y] == old(packedParent[y]) ) );
 //Here we need to use the fraction to right(this).
     call PackCount(this, newc, ol, or, c1, c2);
     packedCount[this]:=true;
-
-//We need this assert otherwise Boogie does not know the value with which 
-//it should instantiate c3 from the post-condition.
-//TODO I need to find a way to generate this assert and the most likely value 
-//for c3.
-assert funcParamCountC(newc, this, paramCountC);
     
 }
 
@@ -360,7 +345,7 @@ if (parent[this] != null) {
 	packedRight[opp] := false;
 	assert (fracCount[opp] == 0.5);
 	fracCount[this] := fracCount[this] * 2.0;
-	call updateCount(this, lcc, ol, or, lc, rc);
+	call updateCount(this, lcc, ol, or, lc, rc, lc+rc+1);
 
 	// Need to add foralls around procedures
 	// for cases like this, when we need to 
@@ -394,7 +379,7 @@ if (parent[this] != null) {
 	}
 	else { 
 		fracCount[this] := fracCount[this] * 2.0;
-    call updateCount(this, lcc, ol, or, lc, rc);
+    		call updateCount(this, lcc, ol, or, lc, rc, lc + rc +1);
 		call PackParentNull(this, lcc);
 		packedParent[this] := true; 
 	}  
