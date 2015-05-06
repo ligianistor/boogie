@@ -169,7 +169,7 @@ ensures	(left[this] == null);
 ensures	(right[this] == null);
 ensures	(parent[this] == null);
 
-procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, c1:int, c2:int, c3:int)
+procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, c1:int, c2:int)
 modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight, paramCountC;
 
@@ -187,7 +187,7 @@ requires (paramCountC[this] == c);
 requires (packedCount[this] == false);
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
-ensures (paramCountC[this] == c3);  
+ensures (paramCountC[this] == c1 + c2 + 1 );  
 ensures (forall y:Ref :: ((y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
 ensures (forall y:Ref :: (packedRight[y] == old(packedRight[y]) ) );
 ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
@@ -345,7 +345,7 @@ if (parent[this] != null) {
 	packedRight[opp] := false;
 	assert (fracCount[opp] == 0.5);
 	fracCount[this] := fracCount[this] * 2.0;
-	call updateCount(this, lcc, ol, or, lc, rc, lc+rc+1);
+	call updateCount(this, lcc, ol, or, lc, rc);
 
 	// Need to add foralls around procedures
 	// for cases like this, when we need to 
@@ -379,8 +379,8 @@ if (parent[this] != null) {
 	}
 	else { 
 		fracCount[this] := fracCount[this] * 2.0;
-    		call updateCount(this, lcc, ol, or, lc, rc, lc + rc +1);
-		call PackParentNull(this, lcc);
+    		call updateCount(this, lcc, ol, or, lc, rc);
+		call PackParentNull(this, lc + rc + 1);
 		packedParent[this] := true; 
 	}  
 }
