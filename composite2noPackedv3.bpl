@@ -118,7 +118,7 @@ requires (fracCount[this] == 0.5);
 requires (paramCountC[this] == c);
 requires (parent[this] != null);
 requires (fracParent[parent[this]] > 0.0);
-requires  (  	(fracLeft[parent[this]] == 0.5) && 
+requires  ((fracLeft[parent[this]] == 0.5) && 
 	     	(paramLeftOl[parent[this]] == this) && 
              	(paramLeftLc[parent[this]] == c)
 	  )
@@ -174,6 +174,8 @@ modifies count, packedCount, packedLeft, packedRight,
 	fracCount, fracLeft, fracRight, paramCountC;
 
 requires this != null;
+requires ol != this;
+requires or != this;
 requires packedLeft[this];
 requires (paramLeftOl[this] == ol);
 requires (paramLeftLc[this] == c1);
@@ -185,6 +187,7 @@ requires (fracRight[this] == 0.5);
 requires (fracCount[this] == 1.0);
 requires (paramCountC[this] == c);
 requires (packedCount[this] == false);
+requires (forall y:Ref :: ((y!=this) ==> (packedCount[y] ) ) );
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
 ensures (paramCountC[this] == c1 + c2 + 1 );  
@@ -192,6 +195,8 @@ ensures (forall y:Ref :: ((y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) )
 ensures (forall y:Ref :: (packedRight[y] == old(packedRight[y]) ) );
 ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
 ensures (forall y:Ref :: (packedParent[y] == old(packedParent[y]) ) );
+ensures (forall y:Ref :: ((y!=this) ==> (paramCountC[y] == old(paramCountC[y]) ) ) );
+ensures (forall y:Ref :: ((y!=this) ==> (packedCount[y] == old(packedCount[y]) ) ) );
 {
    var newc : int;
 //All variable declarations must be made before the code starts.
@@ -206,6 +211,7 @@ ensures (forall y:Ref :: (packedParent[y] == old(packedParent[y]) ) );
   var rc2:int;
 
    newc := 1;
+
 //In the source java code, the programmer can use 
 // unpack(ol#1/2 count(c1)), where ol appears in the exists
 //
@@ -218,8 +224,6 @@ ensures (forall y:Ref :: (packedParent[y] == old(packedParent[y]) ) );
 
         if (left[this] != null)
            {
-//This should be in a forall in the requires of the procedure.
-	packedCount[ol] := true;
 	
 	call UnpackCount(ol, c1, ol1, or1, lc1, rc1);
 	packedCount[ol] := false; 
@@ -232,14 +236,12 @@ ensures (forall y:Ref :: (packedParent[y] == old(packedParent[y]) ) );
 	packedLeft[this] := true;
    
         call UnpackRight(this, or, c2);
-	packedRight[this] := false;
+	     packedRight[this] := false;
     
         if (right[this] != null)
              {
 
 //Here it is easy to come up with ol2, or2, lc2, rc2 because they can be arbitrary.
-//Again, this should be in the requires of this procedure.
-	packedCount[or] := true;
 	call UnpackCount(or, c2, ol2, or2, lc2, rc2);
          newc := newc + count[right[this]]; 
        }
@@ -262,24 +264,26 @@ ensures (forall y:Ref :: (packedParent[y] == old(packedParent[y]) ) );
 
 procedure updateCountRec(this: Ref, opp: Ref, lcc: int, ol: Ref, or: Ref, lc: int, rc: int)
 modifies count, packedCount, packedLeft, packedRight, packedParent,
-	fracCount, fracParent, fracLeft, fracRight, paramCountC;
+	fracCount, fracParent, fracLeft, fracRight, paramCountC, paramLeftOl, paramLeftLc, paramRightRc;
 requires (this != null);
 requires packedParent[this] == false;
 // We only have  these 2 object propositions unpacked at the same time
-requires (forall y:Ref :: ( ( (y!=this) && (y!=opp) ) ==> packedParent[y]));
+requires (forall y:Ref :: ( (y!=this)  ==> packedParent[y]));
+requires (forall y:Ref ::  (packedCount[y] )  );
 requires (forall y:Ref :: ( fracParent[y] > 0.0 )  );
 requires (parent[this] == opp);
 requires (fracParent[this] > 0.0);
 requires (opp != null) ==> (fracParent[opp] > 0.0); 
 requires (opp != null) ==> packedParent[opp];
-requires ((opp != null) && (this==right[opp])) ==> 
-	((fracRight[opp] == 0.5) && 
+requires (opp != null) ==> 
+	( ((fracRight[opp] == 0.5) && 
 	(paramRightOr[opp] == this) && 
-	(paramRightRc[this] == lcc));
-requires (opp != null) && (this==left[opp]) ==> 
-	((fracLeft[opp] == 0.5) && 
+	(paramRightRc[this] == lcc))
+  ||
+  	((fracLeft[opp] == 0.5) && 
 	(paramLeftOl[opp] == this) && 
-	(paramLeftLc[this] == lcc));
+	(paramLeftLc[this] == lcc))
+  );
 requires (opp == null) ==> ((fracCount[this] == 0.5) && 
 			    (paramCountC[this] == lcc));
 requires packedLeft[this];
@@ -326,6 +330,8 @@ if (parent[this] != null) {
 
 	call UnpackParent(opp, lccc);
 	packedParent[opp] := false;
+  
+
 
 	call UnpackCount(opp, lccc, oll, orr, llc, rrc);
 	packedCount[opp] := false;
@@ -336,46 +342,49 @@ if (parent[this] != null) {
 	assume (rrc == lcc);
 	assert (fracRight[opp]==0.5);
 
-	fracRight[opp] := 2.0 * fracRight[opp];
+	//fracRight[opp] := 2.0 * fracRight[opp];
 	
-
 	// This should be in a forall in the pre-condition.
 	packedRight[opp] := true;
 	call UnpackRight(opp, this, lcc);
+  assert (paramRightRc[opp] == paramCountC[this]);
 	packedRight[opp] := false;
 	assert (fracCount[opp] == 0.5);
 	fracCount[this] := fracCount[this] * 2.0;
 	call updateCount(this, lcc, ol, or, lc, rc);
 
-	// Need to add foralls around procedures
-	// for cases like this, when we need to 
-	// have the old values of frac for different
-	// global variables unchanged.
+  // We know that if right[opp] == this,
+  // when paramCountC[this] changes, then paramRightRc[opp] also changes
+  paramRightRc[opp] := paramCountC[this];
+
   fracLocalCount[this] := fracCount[this] / 2.0;
   fracCount[this] := fracCount[this] / 2.0;
+  
+    
+	// TODO do we need this assume?
+  //assume (parent[opp] != this) && (parent[opp] != opp);
+  	assert (fracRight[opp] == 0.5);
+		assert (paramRightOr[parent[this]] == this);
+		//assert (paramRightRc[opp] == lc + rc + 1);
+
+
+	call PackParentNotNull(this, lc + rc + 1);
+	packedParent[this] := true;
 	
-	call PackRight(opp, this, lcc);
+	call PackRight(opp, this, lc + rc + 1);
 	packedRight[opp] := true;
-	
-	// lccc == count[parent[this]]] from above
-	// TODO we might need to revise this
-	// or find a way to infer the parameters
-  // Instead of parent[parent[this]] I had oppp but oppp is just a variable
-  // and it needs to satisfy the pre-condition oppp == parent[parent[this]]
 
   // This assume says that there are no cycles in the tree.
   // Maybe can state it as an axiom.
   // Maybe the user needs to give a hint that
   // there are no cycles.
+
   
-  assume (parent[opp] != this) && (parent[opp] != opp);
-
-	call updateCountRec(opp, parent[opp], lccc, olpar, this, lcpar, lcc);
-	call PackParentNotNull(opp, lccc);
-	packedParent[opp] := true;
-
-	call PackParentNotNull(this, lcc);
-	packedParent[this] := true;
+//This is added as part of the exitential instantiation.
+  paramLeftOl[opp] := olpar;
+  paramLeftLc[opp] := lcpar;
+  
+	call updateCountRec(opp, parent[opp], lccc, olpar, this, lcpar, lc + rc + 1);
 	}
 	else { 
 		fracCount[this] := fracCount[this] * 2.0;
@@ -387,7 +396,7 @@ if (parent[this] != null) {
 
 procedure setLeft(this: Ref, l:Ref)
 modifies parent, left, count, packedCount, packedLeft, packedRight, packedParent,
-	fracCount, fracParent, fracLeft, fracRight, paramCountC;
+	fracCount, fracParent, fracLeft, fracRight, paramCountC, paramLeftOl, paramLeftLc, paramRightRc;
 requires this!=null;
 requires this!=l;
 requires l!=null;
