@@ -278,11 +278,11 @@ requires (opp != null) ==> packedParent[opp];
 requires (opp != null) ==> 
 	( ((fracRight[opp] == 0.5) && 
 	(paramRightOr[opp] == this) && 
-	(paramRightRc[this] == lcc))
+	(paramRightRc[opp] == lcc))
   ||
   	((fracLeft[opp] == 0.5) && 
 	(paramLeftOl[opp] == this) && 
-	(paramLeftLc[this] == lcc))
+	(paramLeftLc[opp] == lcc))
   );
 requires (opp == null) ==> ((fracCount[this] == 0.5) && 
 			    (paramCountC[this] == lcc));
@@ -355,7 +355,7 @@ if (parent[this] != null) {
 
   // We know that if right[opp] == this,
   // when paramCountC[this] changes, then paramRightRc[opp] also changes
-  paramRightRc[opp] := paramCountC[this];
+ // paramRightRc[opp] := paramCountC[this];
 
   fracLocalCount[this] := fracCount[this] / 2.0;
   fracCount[this] := fracCount[this] / 2.0;
