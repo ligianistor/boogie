@@ -14,7 +14,6 @@ var paramRangeY : [Ref] int;
 var paramUniRangeX : [Ref] int;
 var paramUniRangeY : [Ref] int;
 
-
 procedure ConstructLink(x: int, y:int, val1: int, next1: Ref, this: Ref);
 	ensures (val[this] == val1) && 
 		(next[this] == next1);
@@ -40,11 +39,12 @@ procedure UnpackRange(x:int, y:int, this:Ref);
 procedure PackUniRange(x:int, y:int, this:Ref);
 	requires (val[this] >= x);
 	requires (val[this] <= y);
-  requires (next[this] != this);
 	requires ((next[this] == null) ||
 		(
 		(fracUniRange[next[this]] == 1.0) &&
-    		packedUniRange[next[this]] 
+    		packedUniRange[next[this]] &&
+		(paramUniRangeX[next[this]] == x) &&
+		(paramUniRangeY[next[this]] == y)
 		)
 );
 
@@ -62,47 +62,43 @@ procedure UnpackUniRange(x:int, y:int, this:Ref);
 		(paramUniRangeY[next[this]] == y)
 ) 
 		 );
-    ensures (next[this] != this);
-	
+    ensures (next[this] != this);	
 
 procedure add(z:int, x:int, y:int, this: Ref)
-	modifies val, packedUniRange, fracUniRange, paramUniRangeX, paramUniRangeY;
+	modifies val, packedUniRange, fracUniRange, 
+		paramUniRangeX, paramUniRangeY;
 	requires x < y;
 	requires fracUniRange[this] == 1.0;
-  requires packedUniRange[this];
+  	requires packedUniRange[this];
 	requires paramUniRangeX[this] == x;
 	requires paramUniRangeY[this] == y;
 	ensures packedUniRange[this];
 	ensures paramUniRangeX[this] == x+z;
 	ensures paramUniRangeY[this] == y+z;
 	ensures packedUniRange[this];
-  ensures fracUniRange[this] == 1.0;
-  ensures (forall y1:Ref :: (packedUniRange[y1] == old(packedUniRange[y1])) );
+  	ensures fracUniRange[this] == 1.0;
+  	ensures (forall y1:Ref :: (packedUniRange[y1] == old(packedUniRange[y1])) );
 	ensures (forall y1:Ref :: (fracUniRange[y1] == old(fracUniRange[y1])) ); 
-  ensures (forall y1:Ref :: ( ( (next[y1] == this) ==> (paramUniRangeX[y1] == old(paramUniRangeX[y1]))  )  ) );
-  ensures (forall y1:Ref :: ( ( (next[y1] == this) ==> (paramUniRangeY[y1] == old(paramUniRangeY[y1]))  )  ) );
-{
+	free ensures (forall y1:Ref :: ((y1!=this) && (fracUniRange[y1] == 1.0))
+    ==> (val[y1] == old(val[y1])));
 
+{
 	call UnpackUniRange(x, y, this);
 
 	packedUniRange[this] := false;
-
 	val[this] := val[this]+z;
+
 
 	if (next[this] != null )
 	{  
- 
-    call add(z, x, y, next[this]);
-   
+    call add(z, x, y, next[this]);   
 	}
-  
-    call PackUniRange(x+z, y+z, this);
+
+  	call PackUniRange(x+z, y+z, this);
 	packedUniRange[this] := true;
 	fracUniRange[this] :=  1.0;
 	paramUniRangeX[this] := x+z;
 	paramUniRangeY[this] := y+z;
-
-
 }
 
 procedure addModulo11(x:int, this: Ref) 
