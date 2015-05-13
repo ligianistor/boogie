@@ -33,17 +33,6 @@ var paramLeftLc : [Ref]int;
 var paramRightOr : [Ref]Ref;
 var paramRightRc : [Ref]int;
 
-//axiom that shows there are no cycles in the tree, locally
-//this axiom describes the data structure, does not depend on whether 
-//a predicate holds or not
-axiom (forall this: Ref, l:Ref, left: [Ref]Ref, right: [Ref]Ref, parent:[Ref]Ref::
-    (this!=right[this]) && (this!=left[this]) && (this!=parent[this]));
-
-//axiom stating that this is a binary tree
-axiom (forall this: Ref, left: [Ref]Ref, right: [Ref]Ref, parent:[Ref]Ref::
-    (this!=null) && (parent[this]!=null) ==>((this==right[parent[this]]) || (this==left[parent[this]]))
-);
-
 procedure PackLeft(this:Ref, ol:Ref, lc:int);
 requires (packedLeft[this] == false);
 requires (paramLeftOl[this] == ol);
@@ -107,18 +96,15 @@ ensures (paramLeftOl[this] == ol);
 ensures (paramLeftLc[this] == lc);
 ensures (c == lc + rc + 1);
 
-
-//maybe we do not need this axiom now
-axiom (forall this:Ref,count: [Ref]int :: (this==null) ==> (count[this]==0)  );
-
-procedure PackParentNotNull(this:Ref, c:int);
+procedure PackParent(this:Ref, c:int);
 requires (packedParent[this] == false);
 requires (parent[this] != this);
 requires (fracCount[this] == 0.5);
 requires (paramCountC[this] == c);
 requires (parent[this] != null);
 requires (fracParent[parent[this]] > 0.0);
-requires  ((fracLeft[parent[this]] == 0.5) && 
+requires  (parent[this] != null) ==>
+	((fracLeft[parent[this]] == 0.5) && 
 	     	(paramLeftOl[parent[this]] == this) && 
              	(paramLeftLc[parent[this]] == c)
 	  )
@@ -128,14 +114,8 @@ requires  ((fracLeft[parent[this]] == 0.5) &&
 		(paramRightOr[parent[this]] == this) && 
 		(paramRightRc[parent[this]] == c)
 	  );
+requires (parent[this]==null) ==> ((fracCount[this] == 0.5) && packedCount[this]);
 
-procedure PackParentNull(this:Ref, c:int);
-requires (packedParent[this] == false);
-requires (parent[this] != this);
-requires (fracCount[this] == 1.0);
-requires (paramCountC[this] == c);
-requires packedCount[this];
-requires (parent[this]==null);
 
 procedure UnpackParent(this:Ref, c:int);
 requires packedParent[this];
@@ -269,7 +249,7 @@ requires (this != null);
 requires packedParent[this] == false;
 // We only have  these 2 object propositions unpacked at the same time
 requires (forall y:Ref :: ( (y!=this)  ==> packedParent[y]));
-requires (forall y:Ref ::  (packedCount[y] )  );
+requires (forall y:Ref ::  ((y!=this) ==> packedCount[y] )  );
 requires (forall y:Ref :: ( fracParent[y] > 0.0 )  );
 requires (parent[this] == opp);
 requires (fracParent[this] > 0.0);
@@ -368,7 +348,7 @@ if (parent[this] != null) {
 		//assert (paramRightRc[opp] == lc + rc + 1);
 
 
-	call PackParentNotNull(this, lc + rc + 1);
+	call PackParent(this, lc + rc + 1);
 	packedParent[this] := true;
 	
 	call PackRight(opp, this, lc + rc + 1);
@@ -388,8 +368,8 @@ if (parent[this] != null) {
 	}
 	else { 
 		fracCount[this] := fracCount[this] * 2.0;
-    		call updateCount(this, lcc, ol, or, lc, rc);
-		call PackParentNull(this, lc + rc + 1);
+    call updateCount(this, lcc, ol, or, lc, rc);
+		call PackParent(this, lc + rc + 1);
 		packedParent[this] := true; 
 	}  
 }
@@ -403,6 +383,9 @@ requires l!=null;
 requires packedParent[this];
 requires fracParent[this] > 0.0;
 requires packedParent[l];
+requires (forall y:Ref :: packedLeft[y]);
+requires (forall y:Ref :: packedParent[y]);
+requires (forall y:Ref ::  packedCount[y]   );
 requires fracParent[l] > 0.0;
 ensures packedParent[this];
 ensures fracParent[this] > 0.0;
@@ -424,21 +407,19 @@ if (parent[l] == null) {
    	parent[l] := this;
 	call UnpackParent(this, lcc);
 	packedParent[this] := false;
-	call UnpackCount(this, lcc, ol, or, llc, rc);
+	call UnpackCount(this, lcc, null, or, 0, rc);
 	packedCount[this] := false;
-	// We instantiate ol and llc below.
-	assume (ol == null);
-	assume (llc == 0);
 	fracLeft[this] := fracLeft[this] * 2.0;
 	call UnpackLeft(this, null, 0);
 	packedLeft[this] := false;
 
    	left[this] := l;
+    	paramLeftOl[this] := l;
 	call PackLeft(this, l, lc);
 	packedLeft[this] := true;
 
 	call updateCountRec(this, parent[this], lcc, l, right[this], lc, rc);
-	call PackParentNotNull(l, lc);
+	call PackParent(l, lc);
 }
    
 }
