@@ -244,6 +244,8 @@ procedure updateCountRec(this: Ref, opp: Ref, lcc: int, ol: Ref, or: Ref, lc: in
 modifies count, packedCount, packedLeft, packedRight, packedParent,
 	fracCount, fracParent, fracLeft, fracRight, paramCountC, paramLeftOl, paramLeftLc, paramRightRc;
 requires (this != null);
+requires ol!=opp;
+requires or!=opp;
 requires packedParent[this] == false;
 // We only have  these 2 object propositions unpacked at the same time
 requires (forall y:Ref :: ((y!=this)  ==> packedParent[y]));
@@ -316,8 +318,6 @@ if (parent[this] != null) {
 	// Instantiate orr==this and rrc==lcc;
 	call UnpackCount(opp, lccc, oll, this, llc, lcc);
 	packedCount[opp] := false;
-  assume (ol!=opp);
-  assume (or!=opp);
 
 	assume (this == right[opp]);
 
@@ -415,6 +415,3 @@ if (parent[l] == null) {
    
 }
 
-//  You can add requires and ensures to this proof to make it work.
-// As long as these requires and ensures are local, talking only about 2 or three neighboring 
-//objects, it is ok. It emplasizes the locality of my work.
