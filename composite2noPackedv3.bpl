@@ -152,7 +152,6 @@ ensures	(parent[this] == null);
 procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, c1:int, c2:int)
 modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight, paramCountC;
-
 requires this != null;
 requires packedLeft[this];
 requires (paramLeftOl[this] == ol);
@@ -165,7 +164,9 @@ requires (fracRight[this] == 0.5);
 requires (fracCount[this] == 1.0);
 requires (paramCountC[this] == c);
 requires (packedCount[this] == false);
-requires (forall y:Ref :: ((y!=this) ==> (packedCount[y] ) ) );
+requires (forall y:Ref :: ( ( (y!=this) && (parent[this]!=y) ) ==> (packedCount[y] ) ) );
+requires packedCount[ol];
+requires packedCount[or];
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
 ensures (paramCountC[this] == c1 + c2 + 1 );  
@@ -269,6 +270,8 @@ requires (opp == null) ==> ((fracCount[this] == 0.5) &&
 requires packedLeft[this];
 requires (paramLeftOl[this] == ol);
 requires (paramLeftLc[this] == lc);
+requires packedCount[ol];
+requires packedCount[or];
 requires packedRight[this];
 requires (paramRightOr[this] == or);
 requires (paramRightRc[this] == rc);
@@ -313,6 +316,8 @@ if (parent[this] != null) {
 	// Instantiate orr==this and rrc==lcc;
 	call UnpackCount(opp, lccc, oll, this, llc, lcc);
 	packedCount[opp] := false;
+  assume (ol!=opp);
+  assume (or!=opp);
 
 	assume (this == right[opp]);
 
@@ -410,3 +415,6 @@ if (parent[l] == null) {
    
 }
 
+//  You can add requires and ensures to this proof to make it work.
+// As long as these requires and ensures are local, talking only about 2 or three neighboring 
+//objects, it is ok. It emplasizes the locality of my work.
