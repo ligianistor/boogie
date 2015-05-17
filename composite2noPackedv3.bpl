@@ -101,7 +101,6 @@ requires (packedParent[this] == false);
 requires (parent[this] != this);
 requires (fracCount[this] == 0.5);
 requires (paramCountC[this] == c);
-requires (parent[this] != null);
 requires (fracParent[parent[this]] > 0.0);
 requires  (parent[this] != null) ==>
 	((fracLeft[parent[this]] == 0.5) && 
@@ -248,7 +247,7 @@ requires ol!=opp;
 requires or!=opp;
 requires packedParent[this] == false;
 // We only have  these 2 object propositions unpacked at the same time
-requires (forall y:Ref :: ((y!=this)  ==> packedParent[y]));
+requires (forall y:Ref :: ( ((y!=this) && (y!=opp) ) ==> packedParent[y]));
 requires (forall y:Ref ::  ((y!=this) ==> packedCount[y]));
 requires (packedCount[this] == false);
 requires (forall y:Ref :: ( fracParent[y] > 0.0 ));
@@ -331,6 +330,8 @@ if (parent[this] != null) {
 
 	fracCount[this] := fracCount[this] * 2.0;
 	call updateCount(this, lcc, ol, or, lc, rc);
+  // We need to ensure this connection between paramRightRc and paramCountC
+  paramRightRc[parent[this]] := paramCountC[this];
 
   // We know that if right[opp] == this,
   // when paramCountC[this] changes, then paramRightRc[opp] also changes
@@ -338,6 +339,13 @@ if (parent[this] != null) {
 
   fracLocalCount[this] := fracCount[this] / 2.0;
   fracCount[this] := fracCount[this] / 2.0;
+  assert parent[this] != null;
+  
+  assert (fracRight[parent[this]] == 0.5);
+	assert (paramRightOr[parent[this]] == this);
+  assert (paramCountC[this] == lc + rc + 1);
+	assert (paramRightRc[parent[this]] == lc + rc + 1);
+  
 
 	call PackParent(this, lc + rc + 1);
 	packedParent[this] := true;
@@ -351,15 +359,57 @@ if (parent[this] != null) {
   // there are no cycles.
 
   
-//This is added as part of the exitential instantiation.
+//This is added as part of the existential instantiation.
   paramLeftOl[opp] := olpar;
   paramLeftLc[opp] := lcpar;
+  
+  /*  
+assert ol!=opp;
+assert or!=opp;
+assert packedParent[this] == false;
+assert (forall y:Ref :: ( ((y!=this) && (y!=opp) ) ==> packedParent[y]));
+assert (forall y:Ref ::  ((y!=this) ==> packedCount[y]));
+assert (packedCount[this] == false);
+assert (forall y:Ref :: ( fracParent[y] > 0.0 ));
+assert (parent[this] == opp);
+assert (fracParent[this] > 0.0);
+assert (opp != null) ==> (fracParent[opp] > 0.0); 
+assert (opp != null) ==> packedParent[opp];
+assert (opp != null) ==> 
+	( ((fracRight[opp] == 0.5) && 
+	(paramRightOr[opp] == this) && 
+	(paramRightRc[opp] == lcc))
+  ||
+  	((fracLeft[opp] == 0.5) && 
+	(paramLeftOl[opp] == this) && 
+	(paramLeftLc[opp] == lcc))
+  );
+assert (opp == null) ==> ((fracCount[this] == 0.5) && 
+			    (paramCountC[this] == lcc) );
+assert packedLeft[this];
+assert (paramLeftOl[this] == ol);
+assert (paramLeftLc[this] == lc);
+assert packedCount[ol];
+assert packedCount[or];
+assert packedRight[this];
+assert (paramRightOr[this] == or);
+assert (paramRightRc[this] == rc);
+assert (fracLeft[this] == 0.5);
+assert (fracRight[this] == 0.5);
+assert (fracCount[this] == 0.5);
+assert (paramCountC[this] == lcc);
+assert (count[this] == lcc);
+
+procedure updateCountRec(this: Ref, opp: Ref, lcc: int, ol: Ref, or: Ref, lc: int, rc: int)
+*/
   
 	call updateCountRec(opp, parent[opp], lccc, olpar, this, lcpar, lc + rc + 1);
 	}
 	else { 
 		fracCount[this] := fracCount[this] * 2.0;
-    		call updateCount(this, lcc, ol, or, lc, rc);
+    call updateCount(this, lcc, ol, or, lc, rc);
+    fracLocalCount[this] := fracCount[this] / 2.0;
+    fracCount[this] := fracCount[this] / 2.0;
 		call PackParent(this, lc + rc + 1);
 		packedParent[this] := true; 
 	}  
@@ -371,12 +421,17 @@ modifies parent, left, count, packedCount, packedLeft, packedRight, packedParent
 requires this!=null;
 requires this!=l;
 requires l!=null;
+requires right[this]!=parent[this];
+requires l!=parent[this];
+requires this!=right[this];
 requires packedParent[this];
 requires fracParent[this] > 0.0;
 requires packedParent[l];
 requires (forall y:Ref :: packedLeft[y]);
+requires (forall y:Ref :: packedRight[y]);
 requires (forall y:Ref :: packedParent[y]);
-requires (forall y:Ref ::  packedCount[y]   );
+requires (forall y:Ref :: packedCount[y]);
+requires (forall y:Ref :: ( fracParent[y] > 0.0 ));
 requires fracParent[l] > 0.0;
 ensures packedParent[this];
 ensures fracParent[this] > 0.0;
@@ -395,7 +450,7 @@ var rc : int;
 call UnpackParent(l, lc);
 packedParent[l] := false;
 if (parent[l] == null) {
-   	parent[l] := this;
+  parent[l] := this;
 	call UnpackParent(this, lcc);
 	packedParent[this] := false;
 	call UnpackCount(this, lcc, null, or, 0, rc);
@@ -406,11 +461,54 @@ if (parent[l] == null) {
 
   left[this] := l;
   paramLeftOl[this] := l;
+  paramLeftLc[this] := lc;
 	call PackLeft(this, l, lc);
 	packedLeft[this] := true;
 
-	call updateCountRec(this, parent[this], lcc, l, right[this], lc, rc);
-	call PackParent(l, lc);
+call PackParent(l, lc);
+packedParent[l] := true;
+
+assert l!=parent[this];
+assert right[this]!=parent[this];
+assert packedParent[this] == false;
+assert (forall y:Ref :: ( ((y!=this) && (y!=parent[this]) ) ==> packedParent[y]));
+assert (forall y:Ref ::  ((y!=this) ==> packedCount[y]));
+assert (packedCount[this] == false);
+assert (forall y:Ref :: ( fracParent[y] > 0.0 ));
+assert (fracParent[this] > 0.0);
+assert (parent[this] != null) ==> (fracParent[parent[this]] > 0.0); 
+assert (parent[this] != null) ==> packedParent[parent[this]];
+assert (parent[this] != null) ==> 
+	( ((fracRight[parent[this]] == 0.5) && 
+	(paramRightOr[parent[this]] == this) && 
+	(paramRightRc[parent[this]] == lcc))
+  ||
+  	((fracLeft[parent[this]] == 0.5) && 
+	(paramLeftOl[parent[this]] == this) && 
+	(paramLeftLc[parent[this]] == lcc))
+  );
+assert (parent[this] == null) ==> ((fracCount[this] == 0.5) && 
+			    (paramCountC[this] == lcc) );
+assert packedLeft[this];
+assert (paramLeftOl[this] == l);
+assert (paramLeftLc[this] == lc);
+assert packedCount[l];
+assert packedCount[right[this]];
+assert packedRight[this];
+// Need a mechanism to say what each param means. 
+// They usually mean the current value of a field.
+// In those cases, I need a mechanism to say that.
+// And the connections between different params. 
+assert (paramRightOr[this] == right[this]);
+assert (paramRightRc[this] == rc);
+assert (fracLeft[this] == 0.5);
+assert (fracRight[this] == 0.5);
+assert (fracCount[this] == 0.5);
+assert (paramCountC[this] == lcc);
+assert (count[this] == lcc);
+  
+call updateCountRec(this, parent[this], lcc, l, right[this], lc, rc);
+call PackParent(l, lc);
 }
    
 }
