@@ -152,6 +152,7 @@ procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, c1:int, c2:int)
 modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight, paramCountC;
 requires this != null;
+requires this!=parent[this];
 requires packedLeft[this];
 requires (paramLeftOl[this] == ol);
 requires (paramLeftLc[this] == c1);
@@ -180,7 +181,9 @@ ensures (forall y:Ref :: (packedLeft[y] == old(packedLeft[y]) ) );
 ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
 ensures (forall y:Ref :: (packedParent[y] == old(packedParent[y]) ) );
 ensures (forall y:Ref :: ((y!=this) ==> (paramCountC[y] == old(paramCountC[y]) ) ) );
-ensures (forall y:Ref :: ((y!=this) ==> (packedCount[y] == old(packedCount[y]) ) ) );
+ensures (forall y:Ref :: (  (parent[this]!=y)  ==> (packedCount[y] ) ) );
+ensures (forall y:Ref :: ( (y!=this)  ==> (count[y] == old(count[y])) ) );
+ensures packedCount[parent[this]] == old(packedCount[parent[this]]);
 {
    var newc : int;
 //All variable declarations must be made before the code starts.
@@ -300,7 +303,8 @@ var fracLocalLeft : [Ref]real;
 var fracLocalParent : [Ref]real; 
 
 // Existential variable for UnpackParent(opp, lccc)
-var lccc : int;
+// var lccc : int;
+// Instead of this I can just put count[opp]
 
 // Existential variables for UnpackCount(opp, lccc)
 var oll : Ref;
@@ -320,12 +324,12 @@ if (parent[this] != null) {
 	fracLocalParent[opp] := fracParent[opp] / 2.0;
 	fracParent[opp] := fracParent[opp] / 2.0;
 
-	call UnpackParent(opp, lccc);
+	call UnpackParent(opp, count[opp]);
 	packedParent[opp] := false;
  
 
 	// Instantiate orr==this and rrc==lcc;
-	call UnpackCount(opp, lccc, oll, this, llc, lcc);
+	call UnpackCount(opp, count[opp], oll, this, llc, lcc);
 	packedCount[opp] := false;
 
 	assume (this == right[opp]);
@@ -340,6 +344,7 @@ if (parent[this] != null) {
 
 	fracCount[this] := fracCount[this] * 2.0;
 	call updateCount(this, lcc, ol, or, lc, rc);
+ 
   // We need to ensure this connection between paramRightRc and paramCountC
   paramRightRc[parent[this]] := paramCountC[this];
 
@@ -349,13 +354,6 @@ if (parent[this] != null) {
 
   fracLocalCount[this] := fracCount[this] / 2.0;
   fracCount[this] := fracCount[this] / 2.0;
-  assert parent[this] != null;
-  
-  assert (fracRight[parent[this]] == 0.5);
-	assert (paramRightOr[parent[this]] == this);
-  assert (paramCountC[this] == lc + rc + 1);
-	assert (paramRightRc[parent[this]] == lc + rc + 1);
-  
 
 	call PackParent(this, lc + rc + 1);
 	packedParent[this] := true;
@@ -377,45 +375,9 @@ assume olpar!=parent[opp];
 assume olpar!=this;
 assume olpar!=opp;
 
-assert olpar!=parent[opp];
-assert this!=parent[opp];
-assert packedParent[opp] == false;
-assert (forall y:Ref :: ( ((y!=opp) && (y!=parent[opp]) ) ==> packedParent[y]));
-assert (forall y:Ref ::  ((y!=opp) ==> packedCount[y]));
 assert (packedCount[opp] == false);
-assert (forall y:Ref :: ( fracParent[y] > 0.0 ));
-assert (parent[opp] == parent[opp]);
-assert (fracParent[opp] > 0.0);
-assert (parent[opp] != null) ==> (fracParent[parent[opp]] > 0.0); 
-assert (parent[opp] != null) ==> packedParent[parent[opp]];
-assert (parent[opp] != null) ==> 
-	( ((fracRight[parent[opp]] == 0.5) && 
-	(paramRightOr[parent[opp]] == opp) && 
-	(paramRightRc[parent[opp]] == lccc))
-  ||
-  	((fracLeft[parent[opp]] == 0.5) && 
-	(paramLeftOl[parent[opp]] == opp) && 
-	(paramLeftLc[parent[opp]] == lccc))
-  );
-assert (parent[opp] == null) ==> ((fracCount[opp] == 0.5) && 
-			    (paramCountC[opp] == lccc) );
-assert opp != this;
-assert (forall y:Ref ::  ((y!=this) ==> packedLeft[y]) );
-assert packedLeft[opp];
-assert (paramLeftOl[opp] == olpar);
-assert (paramLeftLc[opp] == lcpar);
-assert packedCount[olpar];
-assert packedCount[this];
-assert packedRight[this];
-assert (paramRightOr[opp] == this);
-assert (paramRightRc[opp] == lc + rc + 1);
-assert (fracLeft[opp] == 0.5);
-assert (fracRight[opp] == 0.5);
-assert (fracCount[opp] == 0.5);
-assert (paramCountC[opp] == lccc);
-assert (count[opp] == lccc);
   
-	call updateCountRec(opp, parent[opp], lccc, olpar, this, lcpar, lc + rc + 1);
+	call updateCountRec(opp, parent[opp], count[opp], olpar, this, lcpar, lc + rc + 1);
 	}
 	else { 
 		fracCount[this] := fracCount[this] * 2.0;
@@ -480,37 +442,6 @@ if (parent[l] == null) {
 call PackParent(l, lc);
 packedParent[l] := true;
 
-assert l!=parent[this];
-assert right[this]!=parent[this];
-assert packedParent[this] == false;
-assert (forall y:Ref :: ( ((y!=this) && (y!=parent[this]) ) ==> packedParent[y]));
-assert (forall y:Ref ::  ((y!=this) ==> packedCount[y]));
-assert (packedCount[this] == false);
-assert (forall y:Ref :: ( fracParent[y] > 0.0 ));
-assert (fracParent[this] > 0.0);
-assert (parent[this] != null) ==> (fracParent[parent[this]] > 0.0); 
-assert (parent[this] != null) ==> packedParent[parent[this]];
-assert (parent[this] != null) ==> 
-	( ((fracRight[parent[this]] == 0.5) && 
-	(paramRightOr[parent[this]] == this) && 
-	(paramRightRc[parent[this]] == lcc))
-  ||
-  	((fracLeft[parent[this]] == 0.5) && 
-	(paramLeftOl[parent[this]] == this) && 
-	(paramLeftLc[parent[this]] == lcc))
-  );
-assert (parent[this] == null) ==> ((fracCount[this] == 0.5) && 
-			    (paramCountC[this] == lcc) );
-assert packedLeft[this];
-assert (paramLeftOl[this] == l);
-assert (paramLeftLc[this] == lc);
-assert packedCount[l];
-assert packedCount[right[this]];
-assert packedRight[this];
-// Need a mechanism to say what each param means. 
-// They usually mean the current value of a field.
-// In those cases, I need a mechanism to say that.
-// And the connections between different params. 
 assert (paramRightOr[this] == right[this]);
 assert (paramRightRc[this] == rc);
 assert (fracLeft[this] == 0.5);
