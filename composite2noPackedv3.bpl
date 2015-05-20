@@ -169,8 +169,14 @@ requires packedCount[or];
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
 ensures (paramCountC[this] == c1 + c2 + 1 );  
-ensures (forall y:Ref :: ((y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
+ensures (forall y:Ref :: (fracRight[y] == old(fracRight[y]) ) );
+ensures (forall y:Ref :: (paramRightOr[y] == old(paramRightOr[y]) ) );
+ensures (forall y:Ref :: (paramRightRc[y] == old(paramRightRc[y]) ) );
+ensures (forall y:Ref :: (paramLeftOl[y] == old(paramLeftOl[y]) ) );
+ensures (forall y:Ref :: (paramLeftLc[y] == old(paramLeftLc[y]) ) );
+ensures (forall y:Ref :: (fracLeft[y] == old(fracLeft[y]) ) );
 ensures (forall y:Ref :: (packedRight[y] == old(packedRight[y]) ) );
+ensures (forall y:Ref :: (packedLeft[y] == old(packedLeft[y]) ) );
 ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
 ensures (forall y:Ref :: (packedParent[y] == old(packedParent[y]) ) );
 ensures (forall y:Ref :: ((y!=this) ==> (paramCountC[y] == old(paramCountC[y]) ) ) );
@@ -249,7 +255,11 @@ requires packedParent[this] == false;
 // We only have  these 2 object propositions unpacked at the same time
 requires (forall y:Ref :: ( ((y!=this) && (y!=opp) ) ==> packedParent[y]));
 requires (forall y:Ref ::  ((y!=this) ==> packedCount[y]));
+requires (forall y:Ref ::  ((y!=this) ==> packedLeft[y]) );
 requires (packedCount[this] == false);
+// These foralls should be put in by the programmer,
+// because it is implicit only that everything that is not unpacked is packed.
+// IT's just a small step that the programmer could put in.
 requires (forall y:Ref :: ( fracParent[y] > 0.0 ));
 requires (parent[this] == opp);
 requires (fracParent[this] > 0.0);
@@ -281,7 +291,7 @@ requires (fracRight[this] == 0.5);
 requires (fracCount[this] == 0.5);
 requires (paramCountC[this] == lcc);
 requires (count[this] == lcc);
-ensures   (packedParent[this]);  
+ensures (packedParent[this]);  
 ensures (fracParent[this] > 0.0);  
 {
 var fracLocalCount : [Ref]real;
@@ -312,7 +322,7 @@ if (parent[this] != null) {
 
 	call UnpackParent(opp, lccc);
 	packedParent[opp] := false;
-  
+ 
 
 	// Instantiate orr==this and rrc==lcc;
 	call UnpackCount(opp, lccc, oll, this, llc, lcc);
@@ -363,45 +373,47 @@ if (parent[this] != null) {
   paramLeftOl[opp] := olpar;
   paramLeftLc[opp] := lcpar;
   
-  /*  
-assert ol!=opp;
-assert or!=opp;
-assert packedParent[this] == false;
-assert (forall y:Ref :: ( ((y!=this) && (y!=opp) ) ==> packedParent[y]));
-assert (forall y:Ref ::  ((y!=this) ==> packedCount[y]));
-assert (packedCount[this] == false);
-assert (forall y:Ref :: ( fracParent[y] > 0.0 ));
-assert (parent[this] == opp);
-assert (fracParent[this] > 0.0);
-assert (opp != null) ==> (fracParent[opp] > 0.0); 
-assert (opp != null) ==> packedParent[opp];
-assert (opp != null) ==> 
-	( ((fracRight[opp] == 0.5) && 
-	(paramRightOr[opp] == this) && 
-	(paramRightRc[opp] == lcc))
-  ||
-  	((fracLeft[opp] == 0.5) && 
-	(paramLeftOl[opp] == this) && 
-	(paramLeftLc[opp] == lcc))
-  );
-assert (opp == null) ==> ((fracCount[this] == 0.5) && 
-			    (paramCountC[this] == lcc) );
-assert packedLeft[this];
-assert (paramLeftOl[this] == ol);
-assert (paramLeftLc[this] == lc);
-assert packedCount[ol];
-assert packedCount[or];
-assert packedRight[this];
-assert (paramRightOr[this] == or);
-assert (paramRightRc[this] == rc);
-assert (fracLeft[this] == 0.5);
-assert (fracRight[this] == 0.5);
-assert (fracCount[this] == 0.5);
-assert (paramCountC[this] == lcc);
-assert (count[this] == lcc);
+assume olpar!=parent[opp];
+assume olpar!=this;
+assume olpar!=opp;
 
-procedure updateCountRec(this: Ref, opp: Ref, lcc: int, ol: Ref, or: Ref, lc: int, rc: int)
-*/
+assert olpar!=parent[opp];
+assert this!=parent[opp];
+assert packedParent[opp] == false;
+assert (forall y:Ref :: ( ((y!=opp) && (y!=parent[opp]) ) ==> packedParent[y]));
+assert (forall y:Ref ::  ((y!=opp) ==> packedCount[y]));
+assert (packedCount[opp] == false);
+assert (forall y:Ref :: ( fracParent[y] > 0.0 ));
+assert (parent[opp] == parent[opp]);
+assert (fracParent[opp] > 0.0);
+assert (parent[opp] != null) ==> (fracParent[parent[opp]] > 0.0); 
+assert (parent[opp] != null) ==> packedParent[parent[opp]];
+assert (parent[opp] != null) ==> 
+	( ((fracRight[parent[opp]] == 0.5) && 
+	(paramRightOr[parent[opp]] == opp) && 
+	(paramRightRc[parent[opp]] == lccc))
+  ||
+  	((fracLeft[parent[opp]] == 0.5) && 
+	(paramLeftOl[parent[opp]] == opp) && 
+	(paramLeftLc[parent[opp]] == lccc))
+  );
+assert (parent[opp] == null) ==> ((fracCount[opp] == 0.5) && 
+			    (paramCountC[opp] == lccc) );
+assert opp != this;
+assert (forall y:Ref ::  ((y!=this) ==> packedLeft[y]) );
+assert packedLeft[opp];
+assert (paramLeftOl[opp] == olpar);
+assert (paramLeftLc[opp] == lcpar);
+assert packedCount[olpar];
+assert packedCount[this];
+assert packedRight[this];
+assert (paramRightOr[opp] == this);
+assert (paramRightRc[opp] == lc + rc + 1);
+assert (fracLeft[opp] == 0.5);
+assert (fracRight[opp] == 0.5);
+assert (fracCount[opp] == 0.5);
+assert (paramCountC[opp] == lccc);
+assert (count[opp] == lccc);
   
 	call updateCountRec(opp, parent[opp], lccc, olpar, this, lcpar, lc + rc + 1);
 	}
