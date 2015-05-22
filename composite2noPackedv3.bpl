@@ -255,14 +255,13 @@ requires (this != null);
 requires ol!=opp;
 requires or!=opp;
 requires packedParent[this] == false;
-// We only have  these 2 object propositions unpacked at the same time
-requires (forall y:Ref :: ( ((y!=this) && (y!=opp) ) ==> packedParent[y]));
+requires (forall y:Ref :: ( (y!=this) ==> packedParent[y]));
 requires (forall y:Ref ::  ((y!=this) ==> packedCount[y]));
 requires (forall y:Ref ::  ((y!=this) ==> packedLeft[y]) );
 requires (packedCount[this] == false);
 // These foralls should be put in by the programmer,
 // because it is implicit only that everything that is not unpacked is packed.
-// IT's just a small step that the programmer could put in.
+// It's just a small step that the programmer could put in.
 requires (forall y:Ref :: ( fracParent[y] > 0.0 ));
 requires (parent[this] == opp);
 requires (fracParent[this] > 0.0);
@@ -294,8 +293,10 @@ requires (fracRight[this] == 0.5);
 requires (fracCount[this] == 0.5);
 requires (paramCountC[this] == lcc);
 requires (count[this] == lcc);
-ensures (packedParent[this]);  
+ensures packedParent[this];  
 ensures (fracParent[this] > 0.0);  
+ensures (forall y:Ref :: packedParent[y] );
+ensures (forall y:Ref :: fracParent[y] > 0.0);
 {
 var fracLocalCount : [Ref]real;
 var fracLocalRight : [Ref]real;
@@ -345,15 +346,15 @@ if (parent[this] != null) {
 	fracCount[this] := fracCount[this] * 2.0;
 	call updateCount(this, lcc, ol, or, lc, rc);
  
-  // We need to ensure this connection between paramRightRc and paramCountC
-  paramRightRc[parent[this]] := paramCountC[this];
+ 	 // We need to ensure this connection between paramRightRc and paramCountC
+  	paramRightRc[parent[this]] := paramCountC[this];
 
-  // We know that if right[opp] == this,
-  // when paramCountC[this] changes, then paramRightRc[opp] also changes
- // paramRightRc[opp] := paramCountC[this];
+  	// We know that if right[opp] == this,
+  	// when paramCountC[this] changes, then paramRightRc[opp] also changes
+ 	// paramRightRc[opp] := paramCountC[this];
 
-  fracLocalCount[this] := fracCount[this] / 2.0;
-  fracCount[this] := fracCount[this] / 2.0;
+  	fracLocalCount[this] := fracCount[this] / 2.0;
+  	fracCount[this] := fracCount[this] / 2.0;
 
 	call PackParent(this, lc + rc + 1);
 	packedParent[this] := true;
@@ -361,37 +362,44 @@ if (parent[this] != null) {
 	call PackRight(opp, this, lc + rc + 1);
 	packedRight[opp] := true;
 
-  // This assume says that there are no cycles in the tree.
-  // Maybe can state it as an axiom.
-  // Maybe the user needs to give a hint that
-  // there are no cycles.
+  	// This assume says that there are no cycles in the tree.
+  	// Maybe can state it as an axiom.
+  	// Maybe the user needs to give a hint that
+  	// there are no cycles.
 
   
-//This is added as part of the existential instantiation.
-  paramLeftOl[opp] := olpar;
-  paramLeftLc[opp] := lcpar;
+	//This is added as part of the existential instantiation.
+  	paramLeftOl[opp] := olpar;
+  	paramLeftLc[opp] := lcpar;
   
-assume olpar!=parent[opp];
-assume olpar!=this;
-assume olpar!=opp;
+	assume olpar!=parent[opp];
+	assume olpar!=this;
+	assume olpar!=opp;
 
-assert (packedCount[opp] == false);
+	assert (packedCount[opp] == false);
   
+    assert packedParent[this];  
+assert (fracParent[this] > 0.0); 
+assert this!= parent[opp];
+assert this!=opp;
 	call updateCountRec(opp, parent[opp], count[opp], olpar, this, lcpar, lc + rc + 1);
-	}
-	else { 
-		fracCount[this] := fracCount[this] * 2.0;
-    call updateCount(this, lcc, ol, or, lc, rc);
-    fracLocalCount[this] := fracCount[this] / 2.0;
-    fracCount[this] := fracCount[this] / 2.0;
-		call PackParent(this, lc + rc + 1);
-		packedParent[this] := true; 
-	}  
+  assert packedParent[this];  
+assert (fracParent[this] > 0.0); 
+}
+else { 
+	fracCount[this] := fracCount[this] * 2.0;
+  call updateCount(this, lcc, ol, or, lc, rc);
+  fracLocalCount[this] := fracCount[this] / 2.0;
+  fracCount[this] := fracCount[this] / 2.0;
+	call PackParent(this, lc + rc + 1);
+	packedParent[this] := true; 
+}  
 }
 
 procedure setLeft(this: Ref, l:Ref)
 modifies parent, left, count, packedCount, packedLeft, packedRight, packedParent,
-	fracCount, fracParent, fracLeft, fracRight, paramCountC, paramLeftOl, paramLeftLc, paramRightRc;
+	fracCount, fracParent, fracLeft, fracRight, paramCountC, paramLeftOl, paramLeftLc, paramRightRc,
+  paramRightOr;
 requires this!=null;
 requires this!=l;
 requires l!=null;
@@ -400,7 +408,7 @@ requires l!=parent[this];
 requires this!=right[this];
 requires packedParent[this];
 requires fracParent[this] > 0.0;
-requires packedParent[l];
+requires (packedParent[l] == false);
 requires (forall y:Ref :: packedLeft[y]);
 requires (forall y:Ref :: packedRight[y]);
 requires (forall y:Ref :: packedParent[y]);
@@ -421,8 +429,6 @@ var or : Ref;
 var llc : int;
 var rc : int;
 
-call UnpackParent(l, lc);
-packedParent[l] := false;
 if (parent[l] == null) {
   parent[l] := this;
 	call UnpackParent(this, lcc);
@@ -439,17 +445,11 @@ if (parent[l] == null) {
 	call PackLeft(this, l, lc);
 	packedLeft[this] := true;
 
-call PackParent(l, lc);
-packedParent[l] := true;
+// This line is part of the existential instantiation.
+paramRightOr[this] := right[this];
 
-assert (paramRightOr[this] == right[this]);
-assert (paramRightRc[this] == rc);
 assert (fracLeft[this] == 0.5);
-assert (fracRight[this] == 0.5);
-assert (fracCount[this] == 0.5);
-assert (paramCountC[this] == lcc);
-assert (count[this] == lcc);
-  
+ 
 call updateCountRec(this, parent[this], lcc, l, right[this], lc, rc);
 call PackParent(l, lc);
 }
