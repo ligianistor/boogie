@@ -185,19 +185,19 @@ ensures (forall y:Ref :: (  (parent[this]!=y)  ==> (packedCount[y] ) ) );
 ensures (forall y:Ref :: ( (y!=this)  ==> (count[y] == old(count[y])) ) );
 ensures packedCount[parent[this]] == old(packedCount[parent[this]]);
 {
-   var newc : int;
+var newc : int;
 //All variable declarations must be made before the code starts.
-  var ol1: Ref;
-  var or1:Ref;
-  var lc1:int;
-  var rc1:int;
+var ol1: Ref;
+var or1:Ref;
+var lc1:int;
+var rc1:int;
 
-  var ol2: Ref;
-  var or2:Ref;
-  var lc2:int;
-  var rc2:int;
+var ol2: Ref;
+var or2:Ref;
+var lc2:int;
+var rc2:int;
 
-   newc := 1;
+newc := 1;
 
 //In the source java code, the programmer can use 
 // unpack(ol#1/2 count(c1)), where ol appears in the exists
@@ -206,46 +206,44 @@ ensures packedCount[parent[this]] == old(packedCount[parent[this]]);
 //because we use left[this] in the condition of the if,
 //that is we access the field left of this.
 //For this we need the field to be accessible, unpacked.
- 	call UnpackLeft(this, ol, c1);
-	packedLeft[this] := false;
+call UnpackLeft(this, ol, c1);
+packedLeft[this] := false;
 
-        if (left[this] != null)
-           {
-	
+if (left[this] != null) {
 	call UnpackCount(ol, c1, ol1, or1, lc1, rc1);
 	packedCount[ol] := false; 
         newc := newc + count[left[this]];
 	call PackCount(ol, c1, ol1, or1, lc1, rc1);
 	packedCount[ol]:=true;
-       }
- 	call PackLeft(this, ol, c1);
-	packedLeft[this] := true;
+}
+call PackLeft(this, ol, c1);
+packedLeft[this] := true;
    
-        call UnpackRight(this, or, c2);
-	     packedRight[this] := false;
+call UnpackRight(this, or, c2);
+packedRight[this] := false;
     
-        if (right[this] != null)
-             {
+if (right[this] != null) {
 
-//Here it is easy to come up with ol2, or2, lc2, rc2 because they can be arbitrary.
+	//Here it is easy to come up with ol2, or2, lc2, rc2 because they can be arbitrary.
 	call UnpackCount(or, c2, ol2, or2, lc2, rc2);
-         newc := newc + count[right[this]]; 
-       }
+	packedCount[or] := false;
+  newc := newc + count[right[this]]; 
+  call PackCount(or, c2, ol2, or2, lc2, rc2);
+	packedCount[or] := true;
+}
 
-        call PackRight(this, or, c2);
-	packedRight[this] := true;
+call PackRight(this, or, c2);
+packedRight[this] := true;
     
-
-    count[this] := newc; 
-    //We update the corresponding paramCount for that field
-    //whenever we update a field.
-    paramCountC[this] := newc;  
+count[this] := newc; 
+//We update the corresponding paramCount for that field
+//whenever we update a field.
+paramCountC[this] := newc;  
 //Here it is difficult because this is the phase where we need to use what we know and 
 //instantiate the exists with the right values.
 //Here we need to use the fraction to right(this).
-    call PackCount(this, newc, ol, or, c1, c2);
-    packedCount[this]:=true;
-    
+call PackCount(this, newc, ol, or, c1, c2);
+packedCount[this]:=true; 
 }
 
 procedure updateCountRec(this: Ref, opp: Ref, lcc: int, ol: Ref, or: Ref, lc: int, rc: int)
@@ -276,6 +274,10 @@ requires (opp != null) ==>
 	(paramLeftOl[opp] == this) && 
 	(paramLeftLc[opp] == lcc))
   );
+// TODO Can have some kind of map saying that the value of paramLeftOl[this] is the current value
+// of the left child of this. Then we need also an axiom like in the case of 
+// connecting paramCountC[opp] to paramLeftLc[this] , when opp == parent[this]  and this is the left child of 
+// opp.
   //Could add ==> packedCount[this] below but that
   //leads to inconsistencies similar to "requires false"
 requires (opp == null) ==> ((fracCount[this] == 0.5) && 
@@ -315,9 +317,25 @@ var rrc : int;
 
 // Existential variables used in the parameters of call updateCountRec()
 var oppp : Ref;
+// When I instantiate with olpar, I do not know anything about it. 
+// So it could be anything, even this, or opp, or parent[opp].
+// What I want to say when I instantiate with olpar is that it is a fresh new variable,
+// different from all the variables that were used so far.
+// Same with other variables that I instantiate with.
+// When the programmer gives the variable to instantiate with, he can say
+// "new variable". And then I know to assume that this variable is different than all existing variables.
+// Note: all assumes have to be done after the declaration of the variables.
+// We might have too many assumes, so maybe the programmer can say which variables she/he doesn't 
+// want the new variable to be equal to.
+
 var olpar : Ref;
+
 var lcpar : int; 
 
+assume olpar!=parent[opp];
+assume olpar!=this;
+assume olpar!=opp;
+//assume olpar != or;
 if (parent[this] != null) {
 	// Split the fraction k of opp in parent.
 	// fracLocalParent represents what is left over after the splitting
@@ -328,7 +346,6 @@ if (parent[this] != null) {
 	call UnpackParent(opp, count[opp]);
 	packedParent[opp] := false;
  
-
 	// Instantiate orr==this and rrc==lcc;
 	call UnpackCount(opp, count[opp], oll, this, llc, lcc);
 	packedCount[opp] := false;
@@ -340,10 +357,10 @@ if (parent[this] != null) {
 	// This should be in a forall in the pre-condition.
 	packedRight[opp] := true;
 	call UnpackRight(opp, this, lcc);
-  assert (paramRightRc[opp] == paramCountC[this]);
 	packedRight[opp] := false;
 
 	fracCount[this] := fracCount[this] * 2.0;
+  
 	call updateCount(this, lcc, ol, or, lc, rc);
  
  	 // We need to ensure this connection between paramRightRc and paramCountC
@@ -367,30 +384,17 @@ if (parent[this] != null) {
   	// Maybe the user needs to give a hint that
   	// there are no cycles.
 
-  
 	//This is added as part of the existential instantiation.
   	paramLeftOl[opp] := olpar;
   	paramLeftLc[opp] := lcpar;
   
-	assume olpar!=parent[opp];
-	assume olpar!=this;
-	assume olpar!=opp;
-
-	assert (packedCount[opp] == false);
-  
-    assert packedParent[this];  
-assert (fracParent[this] > 0.0); 
-assert this!= parent[opp];
-assert this!=opp;
 	call updateCountRec(opp, parent[opp], count[opp], olpar, this, lcpar, lc + rc + 1);
-  assert packedParent[this];  
-assert (fracParent[this] > 0.0); 
 }
 else { 
 	fracCount[this] := fracCount[this] * 2.0;
-  call updateCount(this, lcc, ol, or, lc, rc);
-  fracLocalCount[this] := fracCount[this] / 2.0;
-  fracCount[this] := fracCount[this] / 2.0;
+  	call updateCount(this, lcc, ol, or, lc, rc);
+  	fracLocalCount[this] := fracCount[this] / 2.0;
+  	fracCount[this] := fracCount[this] / 2.0;
 	call PackParent(this, lc + rc + 1);
 	packedParent[this] := true; 
 }  
@@ -430,7 +434,7 @@ var llc : int;
 var rc : int;
 
 if (parent[l] == null) {
-  parent[l] := this;
+	parent[l] := this;
 	call UnpackParent(this, lcc);
 	packedParent[this] := false;
 	call UnpackCount(this, lcc, null, or, 0, rc);
@@ -439,19 +443,17 @@ if (parent[l] == null) {
 	call UnpackLeft(this, null, 0);
 	packedLeft[this] := false;
 
-  left[this] := l;
-  paramLeftOl[this] := l;
-  paramLeftLc[this] := lc;
+  	left[this] := l;
+  	paramLeftOl[this] := l;
+  	paramLeftLc[this] := lc;
 	call PackLeft(this, l, lc);
 	packedLeft[this] := true;
 
-// This line is part of the existential instantiation.
-paramRightOr[this] := right[this];
-
-assert (fracLeft[this] == 0.5);
+	// This line is part of the existential instantiation.
+	paramRightOr[this] := right[this];
  
-call updateCountRec(this, parent[this], lcc, l, right[this], lc, rc);
-call PackParent(l, lc);
+	call updateCountRec(this, parent[this], lcc, l, right[this], lc, rc);
+	call PackParent(l, lc);
 }
    
 }
