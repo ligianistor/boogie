@@ -35,7 +35,6 @@ var fracParent : [Ref] real;
 
 procedure PackLeft(this:Ref, ol:Ref, lc:int);
 requires (packedLeft[this] == false);
-requires (left[this] == ol);
 requires (count[left[this]] == lc);
 requires (left[this] == ol);
 requires (left[this] != null) ==> (fracCount[ol] == 0.5);
@@ -46,7 +45,6 @@ requires packedLeft[this];
 requires (left[this] == ol);
 requires (count[left[this]] == lc);
 requires (fracLeft[this] > 0.0);
-ensures	(left[this] == ol);
 ensures (count[ol] == lc);
 ensures (left[this] == null) ==> (lc == 0);
 ensures (left[this] != null) ==> (fracCount[ol] == 0.5);
@@ -64,7 +62,6 @@ requires packedRight[this];
 requires (right[this] == or);
 requires (count[right[this]] == rc);
 requires (fracRight[this] > 0.0);
-ensures (right[this] == or);
 ensures (count[or] == rc);
 ensures (right[this] == null) ==> (rc == 0);
 ensures (right[this] != null) ==> (fracCount[or] == 0.5);
@@ -73,7 +70,6 @@ procedure PackCount(this:Ref, c:int, ol: Ref, or:Ref, lc:int, rc:int);
 requires (packedCount[this] == false);
 requires (count[this] == c);
 requires (this!=null);
-requires (count[this] == c);
 requires (fracLeft[this] == 0.5);
 requires (fracRight[this] == 0.5);
 requires (right[this] == or);
@@ -87,7 +83,6 @@ requires packedCount[this];
 requires (count[this] == c);
 requires (fracCount[this] > 0.0);
 ensures (this!=null);
-ensures	(count[this] == c);
 ensures (fracLeft[this] == 0.5);
 ensures (fracRight[this] == 0.5);
 ensures (right[this] == or);
@@ -221,12 +216,11 @@ call UnpackRight(this, or, c2);
 packedRight[this] := false;
     
 if (right[this] != null) {
-
 	//Here it is easy to come up with ol2, or2, lc2, rc2 because they can be arbitrary.
 	call UnpackCount(or, c2, ol2, or2, lc2, rc2);
 	packedCount[or] := false;
-  newc := newc + count[right[this]]; 
-  call PackCount(or, c2, ol2, or2, lc2, rc2);
+  	newc := newc + count[right[this]]; 
+  	call PackCount(or, c2, ol2, or2, lc2, rc2);
 	packedCount[or] := true;
 }
 
@@ -292,7 +286,6 @@ requires (fracLeft[this] == 0.5);
 requires (fracRight[this] == 0.5);
 requires (fracCount[this] == 0.5);
 requires (count[this] == lcc);
-requires (count[this] == lcc);
 ensures packedParent[this];  
 ensures (fracParent[this] > 0.0);  
 ensures (forall y:Ref :: packedParent[y] );
@@ -327,13 +320,16 @@ var oppp : Ref;
 // want the new variable to be equal to.
 // var olpar : Ref;
 
-var lcpar : int; 
+// These assumes say that there are no cycles in the tree.
+// Maybe can state it as an axiom.
+// Maybe the user needs to give a hint that
+// there are no cycles.
 
-	assume left[opp] != parent[opp];
-	assume left[opp] != this;
-	assume left[opp] != opp;
+assume left[opp] != parent[opp];
+assume left[opp] != this;
+assume left[opp] != opp;
 
-//assume olpar != or;
+//assume left[opp] != or;
 if (parent[this] != null) {
 	// Split the fraction k of opp in parent.
 	// fracLocalParent represents what is left over after the splitting
@@ -369,15 +365,6 @@ if (parent[this] != null) {
 	
 	call PackRight(opp, this, lc + rc + 1);
 	packedRight[opp] := true;
-
-  	// This assume says that there are no cycles in the tree.
-  	// Maybe can state it as an axiom.
-  	// Maybe the user needs to give a hint that
-  	// there are no cycles.
-
-
-  	
-	count[left[opp]] := lcpar;
   
 	call updateCountRec(opp, parent[opp], count[opp], left[opp], this, count[left[opp]], lc + rc + 1);
 }
