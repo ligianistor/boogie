@@ -161,6 +161,7 @@ requires (fracRight[this] == 0.5);
 requires (fracCount[this] == 1.0);
 requires (count[this] == c);
 requires (packedCount[this] == false);
+requires (parent[this]!=null) ==> (packedCount[parent[this]] == false);
 requires (forall y:Ref :: ( ( (y!=this) && (parent[this]!=y) ) ==> (packedCount[y] ) ) );
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
