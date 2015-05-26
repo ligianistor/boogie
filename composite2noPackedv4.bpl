@@ -176,7 +176,6 @@ ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
 ensures (forall y:Ref :: (packedParent[y] == old(packedParent[y]) ) );
 ensures (forall y:Ref :: ((y!=this) ==> (count[y] == old(count[y]) ) ) );
 ensures (forall y:Ref :: ( (this!=y)  ==> (packedCount[y] == old(packedCount[y])) ) );
-ensures (forall y:Ref :: ( (y!=this)  ==> (count[y] == old(count[y])) ) );
 {
 var newc : int;
 //All variable declarations must be made before the code starts.
@@ -249,7 +248,7 @@ requires or!=this;
 requires packedParent[this] == false;
 requires (forall y:Ref :: ( (y!=this) ==> packedParent[y]));
 requires (forall y:Ref ::  ((y!=this) ==> packedCount[y]));
-requires (forall y:Ref ::  ((y!=this) ==> packedLeft[y]) );
+requires (forall y:Ref ::  packedLeft[y] ) ;
 requires (packedCount[this] == false);
 // These foralls should be put in by the programmer,
 // because it is implicit only that everything that is not unpacked is packed.
@@ -276,7 +275,6 @@ requires (opp != null) ==>
   //leads to inconsistencies similar to "requires false"
 requires (opp == null) ==> ((fracCount[this] == 0.5) && 
 			    (count[this] == lcc) );
-requires packedLeft[this];
 requires (left[this] == ol);
 requires (count[left[this]] == lc);
 requires packedRight[this];
