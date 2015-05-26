@@ -69,7 +69,6 @@ ensures (right[this] != null) ==> (fracCount[or] == 0.5);
 procedure PackCount(this:Ref, c:int, ol: Ref, or:Ref, lc:int, rc:int);
 requires (packedCount[this] == false);
 requires (count[this] == c);
-requires (this!=null);
 requires (fracLeft[this] == 0.5);
 requires (fracRight[this] == 0.5);
 requires (right[this] == or);
@@ -82,7 +81,6 @@ procedure UnpackCount(this:Ref, c:int, ol: Ref, or:Ref, lc:int, rc:int);
 requires packedCount[this];
 requires (count[this] == c);
 requires (fracCount[this] > 0.0);
-ensures (this!=null);
 ensures (fracLeft[this] == 0.5);
 ensures (fracRight[this] == 0.5);
 ensures (right[this] == or);
@@ -147,6 +145,10 @@ procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, c1:int, c2:int)
 modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight;
 requires this != null;
+requires ol!=this;
+requires or!=this;
+requires ol!=parent[this];
+requires or!=parent[this];
 requires this!=parent[this];
 requires packedLeft[this];
 requires (left[this] == ol);
@@ -160,8 +162,6 @@ requires (fracCount[this] == 1.0);
 requires (count[this] == c);
 requires (packedCount[this] == false);
 requires (forall y:Ref :: ( ( (y!=this) && (parent[this]!=y) ) ==> (packedCount[y] ) ) );
-requires packedCount[ol];
-requires packedCount[or];
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
 ensures (count[this] == c1 + c2 + 1 );  
@@ -228,9 +228,9 @@ call PackRight(this, or, c2);
 packedRight[this] := true;
     
 count[this] := newc; 
+//TODO: We don't need to do this anymore.
 //We update the corresponding paramCount for that field
 //whenever we update a field.
-count[this] := newc;  
 //Here it is difficult because this is the phase where we need to use what we know and 
 //instantiate the exists with the right values.
 //Here we need to use the fraction to right(this).
@@ -244,6 +244,8 @@ modifies count, packedCount, packedLeft, packedRight, packedParent,
 requires (this != null);
 requires ol!=opp;
 requires or!=opp;
+requires ol!=this;
+requires or!=this;
 requires packedParent[this] == false;
 requires (forall y:Ref :: ( (y!=this) ==> packedParent[y]));
 requires (forall y:Ref ::  ((y!=this) ==> packedCount[y]));
@@ -277,8 +279,6 @@ requires (opp == null) ==> ((fracCount[this] == 0.5) &&
 requires packedLeft[this];
 requires (left[this] == ol);
 requires (count[left[this]] == lc);
-requires packedCount[ol];
-requires packedCount[or];
 requires packedRight[this];
 requires (right[this] == or);
 requires (count[right[this]] == rc);
