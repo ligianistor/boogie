@@ -174,9 +174,8 @@ ensures (forall y:Ref :: (packedLeft[y] == old(packedLeft[y]) ) );
 ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
 ensures (forall y:Ref :: (packedParent[y] == old(packedParent[y]) ) );
 ensures (forall y:Ref :: ((y!=this) ==> (count[y] == old(count[y]) ) ) );
-ensures (forall y:Ref :: ( (parent[this]!=y)  ==> (packedCount[y] ) ) );
+ensures (forall y:Ref :: ( (this!=y)  ==> (packedCount[y] == old(packedCount[y])) ) );
 ensures (forall y:Ref :: ( (y!=this)  ==> (count[y] == old(count[y])) ) );
-ensures packedCount[parent[this]] == old(packedCount[parent[this]]);
 {
 var newc : int;
 //All variable declarations must be made before the code starts.
