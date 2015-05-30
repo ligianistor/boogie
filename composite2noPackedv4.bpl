@@ -166,14 +166,12 @@ requires (forall y:Ref :: ( ( (y!=this) && (parent[this]!=y) ) ==> (packedCount[
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
 ensures (count[this] == c1 + c2 + 1 );  
+// Only write here about the global variables in the modifies clause.
 ensures (forall y:Ref :: (fracRight[y] == old(fracRight[y]) ) );
-ensures (forall y:Ref :: (right[y] == old(right[y]) ) );
-ensures (forall y:Ref :: (left[y] == old(left[y]) ) );
 ensures (forall y:Ref :: (fracLeft[y] == old(fracLeft[y]) ) );
 ensures (forall y:Ref :: (packedRight[y] == old(packedRight[y]) ) );
 ensures (forall y:Ref :: (packedLeft[y] == old(packedLeft[y]) ) );
 ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
-ensures (forall y:Ref :: (packedParent[y] == old(packedParent[y]) ) );
 ensures (forall y:Ref :: ((y!=this) ==> (count[y] == old(count[y]) ) ) );
 ensures (forall y:Ref :: ( (this!=y)  ==> (packedCount[y] == old(packedCount[y])) ) );
 {
@@ -249,6 +247,7 @@ requires packedParent[this] == false;
 requires (forall y:Ref :: ( (y!=this) ==> packedParent[y]));
 requires (forall y:Ref ::  ((y!=this) ==> packedCount[y]));
 requires (forall y:Ref ::  packedLeft[y] ) ;
+requires (forall y:Ref ::  packedRight[y] ) ;
 requires (packedCount[this] == false);
 // These foralls should be put in by the programmer,
 // because it is implicit only that everything that is not unpacked is packed.
@@ -318,16 +317,6 @@ var oppp : Ref;
 // want the new variable to be equal to.
 // var olpar : Ref;
 
-// These assumes say that there are no cycles in the tree.
-// Maybe can state it as an axiom.
-// Maybe the user needs to give a hint that
-// there are no cycles.
-
-assume left[opp] != parent[opp];
-assume left[opp] != this;
-assume left[opp] != opp;
-
-//assume left[opp] != or;
 if (parent[this] != null) {
 	// Split the fraction k of opp in parent.
 	// fracLocalParent represents what is left over after the splitting
@@ -342,12 +331,20 @@ if (parent[this] != null) {
 	call UnpackCount(opp, count[opp], oll, this, llc, lcc);
 	packedCount[opp] := false;
 
-	assume (this == right[opp]);
+	assert ((this == right[parent[this]]) || (this == left[parent[this]]) );
+	if (this == right[parent[this]]) {
+	// These assumes say that there are no cycles in the tree.
+	// Maybe can state it as an axiom.
+	// Maybe the user needs to give a hint that
+	// there are no cycles.
+
+	assume left[opp] != parent[opp];
+	assume left[opp] != opp;
+
+	//assume left[opp] != or;
 
 	//fracRight[opp] := 2.0 * fracRight[opp];
 	
-	// This should be in a forall in the pre-condition.
-	packedRight[opp] := true;
 	call UnpackRight(opp, this, lcc);
 	packedRight[opp] := false;
 
@@ -363,8 +360,32 @@ if (parent[this] != null) {
 	
 	call PackRight(opp, this, lc + rc + 1);
 	packedRight[opp] := true;
-  
 	call updateCountRec(opp, parent[opp], count[opp], left[opp], this, count[left[opp]], lc + rc + 1);
+	}
+	else if (this == left[parent[this]]) { 
+	assume right[opp] != parent[opp];
+	assume right[opp] != opp;
+	//fracLeft[opp] := 2.0 * fracLeft[opp];
+	
+	call UnpackLeft(opp, this, lcc);
+	packedLeft[opp] := false;
+
+	fracCount[this] := fracCount[this] * 2.0;
+  
+	call updateCount(this, lcc, ol, or, lc, rc);
+ 
+  	fracLocalCount[this] := fracCount[this] / 2.0;
+  	fracCount[this] := fracCount[this] / 2.0;
+
+	call PackParent(this, lc + rc + 1);
+	packedParent[this] := true;
+	
+	call PackLeft(opp, this, lc + rc + 1);
+	packedLeft[opp] := true;
+	call updateCountRec(opp, parent[opp], count[opp], this, right[opp], count[left[opp]], lc + rc + 1);
+}
+//TODO I don't know if I need to add a final else here 
+//that has in its body something like "assume false".
 }
 else { 
 	fracCount[this] := fracCount[this] * 2.0;
