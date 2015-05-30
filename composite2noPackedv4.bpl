@@ -145,8 +145,6 @@ procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, c1:int, c2:int)
 modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight;
 requires this != null;
-requires or!=this;
-requires this!=parent[this];
 requires packedLeft[this];
 requires (left[this] == ol);
 requires (count[left[this]] == c1);
@@ -235,7 +233,6 @@ procedure updateCountRec(this: Ref, opp: Ref, lcc: int, ol: Ref, or: Ref, lc: in
 modifies count, packedCount, packedLeft, packedRight, packedParent,
 	fracCount, fracParent, fracLeft, fracRight;
 requires (this != null);
-requires or!=this;
 requires packedParent[this] == false;
 requires (forall y:Ref :: ( (y!=this) ==> packedParent[y]));
 requires (forall y:Ref ::  ((y!=this) ==> packedCount[y]));
