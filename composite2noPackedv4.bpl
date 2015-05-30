@@ -37,7 +37,7 @@ procedure PackLeft(this:Ref, ol:Ref, lc:int);
 requires (packedLeft[this] == false);
 requires (count[left[this]] == lc);
 requires (left[this] == ol);
-requires (left[this] != null) ==> (fracCount[ol] == 0.5);
+requires (left[this] != null) ==> ((fracCount[ol] == 0.5) && (ol!=this) && (ol!=parent[this]));
 requires (left[this] == null) ==> (lc == 0);
 
 procedure UnpackLeft(this:Ref, ol:Ref, lc:int);
@@ -47,14 +47,14 @@ requires (count[left[this]] == lc);
 requires (fracLeft[this] > 0.0);
 ensures (count[ol] == lc);
 ensures (left[this] == null) ==> (lc == 0);
-ensures (left[this] != null) ==> (fracCount[ol] == 0.5);
+ensures (left[this] != null) ==> ((fracCount[ol] == 0.5) && (ol!=this) && (ol!=parent[this]));
 
 procedure PackRight(this:Ref, or:Ref, rc:int);
 requires (packedRight[this] == false);
 requires (right[this] == or);
 requires (count[right[this]] == rc);
 requires (right[this] == or);
-requires (right[this] != null) ==> (fracCount[or] == 0.5);
+requires (right[this] != null) ==> ((fracCount[or] == 0.5) && (or!=this) && (or!=parent[this]));
 requires (right[this] == null) ==> (rc == 0);
 
 procedure UnpackRight(this:Ref, or:Ref, rc:int);
@@ -64,7 +64,7 @@ requires (count[right[this]] == rc);
 requires (fracRight[this] > 0.0);
 ensures (count[or] == rc);
 ensures (right[this] == null) ==> (rc == 0);
-ensures (right[this] != null) ==> (fracCount[or] == 0.5);
+ensures (right[this] != null) ==> ((fracCount[or] == 0.5) && (or!=this) && (or!=parent[this]));
 
 procedure PackCount(this:Ref, c:int, ol: Ref, or:Ref, lc:int, rc:int);
 requires (packedCount[this] == false);
@@ -145,10 +145,7 @@ procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, c1:int, c2:int)
 modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight;
 requires this != null;
-requires ol!=this;
 requires or!=this;
-requires ol!=parent[this];
-requires or!=parent[this];
 requires this!=parent[this];
 requires packedLeft[this];
 requires (left[this] == ol);
@@ -202,7 +199,7 @@ packedLeft[this] := false;
 if (left[this] != null) {
 	call UnpackCount(ol, c1, ol1, or1, lc1, rc1);
 	packedCount[ol] := false; 
-        newc := newc + count[left[this]];
+   newc := newc + count[left[this]];
 	call PackCount(ol, c1, ol1, or1, lc1, rc1);
 	packedCount[ol]:=true;
 }
@@ -213,11 +210,10 @@ call UnpackRight(this, or, c2);
 packedRight[this] := false;
     
 if (right[this] != null) {
-	//Here it is easy to come up with ol2, or2, lc2, rc2 because they can be arbitrary.
 	call UnpackCount(or, c2, ol2, or2, lc2, rc2);
 	packedCount[or] := false;
-  	newc := newc + count[right[this]]; 
-  	call PackCount(or, c2, ol2, or2, lc2, rc2);
+  newc := newc + count[right[this]]; 
+  call PackCount(or, c2, ol2, or2, lc2, rc2);
 	packedCount[or] := true;
 }
 
@@ -239,9 +235,6 @@ procedure updateCountRec(this: Ref, opp: Ref, lcc: int, ol: Ref, or: Ref, lc: in
 modifies count, packedCount, packedLeft, packedRight, packedParent,
 	fracCount, fracParent, fracLeft, fracRight;
 requires (this != null);
-requires ol!=opp;
-requires or!=opp;
-requires ol!=this;
 requires or!=this;
 requires packedParent[this] == false;
 requires (forall y:Ref :: ( (y!=this) ==> packedParent[y]));
@@ -333,16 +326,6 @@ if (parent[this] != null) {
 
 	assert ((this == right[parent[this]]) || (this == left[parent[this]]) );
 	if (this == right[parent[this]]) {
-	// These assumes say that there are no cycles in the tree.
-	// Maybe can state it as an axiom.
-	// Maybe the user needs to give a hint that
-	// there are no cycles.
-
-	assume left[opp] != parent[opp];
-	assume left[opp] != opp;
-
-	//assume left[opp] != or;
-
 	//fracRight[opp] := 2.0 * fracRight[opp];
 	
 	call UnpackRight(opp, this, lcc);
@@ -363,8 +346,6 @@ if (parent[this] != null) {
 	call updateCountRec(opp, parent[opp], count[opp], left[opp], this, count[left[opp]], lc + rc + 1);
 	}
 	else if (this == left[parent[this]]) { 
-	assume right[opp] != parent[opp];
-	assume right[opp] != opp;
 	//fracLeft[opp] := 2.0 * fracLeft[opp];
 	
 	call UnpackLeft(opp, this, lcc);
