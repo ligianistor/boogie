@@ -323,45 +323,45 @@ if (parent[this] != null) {
 
 	assert ((this == right[parent[this]]) || (this == left[parent[this]]) );
 	if (this == right[parent[this]]) {
-	//fracRight[opp] := 2.0 * fracRight[opp];
+		//fracRight[opp] := 2.0 * fracRight[opp];
 	
-	call UnpackRight(opp, this, lcc);
-	packedRight[opp] := false;
+		call UnpackRight(opp, this, lcc);
+		packedRight[opp] := false;
 
-	fracCount[this] := fracCount[this] * 2.0;
+		fracCount[this] := fracCount[this] * 2.0;
   
-	call updateCount(this, lcc, ol, or, lc, rc);
+		call updateCount(this, lcc, ol, or, lc, rc);
  
-  	fracLocalCount[this] := fracCount[this] / 2.0;
-  	fracCount[this] := fracCount[this] / 2.0;
+  		fracLocalCount[this] := fracCount[this] / 2.0;
+  		fracCount[this] := fracCount[this] / 2.0;
 
-	call PackParent(this, lc + rc + 1);
-	packedParent[this] := true;
+		call PackParent(this, lc + rc + 1);
+		packedParent[this] := true;
 	
-	call PackRight(opp, this, lc + rc + 1);
-	packedRight[opp] := true;
-	call updateCountRec(opp, parent[opp], count[opp], left[opp], this, count[left[opp]], lc + rc + 1);
+		call PackRight(opp, this, lc + rc + 1);
+		packedRight[opp] := true;
+		call updateCountRec(opp, parent[opp], count[opp], left[opp], this, count[left[opp]], lc + rc + 1);
 	}
 	else if (this == left[parent[this]]) { 
-	//fracLeft[opp] := 2.0 * fracLeft[opp];
+		//fracLeft[opp] := 2.0 * fracLeft[opp];
 	
-	call UnpackLeft(opp, this, lcc);
-	packedLeft[opp] := false;
+		call UnpackLeft(opp, this, lcc);
+		packedLeft[opp] := false;
 
-	fracCount[this] := fracCount[this] * 2.0;
+		fracCount[this] := fracCount[this] * 2.0;
   
-	call updateCount(this, lcc, ol, or, lc, rc);
+		call updateCount(this, lcc, ol, or, lc, rc);
  
-  	fracLocalCount[this] := fracCount[this] / 2.0;
-  	fracCount[this] := fracCount[this] / 2.0;
+  		fracLocalCount[this] := fracCount[this] / 2.0;
+  		fracCount[this] := fracCount[this] / 2.0;
 
-	call PackParent(this, lc + rc + 1);
-	packedParent[this] := true;
+		call PackParent(this, lc + rc + 1);
+		packedParent[this] := true;
 	
-	call PackLeft(opp, this, lc + rc + 1);
-	packedLeft[opp] := true;
-	call updateCountRec(opp, parent[opp], count[opp], this, right[opp], count[left[opp]], lc + rc + 1);
-}
+		call PackLeft(opp, this, lc + rc + 1);
+		packedLeft[opp] := true;
+		call updateCountRec(opp, parent[opp], count[opp], this, right[opp], count[left[opp]], lc + rc + 1);
+	}
 //TODO I don't know if I need to add a final else here 
 //that has in its body something like "assume false".
 }
