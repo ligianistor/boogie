@@ -93,8 +93,9 @@ ensures (left[this] == ol);
 ensures (count[left[this]] == lc);
 ensures (c == lc + rc + 1);
 
-procedure PackParent(this:Ref, c:int);
+procedure PackParent(this:Ref, op:Ref, c:int);
 requires (packedParent[this] == false);
+requires (parent[this] == op);
 requires (parent[this] != this);
 requires (fracCount[this] == 0.5);
 requires (count[this] == c);
@@ -113,9 +114,10 @@ requires  (parent[this] != null) ==>
 requires (parent[this]==null) ==> ((fracCount[this] == 0.5) && packedCount[this]);
 
 
-procedure UnpackParent(this:Ref, c:int);
+procedure UnpackParent(this:Ref, op:Ref, c:int);
 requires packedParent[this];
 requires (fracParent[this] > 0.0);
+requires (parent[this] == op);
 ensures (parent[this] != this);
 ensures packedCount[this];
 ensures (count[this] == c);
@@ -318,7 +320,7 @@ if (parent[this] != null) {
 	fracLocalParent[opp] := fracParent[opp] / 2.0;
 	fracParent[opp] := fracParent[opp] / 2.0;
 
-	call UnpackParent(opp, count[opp]);
+	call UnpackParent(opp, parent[opp], count[opp]);
 	packedParent[opp] := false;
  
 	// Instantiate orr==this and rrc==lcc;
@@ -339,7 +341,7 @@ if (parent[this] != null) {
   		fracLocalCount[this] := fracCount[this] / 2.0;
   		fracCount[this] := fracCount[this] / 2.0;
 
-		call PackParent(this, lc + rc + 1);
+		call PackParent(this, parent[this], lc + rc + 1);
 		packedParent[this] := true;
 	
 		call PackRight(opp, this, parent[opp], lc + rc + 1);
@@ -359,7 +361,7 @@ if (parent[this] != null) {
   		fracLocalCount[this] := fracCount[this] / 2.0;
   		fracCount[this] := fracCount[this] / 2.0;
 
-		call PackParent(this, lc + rc + 1);
+		call PackParent(this, parent[this], lc + rc + 1);
 		packedParent[this] := true;
 	
 		call PackLeft(opp, this, parent[opp], lc + rc + 1);
@@ -374,7 +376,7 @@ else {
   	call updateCount(this, lcc, ol, or, lc, rc);
   	fracLocalCount[this] := fracCount[this] / 2.0;
   	fracCount[this] := fracCount[this] / 2.0;
-	call PackParent(this, lc + rc + 1);
+	call PackParent(this, parent[this], lc + rc + 1);
 	packedParent[this] := true; 
 }  
 }
@@ -413,7 +415,7 @@ var rc : int;
 
 if (parent[l] == null) {
 	parent[l] := this;
-	call UnpackParent(this, lcc);
+	call UnpackParent(this, parent[this], lcc);
 	packedParent[this] := false;
 	call UnpackCount(this, lcc, null, or, 0, rc);
 	packedCount[this] := false;
@@ -427,7 +429,7 @@ if (parent[l] == null) {
 	packedLeft[this] := true;
 
 	call updateCountRec(this, parent[this], lcc, l, right[this], lc, rc);
-	call PackParent(l, lc);
+	call PackParent(l, parent[l], lc);
 }
    
 }
