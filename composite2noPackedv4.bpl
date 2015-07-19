@@ -38,7 +38,9 @@ requires (packedLeft[this] == false);
 requires (count[left[this]] == lc);
 requires (left[this] == ol);
 requires (parent[this] == op);
-requires (left[this] != null) ==> ((fracCount[ol] == 0.5) && (ol!=this) && (ol!=op));
+requires (left[this] != null) ==> (fracCount[ol] == 0.5);
+requires (left[this] != null) ==> (ol!=this);
+requires (left[this] != null) ==> (ol!=op);
 requires (left[this] == null) ==> (lc == 0);
 
 procedure UnpackLeft(this:Ref, ol:Ref, lc:int, op:Ref);
@@ -49,7 +51,9 @@ requires (count[left[this]] == lc);
 requires (fracLeft[this] > 0.0);
 ensures (count[ol] == lc);
 ensures (left[this] == null) ==> (lc == 0);
-ensures (left[this] != null) ==> ((fracCount[ol] == 0.5) && (ol!=this) && (ol!=op));
+ensures (left[this] != null) ==> (fracCount[ol] == 0.5);
+ensures (left[this] != null) ==> (ol!=this);
+ensures (left[this] != null) ==> (ol!=op);
 
 procedure PackRight(this:Ref, or:Ref, rc:int, op:Ref);
 requires (packedRight[this] == false);
@@ -57,7 +61,9 @@ requires (right[this] == or);
 requires (parent[this] == op);
 requires (count[right[this]] == rc);
 requires (right[this] == or);
-requires (right[this] != null) ==> ((fracCount[or] == 0.5) && (or!=this) && (or!=op));
+requires (right[this] != null) ==> (fracCount[or] == 0.5);
+requires (right[this] != null) ==> (or!=this);
+requires (right[this] != null) ==> (or!=op);
 requires (right[this] == null) ==> (rc == 0);
 
 procedure UnpackRight(this:Ref, or:Ref, rc:int, op:Ref);
@@ -68,7 +74,9 @@ requires (count[right[this]] == rc);
 requires (fracRight[this] > 0.0);
 ensures (count[or] == rc);
 ensures (right[this] == null) ==> (rc == 0);
-ensures (right[this] != null) ==> ((fracCount[or] == 0.5) && (or!=this) && (or!=op));
+ensures (right[this] != null) ==> (fracCount[or] == 0.5);
+ensures (right[this] != null) ==> (or!=this);
+ensures (right[this] != null) ==> (or!=op);
 
 procedure PackCount(this:Ref, c:int, ol: Ref, or:Ref, lc:int, rc:int);
 requires (packedCount[this] == false);
@@ -111,7 +119,8 @@ requires  (parent[this] != null) ==>
 		(right[parent[this]] == this) && 
 		(count[right[parent[this]]] == c)
 	  );
-requires (parent[this]==null) ==> ((fracCount[this] == 0.5) && packedCount[this]);
+requires (parent[this]==null) ==> (fracCount[this] == 0.5);
+requires (parent[this]==null) ==> packedCount[this];
 
 
 procedure UnpackParent(this:Ref, op:Ref, c:int);
@@ -137,7 +146,8 @@ ensures (parent[this] != null) ==>
 	)
            ) 
 	   );
-ensures (parent[this]==null) ==> ((fracCount[this] == 0.5) && (count[this] == c));
+ensures (parent[this]==null) ==> (fracCount[this] == 0.5);
+ensures (parent[this]==null) ==> (count[this] == c);
 
 //---start of methods
 
@@ -399,13 +409,12 @@ var lcc : int;
 // Existentially quantified variables for UnpackCount(this,lcc)
 // The variable rc is also used in the call to updateCountRec()
 var or : Ref;
-var rc : int;
 
 if (parent[l] == null) {
 	parent[l] := this;
 	call UnpackParent(this, parent[this], lcc);
 	packedParent[this] := false;
-	call UnpackCount(this, lcc, null, or, 0, rc);
+	call UnpackCount(this, lcc, null, or, 0, count[right[this]]);
 	packedCount[this] := false;
   
 	fracLeft[this] := fracLeft[this] * 2.0;
@@ -414,12 +423,18 @@ if (parent[l] == null) {
 
   	left[this] := l;
 	count[left[this]] := count[left[l]];
-  	
+  	fracCount[left[this]] := 0.5;
 	call PackLeft(this, l, count[left[l]], parent[this]);
 	packedLeft[this] := true;
+  
+//TODO need to fix the fractions and their values
+	fracLeft[this] := 0.5;
 
-	call updateCountRec(this, parent[this], lcc, l, right[this], count[left[l]], rc);
 	call PackParent(l, parent[l], count[left[l]]);
+  	packedParent[l] := true;
+
+	call updateCountRec(this, parent[this], lcc, l, right[this], count[left[l]], count[right[this]]);
+
 }
    
 }
