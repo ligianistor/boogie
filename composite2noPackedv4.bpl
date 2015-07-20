@@ -395,10 +395,10 @@ requires this!=left[this];
 requires packedParent[this];
 requires fracParent[this] > 0.0;
 requires fracParent[l] > 0.0;
-requires (packedParent[l] == false);
+requires packedParent[l];
 requires (forall y:Ref :: packedLeft[y]);
 requires (forall y:Ref :: packedRight[y]);
-requires (forall y:Ref :: ((l!=y) ==> packedParent[y]));
+requires (forall y:Ref :: packedParent[y]);
 requires (forall y:Ref :: packedCount[y]);
 requires (forall y:Ref :: ( fracParent[y] > 0.0 ));
 ensures packedParent[this];
@@ -409,6 +409,8 @@ var lcc : int;
 // Existentially quantified variables for UnpackCount(this,lcc)
 // The variable rc is also used in the call to updateCountRec()
 var or : Ref;
+call UnpackParent(l, parent[l], count[l]);
+packedParent[l] := false;
 
 if (parent[l] == null) {
 	parent[l] := this;
@@ -422,18 +424,16 @@ if (parent[l] == null) {
 	packedLeft[this] := false;
 
   	left[this] := l;
-	count[left[this]] := count[left[l]];
-  	fracCount[left[this]] := 0.5;
-	call PackLeft(this, l, count[left[l]], parent[this]);
+	count[left[this]] := count[l];
+	call PackLeft(this, l, count[l], parent[this]);
 	packedLeft[this] := true;
   
-//TODO need to fix the fractions and their values
-	fracLeft[this] := 0.5;
+	fracLeft[this] := fracLeft[this] / 2.0;
 
-	call PackParent(l, parent[l], count[left[l]]);
+	call PackParent(l, parent[l], count[l]);
   	packedParent[l] := true;
 
-	call updateCountRec(this, parent[this], lcc, l, right[this], count[left[l]], count[right[this]]);
+	call updateCountRec(this, parent[this], lcc, l, right[this], count[l], count[right[this]]);
 
 }
    
