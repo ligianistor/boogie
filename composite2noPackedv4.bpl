@@ -290,7 +290,7 @@ requires (count[this] == lcc);
 
 // TODO not sure why we need this
 // The programmer could put this as a pre-condition.
-requires (forall y:Ref :: ( fracParent[y] > 0.0 ));
+requires (forall y:Ref :: ( fracParent[y] > 0.0 && (packedParent[y]==false || packedParent[y])));
 requires (forall y:Ref :: ((y!=this) ==> packedParent[y]));
 requires (forall y:Ref :: ((y!=this) ==> packedCount[y]));
 requires (forall y:Ref ::  packedLeft[y] ) ;
@@ -299,7 +299,7 @@ requires (forall y:Ref ::  packedRight[y] ) ;
 ensures packedParent[this];  
 ensures (fracParent[this] > 0.0);  
 ensures (forall y:Ref :: packedParent[y] );
-ensures (forall y:Ref :: fracParent[y] > 0.0);
+ensures (forall y:Ref :: fracParent[y] > 0.0 && (packedParent[y]==false || packedParent[y]));
 {
 var fracLocalCount : [Ref]real;
 var fracLocalRight : [Ref]real;
