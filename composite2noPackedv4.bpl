@@ -33,7 +33,7 @@ var fracParent : [Ref] real;
 //var paramRightOr : [Ref]Ref; paramRightOr[this] == right[this]
 //var paramRightRc : [Ref]int; paramRightRc[this] == count[right[this]]
 
-procedure PackLeft(this:Ref, ol:Ref, lc:int, op:Ref);
+procedure PackLeft(ol:Ref, lc:int, op:Ref, this:Ref);
 requires (packedLeft[this] == false);
 requires (count[left[this]] == lc);
 requires (left[this] == ol);
@@ -43,7 +43,7 @@ requires (left[this] != null) ==> (ol!=this);
 requires (left[this] != null) ==> (ol!=op);
 requires (left[this] == null) ==> (lc == 0);
 
-procedure UnpackLeft(this:Ref, ol:Ref, lc:int, op:Ref);
+procedure UnpackLeft(ol:Ref, lc:int, op:Ref, this:Ref);
 requires packedLeft[this];
 requires (left[this] == ol);
 requires (parent[this] == op);
@@ -55,7 +55,7 @@ ensures (left[this] != null) ==> (fracCount[ol] == 0.5);
 ensures (left[this] != null) ==> (ol!=this);
 ensures (left[this] != null) ==> (ol!=op);
 
-procedure PackRight(this:Ref, or:Ref, rc:int, op:Ref);
+procedure PackRight(or:Ref, rc:int, op:Ref, this:Ref);
 requires (packedRight[this] == false);
 requires (right[this] == or);
 requires (parent[this] == op);
@@ -66,7 +66,7 @@ requires (right[this] != null) ==> (or!=this);
 requires (right[this] != null) ==> (or!=op);
 requires (right[this] == null) ==> (rc == 0);
 
-procedure UnpackRight(this:Ref, or:Ref, rc:int, op:Ref);
+procedure UnpackRight(or:Ref, rc:int, op:Ref, this:Ref);
 requires packedRight[this];
 requires (right[this] == or);
 requires (parent[this] == op);
@@ -78,7 +78,7 @@ ensures (right[this] != null) ==> (fracCount[or] == 0.5);
 ensures (right[this] != null) ==> (or!=this);
 ensures (right[this] != null) ==> (or!=op);
 
-procedure PackCount(this:Ref, c:int, ol: Ref, or:Ref, lc:int, rc:int);
+procedure PackCount(c:int, ol: Ref, or:Ref, lc:int, rc:int, this:Ref);
 requires (packedCount[this] == false);
 requires (count[this] == c);
 requires (fracLeft[this] == 0.5);
@@ -89,7 +89,7 @@ requires (left[this] == ol);
 requires (count[left[this]] == lc);
 requires (c == lc + rc + 1);
 
-procedure UnpackCount(this:Ref, c:int, ol: Ref, or:Ref, lc:int, rc:int);
+procedure UnpackCount(c:int, ol: Ref, or:Ref, lc:int, rc:int, this:Ref);
 requires packedCount[this];
 requires (count[this] == c);
 requires (fracCount[this] > 0.0);
@@ -101,7 +101,7 @@ ensures (left[this] == ol);
 ensures (count[left[this]] == lc);
 ensures (c == lc + rc + 1);
 
-procedure PackParent(this:Ref, op:Ref, c:int);
+procedure PackParent(op:Ref, c:int, this:Ref);
 requires (packedParent[this] == false);
 requires (parent[this] == op);
 requires (parent[this] != this);
@@ -123,7 +123,7 @@ requires (parent[this]==null) ==> (fracCount[this] == 0.5);
 requires (parent[this]==null) ==> packedCount[this];
 
 
-procedure UnpackParent(this:Ref, op:Ref, c:int);
+procedure UnpackParent(op:Ref, c:int, this:Ref);
 requires packedParent[this];
 requires (fracParent[this] > 0.0);
 requires (parent[this] == op);
@@ -214,31 +214,31 @@ newc := 1;
 //because we use left[this] in the condition of the if,
 //that is we access the field left of this.
 //For this we need the field to be accessible, unpacked.
-call UnpackLeft(this, ol, c1, op);
+call UnpackLeft(ol, c1, op, this);
 packedLeft[this] := false;
 
 if (left[this] != null) {
-	call UnpackCount(ol, c1, ol1, or1, lc1, rc1);
+	call UnpackCount(c1, ol1, or1, lc1, rc1, ol);
 	packedCount[ol] := false; 
    	newc := newc + count[left[this]];
-	call PackCount(ol, c1, ol1, or1, lc1, rc1);
+	call PackCount(c1, ol1, or1, lc1, rc1, ol);
 	packedCount[ol]:=true;
 }
-call PackLeft(this, ol, c1, op);
+call PackLeft(ol, c1, op, this);
 packedLeft[this] := true;
    
-call UnpackRight(this, or, c2, op);
+call UnpackRight(or, c2, op, this);
 packedRight[this] := false;
     
 if (right[this] != null) {
-	call UnpackCount(or, c2, ol2, or2, lc2, rc2);
+	call UnpackCount(c2, ol2, or2, lc2, rc2, or);
 	packedCount[or] := false;
   	newc := newc + count[right[this]]; 
-  	call PackCount(or, c2, ol2, or2, lc2, rc2);
+  	call PackCount(c2, ol2, or2, lc2, rc2, or);
 	packedCount[or] := true;
 }
 
-call PackRight(this, or, c2, op);
+call PackRight(or, c2, op, this);
 packedRight[this] := true;
     
 count[this] := newc; 
@@ -248,7 +248,7 @@ count[this] := newc;
 //Here it is difficult because this is the phase where we need to use what we know and 
 //instantiate the exists with the right values.
 //Here we need to use the fraction to right(this).
-call PackCount(this, newc, ol, or, c1, c2);
+call PackCount(newc, ol, or, c1, c2, this);
 packedCount[this]:=true; 
 }
 
@@ -322,18 +322,18 @@ if (parent[this] != null) {
 	fracLocalParent[opp] := fracParent[opp] / 2.0;
 	fracParent[opp] := fracParent[opp] / 2.0;
 
-	call UnpackParent(opp, parent[opp], count[opp]);
+	call UnpackParent(parent[opp], count[opp], opp);
 	packedParent[opp] := false;
  
 	// Instantiate orr==this and rrc==lcc;
-	call UnpackCount(opp, count[opp], oll, this, llc, lcc);
+	call UnpackCount(count[opp], oll, this, llc, lcc, opp);
 	packedCount[opp] := false;
 
 	assert ((this == right[parent[this]]) || (this == left[parent[this]]) );
 	if (this == right[parent[this]]) {
 		//fracRight[opp] := 2.0 * fracRight[opp];
 	
-		call UnpackRight(opp, this, lcc, parent[opp]);
+		call UnpackRight(this, lcc, parent[opp], opp);
 		packedRight[opp] := false;
 
 		fracCount[this] := fracCount[this] * 2.0;
@@ -343,17 +343,17 @@ if (parent[this] != null) {
   		fracLocalCount[this] := fracCount[this] / 2.0;
   		fracCount[this] := fracCount[this] / 2.0;
 
-		call PackParent(this, parent[this], lc + rc + 1);
+		call PackParent(parent[this], lc + rc + 1, this);
 		packedParent[this] := true;
 	
-		call PackRight(opp, this, lc + rc + 1, parent[opp]);
+		call PackRight(this, lc + rc + 1, parent[opp], opp);
 		packedRight[opp] := true;
 		call updateCountRec(opp, parent[opp], count[opp], left[opp], this, count[left[opp]], lc + rc + 1);
 	}
 	else if (this == left[parent[this]]) { 
 		//fracLeft[opp] := 2.0 * fracLeft[opp];
 	
-		call UnpackLeft(opp, this, lcc, parent[opp]);
+		call UnpackLeft(this, lcc, parent[opp], opp);
 		packedLeft[opp] := false;
 
 		fracCount[this] := fracCount[this] * 2.0;
@@ -363,10 +363,10 @@ if (parent[this] != null) {
   		fracLocalCount[this] := fracCount[this] / 2.0;
   		fracCount[this] := fracCount[this] / 2.0;
 
-		call PackParent(this, parent[this], lc + rc + 1);
+		call PackParent(parent[this], lc + rc + 1, this);
 		packedParent[this] := true;
 	
-		call PackLeft(opp, this, lc + rc + 1, parent[opp]);
+		call PackLeft(this, lc + rc + 1, parent[opp], opp);
 		packedLeft[opp] := true;
 		call updateCountRec(opp, parent[opp], count[opp], this, right[opp], count[left[opp]], lc + rc + 1);
 	}
@@ -378,7 +378,7 @@ else {
   	call updateCount(this, lcc, ol, or, opp, lc, rc, count[opp]);
   	fracLocalCount[this] := fracCount[this] / 2.0;
   	fracCount[this] := fracCount[this] / 2.0;
-	call PackParent(this, parent[this], lc + rc + 1);
+	call PackParent(parent[this], lc + rc + 1, this);
 	packedParent[this] := true; 
 }  
 }
@@ -409,28 +409,28 @@ var lcc : int;
 // Existentially quantified variables for UnpackCount(this,lcc)
 // The variable rc is also used in the call to updateCountRec()
 var or : Ref;
-call UnpackParent(l, parent[l], count[l]);
+call UnpackParent(parent[l], count[l], l);
 packedParent[l] := false;
 
 if (parent[l] == null) {
 	parent[l] := this;
-	call UnpackParent(this, parent[this], lcc);
+	call UnpackParent(parent[this], lcc, this);
 	packedParent[this] := false;
-	call UnpackCount(this, lcc, null, or, 0, count[right[this]]);
+	call UnpackCount(lcc, null, or, 0, count[right[this]], this);
 	packedCount[this] := false;
   
 	fracLeft[this] := fracLeft[this] * 2.0;
-  	call UnpackLeft(this, null, 0, parent[this]);
+  	call UnpackLeft(null, 0, parent[this], this);
 	packedLeft[this] := false;
 
   	left[this] := l;
 	count[left[this]] := count[l];
-	call PackLeft(this, l, count[l], parent[this]);
+	call PackLeft(l, count[l], parent[this], this);
 	packedLeft[this] := true;
   
 	fracLeft[this] := fracLeft[this] / 2.0;
 
-	call PackParent(l, parent[l], count[l]);
+	call PackParent(parent[l], count[l], l);
   	packedParent[l] := true;
 
 	call updateCountRec(this, parent[this], lcc, l, right[this], count[l], count[right[this]]);
