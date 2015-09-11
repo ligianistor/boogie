@@ -123,11 +123,13 @@ class StateMultiplyThree implements Statelike {
     private int count = 0;
 
     @Override
-//We cannot know statically the value of count, so we can't know for sure which way the "if"" will go.
+//We cannot know statically the value of count, so we can't know for 
+//sure which way the "if"" will go.
 //In this case the assertion at the end will be less strong.
 //Predicate CountGt1() is the negation of CountLe1().
 //Another example can be without "if"
-	-> this@1 StateMultipleOf3(num) &&  ((CountGt1() -> context@1 state2()) || (CountLe1() -> context@1 state3()))
+	-> this@1 StateMultipleOf3(num) &&  
+	((CountGt1() -> context@1 state2()) || (CountLe1() -> context@1 state3()))
     public void computeResult(final StateContext context, final int num) {
         /* Change state after StateMultiplyThree's computeResult() gets invoked twice */
         if(++count > 1) {
