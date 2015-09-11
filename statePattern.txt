@@ -69,38 +69,89 @@ public class DemoOfClientState {
 ------------------------------------------------------------------
 ********************************
 
+class IntCell {
+
+predicate HigherThanZero() = value->v && v>0
+predicate MultipleOf2(int n) = value->v && (v == n * 2)
+predicate MultipleOf3(int n) = value->v && (v == n * 3)
+
+int value;
+IntCell(int x) {
+	value  = x;
+}
+
+void setValue(int x) {
+	value = x;
+}
+
+int getValue() {
+	return value;
+}
+
+}
+
+
 interface Statelike {
-    void writeNumber(StateContext context, int num); 
+	final static IntCell cell =  new IntCell(1);    
+	void computeResult(StateContext context, int num); 
+	int getValueIntCell();
 }
 
 class StateMultiplyTwo implements Statelike {
 
+	predicate StateMultipleOf2(int n) = cell -> c && c@1 MultipleOf2(n)
+
     @Override
-    public void writeNumber(final StateContext context, final int num) {
-        System.out.println(num*2);
+	-> this@1 StateMultipleOf2(num) && context@1 state3()
+    public void computeResult(final StateContext context, final int num) {
         context.setState(new StateMultiplyThree());
+	cell.setValue(num*2);
     }
+    
+    public int getValueIntCell() {
+	return cell.getValue();
+}
 
 }
 
 class StateMultiplyThree implements Statelike {
     /** Counter local to this state */
+	predicate StateMultipleOf3(int n) = cell ->c && c@1 MultipleOf3(n)
+	predicate CountGt1() = count > 1
+	predicate CountLe1() = count <= 1
+
     private int count = 0;
 
     @Override
-    public void writeNumber(final StateContext context, final int num) {
-        System.out.println(num*3);
-        /* Change state after StateMultiplyThree's writeNumber() gets invoked twice */
+//We cannot know statically the value of count, so we can't know for sure which way the "if"" will go.
+//In this case the assertion at the end will be less strong.
+//Predicate CountGt1() is the negation of CountLe1().
+//Another example can be without "if"
+	-> this@1 StateMultipleOf3(num) &&  ((CountGt1() -> context@1 state2()) || (CountLe1() -> context@1 state3()))
+    public void computeResult(final StateContext context, final int num) {
+        /* Change state after StateMultiplyThree's computeResult() gets invoked twice */
         if(++count > 1) {
             context.setState(new StateMultiplyTwo());
         }
+	cell.setValue(num*3);
     }
+
+    public int getValueIntCell() {
+	return cell.getValue();
+}
     
 }
 
 --------------
 class StateContext {
     private Statelike myState;
+
+predicate state2() = myState isInstanceOf StateMultiplyTwo
+predicate state3() = myState isInstanceOf StateMultiplyThree
+predicate stateContextMultiple2(int num) = myState@1 StateMultipleOf2(num)
+predicate stateContextMultiple3(int num) = myState@1 StateMultipleOf3(num)
+
+	-> state2()
     StateContext() {
         setState(new StateMultiplyTwo());
     }
@@ -114,21 +165,37 @@ class StateContext {
         myState = newState;
     }
 
-    public void writeNumber(final int num) {
-        myState.writeNumber(this, num);
+-> (this@1 state2() -> this@1 stateContextMultiple2(num))
+&&
+(this@1 state3() -> this@1 stateContextMultiple3(num))
+
+    public void computeResult(final int num) {
+        myState.computeResult(this, num);
     }
 }
 ---------------------
 public class DemoOfClientState {
     public static void main(String[] args) {
         final StateContext sc = new StateContext();
+{sc@1 state2()}
+	int result = 0;
 
-        sc.writeNumber(1);
-        sc.writeNumber(2);
-        sc.writeNumber(3);
-        sc.writeNumber(4);
-        sc.writeNumber(5);
-        sc.writeNumber(6);
-        sc.writeNumber(7);
+        sc.computeResult(1);
+	result = result + sc.getIntCellStatelike();
+        sc.computeResult(2);
+	result = result + sc.getIntCellStatelike();
+        sc.computeResult(3);
+	result = result + sc.getIntCellStatelike();
+        sc.computeResult(4);
+	result = result + sc.getIntCellStatelike();
+        sc.computeResult(5);
+	result = result + sc.getIntCellStatelike();
+        sc.computeResult(6);
+	result = result + sc.getIntCellStatelike();
+        sc.computeResult(7);
+	result = result + sc.getIntCellStatelike();
+	//assert result == 72
     }
 }
+-------------
+
