@@ -16,14 +16,18 @@ procedure ConstructDoubleCount(val1: int, dbl1: int, this: Ref);
 	ensures (val[this] == val1) && 
 		(dbl[this] == dbl1);
 
-procedure PackOK(this:Ref);
-	requires (packedOK[this] == false) && 
+procedure PackOK(v:int, d:int, this:Ref);
+	requires (val[this] == v) &&
+		(dbl[this] == d) &&
+		(packedOK[this] == false) && 
 		(dbl[this]==val[this]*2);
 
-procedure UnpackOK(this:Ref);
+procedure UnpackOK(v:int, d:int, this:Ref);
 	requires packedOK[this] &&
 		(fracOK[this] > 0.0);
-	ensures (dbl[this]==val[this]*2);
+	ensures (val[this] == v) &&
+		(dbl[this] == d) &&
+		(dbl[this]==val[this]*2);
 
 procedure increment(this: Ref)
 	modifies val, dbl, packedOK;
@@ -34,10 +38,10 @@ procedure increment(this: Ref)
 		(fracOK[this] > 0.0);
 	ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
 {
-	call UnpackOK(this);
+	call UnpackOK(val[this], dbl[this], this);
 	packedOK[this] := false;
 	val[this] := val[this]+1;
 	dbl[this] := dbl[this]+2;
-	call PackOK(this);
+	call PackOK(val[this], dbl[this], this);
 	packedOK[this] := true;
 }

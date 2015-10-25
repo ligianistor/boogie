@@ -11,19 +11,23 @@ const null: Ref;
 var val: [Ref]int;
 var dbl: [Ref]int;
 
+
 procedure ConstructDoubleCount(val1: int, dbl1: int, this: Ref);
 	ensures (val[this] == val1) && 
 		(dbl[this] == dbl1);
 
-procedure PackOK(this:Ref);
-	requires (packedOK[this] == false) && 
+procedure PackOK(v:int, d:int, this:Ref);
+	requires (val[this] == v) &&
+		(dbl[this] == d) &&
+		(packedOK[this] == false) && 
 		(dbl[this]==val[this]*2);
 
-procedure UnpackOK(this:Ref);
+procedure UnpackOK(v:int, d:int, this:Ref);
 	requires packedOK[this] &&
 		(fracOK[this] > 0.0);
-	ensures (dbl[this]==val[this]*2);
-
+	ensures (val[this] == v) &&
+		(dbl[this] == d) &&
+		(dbl[this]==val[this]*2);
 
 procedure increment(this: Ref)
 	modifies val, dbl, packedOK;
@@ -34,18 +38,18 @@ procedure increment(this: Ref)
 		(fracOK[this] > 0.0);
 	ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
 {
-	call UnpackOK(this);
+	call UnpackOK(val[this], dbl[this], this);
 	packedOK[this] := false;
 	val[this] := val[this]+1;
 	dbl[this] := dbl[this]+2;
-	call PackOK(this);
+	call PackOK(val[this], dbl[this], this);
 	packedOK[this] := true;
 }
 //----------------------------------
 //class Share
 
-var packedShareCount: PackedType;
-var fracShareCount: FractionType;
+var packedShareCount: [Ref] bool;
+var fracShareCount: [Ref] real;
 
 var dc: [Ref]Ref;
 
@@ -58,15 +62,17 @@ var dc: [Ref]Ref;
 procedure ConstructShare(dc1:Ref, this:Ref);
 	ensures (dc[this] == dc1);
 
-procedure PackShareCount(this:Ref);
+procedure PackShareCount(d:Ref, this:Ref);
 	requires (packedShareCount[this] == false) &&
-		(fracOK[dc[this]] > 0.0) ;
+		(dc[this] == d) &&
+		(fracOK[d] > 0.0) ;
 
 //The Pack and Unpack for a predicate must have the same lower bound for 
 //frac..[same object].
-procedure UnpackShareCount(this:Ref);
+procedure UnpackShareCount(d:Ref, this:Ref);
 	requires packedShareCount[this];
-	ensures (fracOK[dc[this]] > 0.0);
+	ensures (dc[this] == d) &&
+		(fracOK[dc[this]] > 0.0);
 
 procedure touch(this: Ref)
 	modifies val, dbl, packedShareCount, packedOK, fracOK;
@@ -79,14 +85,14 @@ procedure touch(this: Ref)
   	ensures (forall x:Ref :: (packedOK[x] == old(packedOK[x])));
   	ensures (forall x:Ref :: (packedShareCount[x] == old(packedShareCount[x])));
 {
-	call UnpackShareCount(this);
+	call UnpackShareCount(dc[this], this);
 // We only need to call the unpack here because we want to get to the predicate OK,
 // not because we are modifying dc[this] or because we are calling a method on it.
 	packedShareCount[this]:=false;
 	call increment(dc[this]) ;
 	fracOK[dc[this]] := fracOK[dc[this]] / 2.0;
 	fracOK[dc[this]] := fracOK[dc[this]] * 2.0;
-	call PackShareCount(this);
+	call PackShareCount(dc[this], this);
 	packedShareCount[this]:=true;
 }
 

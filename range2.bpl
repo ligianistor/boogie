@@ -21,7 +21,7 @@ procedure ConstructLink(x: int, y:int, val1: int, next1: Ref, this: Ref);
 procedure PackRange(x:int, y:int, this:Ref);
 	requires (val[this] >= x);
 	requires (val[this] <= y);
-  requires (next[this] != this);
+  	requires (next[this] != this);
 	requires ((next[this] == null) ||
 		  (fracRange[next[this]] > 0.0)
 	 );

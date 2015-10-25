@@ -12,23 +12,27 @@ procedure ConstructSimpleCell(val1: int, next1: Ref, this: Ref);
 	ensures (val[this] == val1) && 
 		(next[this] == next1);
 
-procedure PackPredVal(this: Ref);
+procedure PackPredVal(v:int, this: Ref);
 	requires (packedPredVal[this] == false) && 
-		(val[this] < 15);
+		(val[this] == v) &&
+		(v < 15);
 
-procedure UnpackPredVal(this: Ref);
+procedure UnpackPredVal(v:int, this: Ref);
 	requires packedPredVal[this] &&
 		(fracPredVal[this] > 0.0);
-	ensures val[this] < 15;
+	ensures (val[this] == v) &&
+		(v < 15);
 
-procedure PackPredNext(this: Ref);
-	requires (fracPredVal[next[this]] == 0.34) &&
+procedure PackPredNext(obj:Ref, this: Ref);
+	requires (next[this] == obj) &&
+		(fracPredVal[obj] == 0.34) &&
 		(packedPredNext[this] == false);
 
-procedure UnpackPredNext(this: Ref);
+procedure UnpackPredNext(obj:Ref, this: Ref);
 	requires packedPredNext[this] &&
 		(fracPredNext[this] > 0.0);
-	ensures	(fracPredVal[next[this]] == 0.34);
+	ensures	(next[this] == obj) &&
+		(fracPredVal[obj] == 0.34);
 
 procedure changeVal(this: Ref, r: int)
 	modifies packedPredVal,val;
@@ -41,10 +45,10 @@ procedure changeVal(this: Ref, r: int)
 		(fracPredVal[this] == 1.0);
 	ensures (forall x:Ref :: (packedPredVal[x] == old(packedPredVal[x])));
 {
-	call UnpackPredVal(this);
+	call UnpackPredVal(val[this], this);
 	packedPredVal[this] := false;
 	val[this] := r;
-	call PackPredVal(this);
+	call PackPredVal(r, this);
 	packedPredVal[this]:=true;
 }
 
@@ -72,10 +76,10 @@ procedure main()
 	fracPredNext[b] := 1.0;
 	fracPredVal[c] := fracPredVal[c] - 0.34;
 
-	call UnpackPredNext(a);
+	call UnpackPredNext(c, a);
 	packedPredNext[a] := false;
 
-	call UnpackPredNext(b);
+	call UnpackPredNext(c, b);
 	packedPredNext[b] := false;
 
 	fracPredVal[c] := fracPredVal[c]+0.34+0.34;
