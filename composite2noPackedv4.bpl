@@ -107,8 +107,10 @@ requires (parent[this] == op);
 requires (parent[this] != this);
 requires (fracCount[this] == 0.5);
 requires (count[this] == c);
-requires (fracParent[parent[this]] > 0.0);
 requires  (parent[this] != null) ==>
+	(fracParent[op] > 0.0) 
+	&&
+	(
 	((fracLeft[op] == 0.5) && 
 	     	(left[op] == this) && 
              	(count[this] == c)
@@ -118,7 +120,8 @@ requires  (parent[this] != null) ==>
 	     	(fracRight[op] == 0.5) && 
 		(right[op] == this) && 
 		(count[this] == c)
-	  );
+	  )
+	);
 requires (parent[this]==null) ==> (fracCount[this] == 0.5);
 requires (parent[this]==null) ==> packedCount[this];
 
@@ -151,6 +154,8 @@ ensures (parent[this]==null) ==> (count[this] == c);
 
 //---start of methods
 
+//TODO might need to change this to look like the
+//other constructors
 procedure ConstructComposite(this:Ref);
 ensures (count[this] == 1);
 ensures	(left[this] == null);
@@ -173,6 +178,7 @@ requires (packedCount[this] == false);
 requires (fracCount[this] == 1.0);
 requires (count[this] == c);
 requires (parent[this] == op);
+//needs to be put in by the programmer
 requires ((packedLeft[op]==false) && (fracLeft[op] > 0.0) && (count[left[op]] == c)) || 
 	((packedRight[op]==false) && (fracRight[op] > 0.0) && (count[right[op]] == c)) ||
 	(op==null);
@@ -288,18 +294,14 @@ requires (packedCount[this] == false);
 requires (fracCount[this] == 0.5);
 requires (count[this] == lcc);
 
-// TODO not sure why we need this
-// The programmer could put this as a pre-condition.
-requires (forall y:Ref :: ( fracParent[y] > 0.0 && (packedParent[y]==false || packedParent[y])));
 requires (forall y:Ref :: ((y!=this) ==> packedParent[y]));
 requires (forall y:Ref :: ((y!=this) ==> packedCount[y]));
 requires (forall y:Ref ::  packedLeft[y] ) ;
 requires (forall y:Ref ::  packedRight[y] ) ;
 
 ensures packedParent[this];  
-ensures (fracParent[this] > 0.0);  
+ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0) );  
 ensures (forall y:Ref :: packedParent[y] );
-ensures (forall y:Ref :: fracParent[y] > 0.0 && (packedParent[y]==false || packedParent[y]));
 {
 var fracLocalCount : [Ref]real;
 var fracLocalRight : [Ref]real;
@@ -319,6 +321,8 @@ if (parent[this] != null) {
 	// Split the fraction k of opp in parent.
 	// fracLocalParent represents what is left over after the splitting
 	// and after half is used.
+	// If a fraction is needed, 
+	// we can look at what is in fracLocal and use that.
 	fracLocalParent[opp] := fracParent[opp] / 2.0;
 	fracParent[opp] := fracParent[opp] / 2.0;
 
@@ -400,7 +404,6 @@ requires (forall y:Ref :: packedLeft[y]);
 requires (forall y:Ref :: packedRight[y]);
 requires (forall y:Ref :: packedParent[y]);
 requires (forall y:Ref :: packedCount[y]);
-requires (forall y:Ref :: ( fracParent[y] > 0.0 ));
 ensures packedParent[this];
 ensures fracParent[this] > 0.0;
  {
@@ -434,7 +437,6 @@ if (parent[l] == null) {
   	packedParent[l] := true;
 
 	call updateCountRec(this, parent[this], lcc, l, right[this], count[l], count[right[this]]);
-
 }
    
 }
