@@ -97,10 +97,9 @@ ensures (c == lc + rc + 1);
 
 procedure PackParent(op:Ref, c:int, this:Ref);
 requires (packedParent[this] == false);
-requires (parent[this] == op);
-requires (parent[this] != this);
 requires (fracCount[this] == 0.5);
 requires (count[this] == c);
+requires (parent[this] != this);
 requires  (parent[this] != null) ==>
 	(fracParent[op] > 0.0) 
 	&&
@@ -116,8 +115,9 @@ requires  (parent[this] != null) ==>
 		(count[this] == c)
 	  )
 	);
-requires (parent[this]==null) ==> (fracCount[this] == 0.5);
-requires (parent[this]==null) ==> packedCount[this];
+requires (parent[this] == null) ==> (fracCount[this] == 0.5);
+requires (parent[this] == null) ==> packedCount[this];
+requires (parent[this] == op);
 
 
 procedure UnpackParent(op:Ref, c:int, this:Ref);
