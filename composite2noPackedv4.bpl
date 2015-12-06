@@ -37,7 +37,7 @@ procedure PackLeft(ol:Ref, lc:int, op:Ref, this:Ref);
 requires (packedLeft[this] == false);
 requires (left[this] == ol);
 requires (parent[this] == op);
-requires (left[this] != null) ==> ((fracCount[ol] == 0.5) && (count[ol] == lc));
+requires (left[this] != null) ==> ((fracCount[ol] >= 0.5) && (count[ol] == lc));
 requires (left[this] != null) ==> (ol!=this);
 requires (left[this] != null) ==> (ol!=op);
 requires (left[this] == null) ==> (lc == 0);
@@ -57,7 +57,7 @@ requires (packedRight[this] == false);
 requires (right[this] == or);
 requires (parent[this] == op);
 requires (right[this] == or);
-requires (right[this] != null) ==> ((fracCount[or] == 0.5) && (count[or] == rc));
+requires (right[this] != null) ==> ((fracCount[or] >= 0.5) && (count[or] == rc));
 requires (right[this] != null) ==> (or!=this);
 requires (right[this] != null) ==> (or!=op);
 requires (right[this] == null) ==> (rc == 0);
@@ -75,8 +75,8 @@ ensures (right[this] != null) ==> (or!=op);
 procedure PackCount(c:int, ol: Ref, or:Ref, lc:int, rc:int, this:Ref);
 requires (packedCount[this] == false);
 requires (count[this] == c);
-requires (fracLeft[this] == 0.5);
-requires (fracRight[this] == 0.5);
+requires (fracLeft[this] >= 0.5);
+requires (fracRight[this] >= 0.5);
 requires (right[this] == or);
 requires (count[or] == rc);
 requires (left[this] == ol);
@@ -97,25 +97,25 @@ ensures (c == lc + rc + 1);
 
 procedure PackParent(op:Ref, c:int, this:Ref);
 requires (packedParent[this] == false);
-requires (fracCount[this] == 0.5);
+requires (fracCount[this] >= 0.5);
 requires (count[this] == c);
 requires (parent[this] != this);
 requires  (parent[this] != null) ==>
 	(fracParent[op] > 0.0) 
 	&&
 	(
-	((fracLeft[op] == 0.5) && 
+	((fracLeft[op] >= 0.5) && 
 	     	(left[op] == this) && 
              	(count[this] == c)
 	  )
           ||
           (
-	     	(fracRight[op] == 0.5) && 
+	     	(fracRight[op] >= 0.5) && 
 		(right[op] == this) && 
 		(count[this] == c)
 	  )
 	);
-requires (parent[this] == null) ==> (fracCount[this] == 0.5);
+requires (parent[this] == null) ==> (fracCount[this] >= 0.5);
 requires (parent[this] == null) ==> packedCount[this];
 requires (parent[this] == op);
 
@@ -185,8 +185,8 @@ ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
 ensures (count[this] == c1 + c2 + 1 );  
 // Only write here about the global variables in the modifies clause.
-ensures (forall y:Ref :: (fracRight[y] == old(fracRight[y]) ) );
-ensures (forall y:Ref :: (fracLeft[y] == old(fracLeft[y]) ) );
+//ensures (forall y:Ref :: (fracRight[y] == old(fracRight[y]) ) );
+//ensures (forall y:Ref :: (fracLeft[y] == old(fracLeft[y]) ) );
 ensures (forall y:Ref :: (packedRight[y] == old(packedRight[y]) ) );
 ensures (forall y:Ref :: (packedLeft[y] == old(packedLeft[y]) ) );
 ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
@@ -214,32 +214,54 @@ newc := 1;
 //because we use left[this] in the condition of the if,
 //that is we access the field left of this.
 //For this we need the field to be accessible, unpacked.
+
+//This assume can also be written like an axiom.
+//We need to know when to call that axiom.
+//Otherwise it has to be written in all procedures
+//and it has to mention even fracs from previous files.
+//I might add that fracs are also <= 1.0.
+assume (forall y:Ref :: (fracRight[y] >= 0.0) );
+assume (forall y:Ref :: (fracLeft[y] >= 0.0) );
+assume (forall y:Ref :: (fracCount[y] >= 0.0) );
+assume (forall y:Ref :: (fracParent[y] >= 0.0) );
 call UnpackLeft(ol, c1, op, this);
 packedLeft[this] := false;
+if (ol != null) { fracCount[ol] := fracCount[ol] + 0.5; }
 
 if (left[this] != null) {
 	call UnpackCount(c1, ol1, or1, lc1, rc1, ol);
 	packedCount[ol] := false; 
+	fracLeft[ol] := fracLeft[ol] + 0.5; 
+	fracRight[ol] := fracRight[ol] + 0.5; 
    	newc := newc + count[left[this]];
 	call PackCount(c1, ol1, or1, lc1, rc1, ol);
 	packedCount[ol]:=true;
+	fracLeft[ol] := fracLeft[ol] - 0.5;
+	fracRight[ol] := fracRight[ol] - 0.5;
 }
 call PackLeft(ol, c1, op, this);
 packedLeft[this] := true;
+if (ol!=null) { fracCount[ol] := fracCount[ol] - 0.5; }
    
 call UnpackRight(or, c2, op, this);
 packedRight[this] := false;
+if (or!=null) { fracCount[or] := fracCount[or] + 0.5; }
     
 if (right[this] != null) {
 	call UnpackCount(c2, ol2, or2, lc2, rc2, or);
 	packedCount[or] := false;
+	fracLeft[or] := fracLeft[or] + 0.5; 
+	fracRight[or] := fracRight[or] + 0.5;
   	newc := newc + count[right[this]]; 
   	call PackCount(c2, ol2, or2, lc2, rc2, or);
 	packedCount[or] := true;
+	fracLeft[or] := fracLeft[or] - 0.5;
+	fracRight[or] := fracRight[or] - 0.5;
 }
 
 call PackRight(or, c2, op, this);
 packedRight[this] := true;
+if (or != null) { fracCount[or] := fracCount[or] - 0.5; }
     
 count[this] := newc; 
 //TODO: We don't need to do this anymore.
@@ -250,6 +272,8 @@ count[this] := newc;
 //Here we need to use the fraction to right(this).
 call PackCount(newc, ol, or, c1, c2, this);
 packedCount[this]:=true; 
+fracLeft[this] := fracLeft[this] - 0.5;
+fracRight[this] := fracRight[this] - 0.5;
 }
 
 procedure updateCountRec(this: Ref, opp: Ref, lcc: int, ol: Ref, or: Ref, lc: int, rc: int)
@@ -310,6 +334,11 @@ var rrc : int;
 
 // Existential variables used in the parameters of call updateCountRec()
 var oppp : Ref;
+
+assume (forall y:Ref :: (fracRight[y] >= 0.0) );
+assume (forall y:Ref :: (fracLeft[y] >= 0.0) );
+assume (forall y:Ref :: (fracCount[y] >= 0.0) );
+assume (forall y:Ref :: (fracParent[y] >= 0.0) );
 
 if (parent[this] != null) {
 	// Split the fraction k of opp in parent.
@@ -406,6 +435,12 @@ var lcc : int;
 // Existentially quantified variables for UnpackCount(this,lcc)
 // The variable rc is also used in the call to updateCountRec()
 var or : Ref;
+
+assume (forall y:Ref :: (fracRight[y] >= 0.0) );
+assume (forall y:Ref :: (fracLeft[y] >= 0.0) );
+assume (forall y:Ref :: (fracCount[y] >= 0.0) );
+assume (forall y:Ref :: (fracParent[y] >= 0.0) );
+
 call UnpackParent(parent[l], count[l], l);
 packedParent[l] := false;
 
