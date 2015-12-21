@@ -48,7 +48,7 @@ requires (fracLeft[this] > 0.0);
 ensures (left[this] == ol);
 ensures (parent[this] == op);
 ensures (left[this] == null) ==> (lc == 0);
-ensures (left[this] != null) ==> ((fracCount[ol] == 0.5) && (count[ol] == lc));
+ensures (left[this] != null) ==> ((fracCount[ol] == old(fracCount[ol]) + 0.5) && (count[ol] == lc));
 ensures (left[this] != null) ==> (ol!=this);
 ensures (left[this] != null) ==> (ol!=op);
 
@@ -68,7 +68,7 @@ requires (fracRight[this] > 0.0);
 ensures (right[this] == or);
 ensures (parent[this] == op);
 ensures (right[this] == null) ==> (rc == 0);
-ensures (right[this] != null) ==> ((fracCount[or] == 0.5) && (count[or] == rc));
+ensures (right[this] != null) ==> ((fracCount[or] == old(fracCount[or]) + 0.5) && (count[or] == rc));
 ensures (right[this] != null) ==> (or!=this);
 ensures (right[this] != null) ==> (or!=op);
 
@@ -87,8 +87,8 @@ procedure UnpackCount(c:int, ol: Ref, or:Ref, lc:int, rc:int, this:Ref);
 requires packedCount[this];
 requires (fracCount[this] > 0.0);
 ensures (count[this] == c);
-ensures (fracLeft[this] == 0.5);
-ensures (fracRight[this] == 0.5);
+ensures (fracLeft[this] == old(fracLeft[this]) + 0.5);
+ensures (fracRight[this] == old(fracRight[this]) + 0.5);
 ensures (right[this] == or);
 ensures (count[or] == rc);
 ensures (left[this] == ol);
@@ -125,21 +125,23 @@ ensures (parent[this] == op);
 ensures (parent[this] != this);
 ensures packedCount[this];
 ensures (count[this] == c);
-ensures (fracCount[this] == 0.5);
+ensures (fracCount[this] == old(fracCount[this]) + 0.5);
+// Here I might need to put
+// fracParent[] == old(fracParent[]) + 0.0001)
 ensures  (parent[this] != null) ==>
 	(fracParent[op] > 0.0) ;
 ensures (parent[this] != null) && (left[op] == this) ==>
-	((fracLeft[op] >= 0.5) && 
+	((fracLeft[op] == old(fracLeft[op]) + 0.5) && 
 	     	(left[op] == this) && 
              	(count[this] == c)
 	  );
 ensures (parent[this] != null) && (right[op] == this) ==>
           (
-	     	(fracRight[op] >= 0.5) && 
+	     	(fracRight[op] == old(fracRight[op]) + 0.5) && 
 		(right[op] == this) && 
 		(count[this] == c)
 	  );
-ensures (parent[this]==null) ==> (fracCount[this] == 0.5);
+ensures (parent[this]==null) ==> (fracCount[this] == old(fracCount[this]) + 0.5);
 ensures (parent[this]==null) ==> (count[this] == c);
 
 //---start of methods
