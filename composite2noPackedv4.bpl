@@ -128,8 +128,11 @@ ensures (count[this] == c);
 ensures (fracCount[this] == old(fracCount[this]) + 0.5);
 // Here I might need to put
 // fracParent[] == old(fracParent[]) + 0.0001)
+// I definitely need to add something to old() because
+// there might already be a frac before this unpackParent is 
+// called.
 ensures  (parent[this] != null) ==>
-	(fracParent[op] > 0.0) ;
+	(fracParent[op] == old(fracParent[op]) + 0.0001) ;
 ensures (parent[this] != null) && (left[op] == this) ==>
 	((fracLeft[op] == old(fracLeft[op]) + 0.5) && 
 	     	(left[op] == this) && 
