@@ -108,6 +108,8 @@ class StateContext {
         }
 	
 	@Override
+        (this@1 stateContextMultiple6() -> (result % 6 == 0)) &&
+	(this@1 stateContextMultiple15() -> (result % 15 == 0))
 	int getIntCellStatelike() {
 		return myState.getIntCellValue();
 	}
@@ -120,8 +122,9 @@ public class DemoOfClientState {
 		int result = 0;
 		{... && (result == 0) }
         	sc.computeResult(1);
-		{ .. & sc@1 stateContextMultiple6(1) }
+		{ .. & sc@1 stateContextMultiple6() }
 		result = result + sc.getIntCellStatelike();
+		{ result % 6 == 0 }
 	        sc.computeResult(2);
 		result = result + sc.getIntCellStatelike();
         	sc.computeResult(3);
@@ -134,9 +137,7 @@ public class DemoOfClientState {
 		result = result + sc.getIntCellStatelike();
         	sc.computeResult(7);
 		result = result + sc.getIntCellStatelike();
-		//assert result satisfies MultipleOf3
-//TODO remove that if that makes this program be difficult
-//Maybe need to wrap result in IntCell.
+
     }
 }
 -------------
