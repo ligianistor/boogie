@@ -51,11 +51,10 @@ class StateMultiplySix implements Statelike {
 }
 
 class StateMultiplyFifteen implements Statelike {
-// We either put all the fields of the derived classes in the interface
-// or the predicates that we use in the exterior should not refer to variables
-// such as "count". 
-	predicate StateMultipleOf15() = cell ->c && c@1 MultipleOf15()
 
+	predicate StateMultipleOf15() = cell ->c && c@1 MultipleOf15()
+	predicate CountGt1() = count > 1
+	predicate CountLe1() = count <= 1
 	/** Counter local to this state */
         private int count = 0;
 
@@ -66,7 +65,7 @@ class StateMultiplyFifteen implements Statelike {
 	//Predicate CountGt1() is the negation of CountLe1().
 	//Another example can be without "if"
 	-> this@1 StateMultipleOf15() &&  
-	( context@1 state6() || context@1 state15() )
+	((CountGt1() -> context@1 state6()) && (CountLe1() -> context@1 state15()))
         public void computeResult(final StateContext context, final int num) {
         	/* Change state after StateMultiplyFifteen's computeResult() gets invoked twice */
         	if(++count > 1) {
@@ -85,8 +84,7 @@ class StateContext {
 	predicate stateContextMultiple3() = myState@1 StateMultipleOf3()
 	predicate stateContextMultiple6() = myState@1 StateMultipleOf6()
 	predicate stateContextMultiple15() = myState@1 StateMultipleOf15()
-// I'm not sure this should be a predicate, with a fraction of its own.
-// It is good that it is a predicate because it encapsulates myState.
+
 	-> this@1 state6() &&  this@1 stateContextMultiple3()
     	StateContext() {
         	setState(new StateMultiplySix());
