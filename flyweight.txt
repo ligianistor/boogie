@@ -1,0 +1,71 @@
+// Instances of College will be the Flyweights
+class College {
+  private final int collegeNumber;
+
+  College(int number) {
+    this.collegeNumber = number;
+  }
+}
+
+// ListOfAvailableColleges acts as a factory and cache for College flyweight objects
+class ListOfAvailableColleges {
+  private Map<int, College> listOfColleges = new ConcurrentHashMap<int, College>();
+
+  College lookup(int collegeNumber) {
+    if (!listOfColleges.containsKey(collegeNumber))
+      listOfColleges.put(collegeNumber, new College(collegeNumber));
+    return listOfColleges.get(collegeNumber);
+  }
+
+  int totalAvailableColleges() {
+    return listOfColleges.size();
+  }
+}
+
+class StudentApplication {
+  private final int studentNumber;
+  private final College college;
+
+  StudentApplication(int studentNumber, College college) {
+    this.studentNumber = studentNumber;
+    this.college = college;
+  }
+}
+
+
+public class ApplicationWebsite {
+  private final List<StudentApplication> listStudentApplications = new Vector<StudentApplication>();
+  private final ListOfAvailableColleges listOfAvailableColleges = new ListOfAvailableColleges();
+
+  void submitApplication(int collegeNumber, int studentNumber) {
+    College college = listOfAvailableColleges.lookup(collegeNumber);
+    StudentApplication studentApplication = new StudentApplication(studentNumber, college);
+    listStudentApplications.add(studentApplication);
+  }
+
+  int report() {
+    return listOfAvailableColleges.totalAvailableColleges();
+  }
+}
+
+  public static void main() {
+    ApplicationWebsite website = new ApplicationWebsite();
+
+    website.submitApplication(1, 2);
+    website.submitApplication(1, 1);
+    website.submitApplication(1, 3);
+    website.submitApplication(1, 897);
+    website.submitApplication(1, 97);
+    website.submitApplication(1, 3);
+    website.submitApplication(2, 3);
+    website.submitApplication(2, 4);
+    website.submitApplication(2, 96);
+    website.submitApplication(2, 552);
+    website.submitApplication(2, 121);
+    website.submitApplication(2, 122);
+
+//TODO Add a new function that counts the total applications.
+
+    website.report();
+  }
+}

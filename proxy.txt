@@ -1,0 +1,77 @@
+interface Sum {
+    public int calculateSum(int n);
+}
+
+//on System A 
+class RealSum implements Sum {
+
+    private int sum = 0;
+    private int n;
+    /**
+     * Constructor
+     * @param filename
+     */
+    public RealSum(final int sum, int n) { 
+        this.sum = sum;
+        calculateRealSum(n);
+    }
+
+    /**
+     * Acually calculates the sum.
+     */
+    private void calculateRealSum(int n) {
+        this.sum = n * (n+1) / 2;
+    }
+
+    /**
+     * Returns the sum.
+     */
+    public int calculateSum() { 
+       return sum;
+    }
+
+}
+
+//on System B 
+class ProxySum implements Sum {
+
+    private RealSum realSum = null;
+    private int sum;
+    /**
+     * Constructor
+     * @param filename 
+     */
+    public ProxySum(final int sum) { 
+        this.sum = sum; 
+    }
+
+    /**
+     * Calculates the sum
+     */
+    public int calculateSum(int n) {
+        if (realSum == null) {
+           realSum = new RealSum(n);
+        } 
+        realSum.calculateSum();
+    }
+
+}
+ 
+class ProxyExample {
+
+   /**
+    * Test method
+    */
+   public static void main() {
+        final Sum sum1 = new ProxySum(1);
+        final Sum sum2 = new ProxySum(2);
+        
+        sum1.calculateSum(); // calculation necessary
+        sum1.calculateSum(); // calculation unnecessary
+        sum2.calculateSum(); // calculation necessary
+        sum2.calculateSum(); // calculation unnecessary
+        sum1.calculateSum(); // calculation unnecessary
+    }
+
+}
+
