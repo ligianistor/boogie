@@ -6,10 +6,13 @@ class College {
     this.collegeNumber = number;
   }
 }
+-----------------
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 // ListOfAvailableColleges acts as a factory and cache for College flyweight objects
 class ListOfAvailableColleges {
-  private Map<int, College> listOfColleges = new ConcurrentHashMap<int, College>();
+  private Map<Integer, College> listOfColleges = new ConcurrentHashMap<Integer, College>();
 
   College lookup(int collegeNumber) {
     if (!listOfColleges.containsKey(collegeNumber))
@@ -21,6 +24,7 @@ class ListOfAvailableColleges {
     return listOfColleges.size();
   }
 }
+---------------------------
 
 class StudentApplication {
   private final int studentNumber;
@@ -31,7 +35,11 @@ class StudentApplication {
     this.college = college;
   }
 }
+--------------------------------
 
+
+import java.util.List;
+import java.util.Vector;
 
 public class ApplicationWebsite {
   private final List<StudentApplication> listStudentApplications = new Vector<StudentApplication>();
@@ -44,11 +52,11 @@ public class ApplicationWebsite {
   }
 
   int report() {
+	  //System.out.println(listOfAvailableColleges.totalAvailableColleges());
     return listOfAvailableColleges.totalAvailableColleges();
   }
-}
 
-  public static void main() {
+  public static void main(String[] args) {
     ApplicationWebsite website = new ApplicationWebsite();
 
     website.submitApplication(1, 2);
@@ -69,3 +77,4 @@ public class ApplicationWebsite {
     website.report();
   }
 }
+

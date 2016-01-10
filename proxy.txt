@@ -1,18 +1,17 @@
-interface Sum {
-    public int calculateSum(int n);
+public interface Sum {
+    public int calculateSum();
+    public void displaySum();
 }
 
 //on System A 
 class RealSum implements Sum {
 
     private int sum = 0;
-    private int n;
     /**
      * Constructor
      * @param filename
      */
-    public RealSum(final int sum, int n) { 
-        this.sum = sum;
+    public RealSum(int n) { 
         calculateRealSum(n);
     }
 
@@ -30,48 +29,61 @@ class RealSum implements Sum {
        return sum;
     }
 
+	@Override
+	public void displaySum() {
+		System.out.println(sum);	
+	}
+
 }
 
 //on System B 
 class ProxySum implements Sum {
-
     private RealSum realSum = null;
-    private int sum;
+    private int n = 0;
     /**
      * Constructor
      * @param filename 
      */
-    public ProxySum(final int sum) { 
-        this.sum = sum; 
+    public ProxySum(final int n) { 
+        this.n = n; 
     }
 
     /**
      * Calculates the sum
      */
-    public int calculateSum(int n) {
+    public int calculateSum() {
         if (realSum == null) {
            realSum = new RealSum(n);
         } 
-        realSum.calculateSum();
+      return realSum.calculateSum();
     }
+    
+	@Override
+	public void displaySum() {
+		System.out.println(realSum.calculateSum());	
+	}
 
 }
- 
+
 class ProxyExample {
 
    /**
     * Test method
     */
-   public static void main() {
-        final Sum sum1 = new ProxySum(1);
-        final Sum sum2 = new ProxySum(2);
+   public static void main(String[] args) {
+        final Sum sum1 = new ProxySum(5);
+        final Sum sum2 = new ProxySum(3);
         
         sum1.calculateSum(); // calculation necessary
+        sum1.displaySum();
         sum1.calculateSum(); // calculation unnecessary
+        sum1.displaySum();
         sum2.calculateSum(); // calculation necessary
+        sum2.displaySum();
         sum2.calculateSum(); // calculation unnecessary
+        sum2.displaySum();
         sum1.calculateSum(); // calculation unnecessary
+        sum1.displaySum();
     }
-
 }
 
