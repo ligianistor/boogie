@@ -48,7 +48,7 @@ requires (fracLeft[this] > 0.0);
 ensures (left[this] == ol);
 ensures (parent[this] == op);
 ensures (left[this] == null) ==> (lc == 0);
-ensures (left[this] != null) ==> (count[ol] == lc);
+ensures (left[this] != null) ==> ((fracCount[ol] >= 0.5) && (count[ol] == lc));
 ensures (left[this] != null) ==> (ol!=this);
 ensures (left[this] != null) ==> (ol!=op);
 
@@ -68,7 +68,7 @@ requires (fracRight[this] > 0.0);
 ensures (right[this] == or);
 ensures (parent[this] == op);
 ensures (right[this] == null) ==> (rc == 0);
-ensures (right[this] != null) ==> (count[or] == rc);
+ensures (right[this] != null) ==> ((fracCount[or] >= 0.5) && (count[or] == rc));
 ensures (right[this] != null) ==> (or!=this);
 ensures (right[this] != null) ==> (or!=op);
 
@@ -87,6 +87,8 @@ procedure UnpackCount(c:int, ol: Ref, or:Ref, lc:int, rc:int, this:Ref);
 requires packedCount[this];
 requires (fracCount[this] > 0.0);
 ensures (count[this] == c);
+ensures (fracLeft[this] >= 0.5);
+ensures (fracRight[this] >= 0.5);
 ensures (right[this] == or);
 ensures (count[or] == rc);
 ensures (left[this] == ol);
@@ -102,7 +104,8 @@ requires (parent[this] != this);
 requires  (parent[this] != null) ==>
 	(fracParent[op] > 0.0) ;
 requires ((op != null) && (left[op] == this)) ==>
-	((fracLeft[op] >= 0.5) && 
+	(
+		(fracLeft[op] >= 0.5) && 
 	     	(left[op] == this) && 
              	(count[this] == c)
 	  );
@@ -122,17 +125,21 @@ requires (fracParent[this] > 0.0);
 ensures (parent[this] == op);
 ensures (parent[this] != this);
 ensures packedCount[this];
+ensures (fracCount[this] >= 0.5);
 ensures (count[this] == c);
 ensures (parent[this] != null) && (left[op] == this) ==>
 	(
+		(fracLeft[op] >= 0.5) && 
 	     	(left[op] == this) && 
              	(count[this] == c)
 	  );
 ensures (parent[this] != null) && (right[op] == this) ==>
           (
+		(fracRight[op] >= 0.5) && 
 		(right[op] == this) && 
 		(count[this] == c)
 	  );
+ensures (parent[this] == null) ==> (fracCount[this] >= 0.5);
 ensures (parent[this]==null) ==> (count[this] == c);
 
 //---start of methods
