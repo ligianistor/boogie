@@ -1,5 +1,4 @@
 type Ref;
-
 const null: Ref;
 
 var left : [Ref]Ref;
@@ -126,11 +125,11 @@ ensures (parent[this] != null) && (right[op] == this) ==>
 ensures (parent[this] == null) ==> (fracCount[this] >= 0.5);
 ensures (parent[this]==null) ==> (count[this] == c);
 
-procedure ConstructComposite(this:Ref);
-ensures (count[this] == 1);
-ensures	(left[this] == null);
-ensures	(right[this] == null);
-ensures	(parent[this] == null);
+procedure ConstructComposite(count1 :int, left1 : Ref, right1 : Ref, parent1 : Ref, this: Ref);
+	 ensures (count[this] == count1) &&
+ 	 	 (left[this] == left1) &&
+ 	 	 (right[this] == right1) &&
+ 	 	 (parent[this] == parent1); 
 
 procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, op:Ref, c1:int, c2:int, c3:int)
 modifies count, packedCount, packedLeft, packedRight, 
