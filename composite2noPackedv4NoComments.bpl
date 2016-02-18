@@ -131,6 +131,7 @@ procedure ConstructComposite(count1 :int, left1 : Ref, right1 : Ref, parent1 : R
  	 	 (right[this] == right1) &&
  	 	 (parent[this] == parent1); 
 
+--->left off here. left, parent and right should not be in the modifies
 procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, op:Ref, c1:int, c2:int, c3:int)
 modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight;
