@@ -168,11 +168,11 @@ requires (packedCount[this] == false);
 requires (fracCount[this] == 1.0);
 requires (count[this] == c);
 requires (parent[this] == op);
+requires (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (count[op] == c3));
 //needs to be put in by the programmer
 requires ((packedLeft[op]==false) && (fracLeft[op] > 0.0) && (count[left[op]] == c)) || 
 	((packedRight[op]==false) && (fracRight[op] > 0.0) && (count[right[op]] == c)) ||
 	(op==null);
-requires (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (count[op] == c3));
 requires (forall y:Ref :: ( ( (y!=this) && (y!=op) ) ==> (packedCount[y] ) ) );
 //We need to add these two requires forall to make it consistent with the requires above.
 requires (forall y:Ref :: ( (y!=op) ==> packedRight[y]));

@@ -148,10 +148,10 @@ requires (packedCount[this] == false);
 requires (fracCount[this] == 1.0);
 requires (count[this] == c);
 requires (parent[this] == op);
+requires (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (count[op] == c3));
 requires ((packedLeft[op]==false) && (fracLeft[op] > 0.0) && (count[left[op]] == c)) || 
 	((packedRight[op]==false) && (fracRight[op] > 0.0) && (count[right[op]] == c)) ||
 	(op==null);
-requires (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (count[op] == c3));
 requires (forall y:Ref :: ( ( (y!=this) && (y!=op) ) ==> (packedCount[y] ) ) );
 requires (forall y:Ref :: ( (y!=op) ==> packedRight[y]));
 requires (forall y:Ref :: ( (y!=op) ==> packedLeft[y]));
@@ -347,6 +347,8 @@ if (parent[this] != null) {
 		if (this != null) { fracCount[this] := fracCount[this] - 0.5;}
 
 		call updateCountRec(opp, parent[opp], count[opp], left[opp], this, count[left[opp]], lc + rc + 1);
+		//TODO might need to add another fraction manipulation statement here, related to 
+		// the unpacked(parent...)
 		if (parent[opp] != null) {
 			 fracParent[parent[opp]] := fracParent[parent[opp]] / 2.0; 
 		} 
@@ -445,7 +447,7 @@ else {
 procedure setLeft(this: Ref, l:Ref)
 modifies parent, left, count, packedCount, packedLeft, packedRight, packedParent,
 	fracCount, fracParent, fracLeft, fracRight;
-requires this!=null;
+requires this != null;
 requires this!=l;
 requires l!=null;
 requires left[this]!=parent[this];
