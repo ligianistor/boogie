@@ -349,6 +349,7 @@ if (parent[this] != null) {
 		call updateCountRec(opp, parent[opp], count[opp], left[opp], this, count[left[opp]], lc + rc + 1);
 		//TODO might need to add another fraction manipulation statement here, related to 
 		// the unpacked(parent...)
+//In the translation, I have the if probably because of the "unpacked" before which is considered an identifier
 		if (parent[opp] != null) {
 			 fracParent[parent[opp]] := fracParent[parent[opp]] / 2.0; 
 		} 
