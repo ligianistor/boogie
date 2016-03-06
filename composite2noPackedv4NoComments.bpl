@@ -131,7 +131,6 @@ procedure ConstructComposite(count1 :int, left1 : Ref, right1 : Ref, parent1 : R
  	 	 (right[this] == right1) &&
  	 	 (parent[this] == parent1); 
 
---->left off here. left, parent and right should not be in the modifies
 procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, op:Ref, c1:int, c2:int, c3:int)
 modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight;
@@ -347,9 +346,14 @@ if (parent[this] != null) {
 		if (this != null) { fracCount[this] := fracCount[this] - 0.5;}
 
 		call updateCountRec(opp, parent[opp], count[opp], left[opp], this, count[left[opp]], lc + rc + 1);
-		//TODO might need to add another fraction manipulation statement here, related to 
+		//TODO I need to add another fraction manipulation statement here, related to 
 		// the unpacked(parent...)
-//In the translation, I have the if probably because of the "unpacked" before which is considered an identifier
+		// TODO make sure this translation is the translation I want for 
+		// Composite.java, with all the right fraction manipulation statements.
+		// In the translation, I have the if probably because of the "unpacked" before which is considered an identifier.
+		// If the predicate is unpacked in the precondition, it means I still have a fraction to that predicate, but 
+		// the actual property might not hold. But I do still hold a fraction to the predicate.
+		// So I need to subtract that fraction in the fraction manipulation statements, just like any other fraction.
 		if (parent[opp] != null) {
 			 fracParent[parent[opp]] := fracParent[parent[opp]] / 2.0; 
 		} 
