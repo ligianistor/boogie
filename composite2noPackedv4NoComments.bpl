@@ -151,9 +151,13 @@ requires (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && 
 // Here, in the actual precondition, I don't give all the parameters that I give when I have the same
 // predicate in the body of the method.
 // This is correct, how the translation works.
+requires (((this==right[opp]) ==> ((packedLeft[op]==false) && (fracLeft[op] > 0.0) && (count[left[op]] == c))) || 
+	(((this == left[opp]) ==> ((packedRight[op]==false) && (fracRight[op] > 0.0) && (count[right[op]] == c))) ||
+	(op==null);
 requires (forall y:Ref :: ( ( (y!=this) && (y!=op) ) ==> (packedCount[y] ) ) );
-requires (forall y:Ref :: ( (y!=op) ==> packedRight[y]));
-requires (forall y:Ref :: ( (y!=op) ==> packedLeft[y]));
+requires (forall y:Ref :: ((y!=op) ==>  packedLeft[y]));
+requires (forall y:Ref :: (  (y!=op) ==> packedRight[y]));
+
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
 ensures (count[this] == c1 + c2 + 1 );  
@@ -324,7 +328,6 @@ if (parent[this] != null) {
 		fracRight[this] := fracRight[this] - 0.5;
 		if (opp!=null) { fracCount[opp] := fracCount[opp] / 2.0; }
 
-    		if (opp!=null) { fracCount[opp] := fracCount[opp] * 2.0; }
 		fracCount[this] := 1.0;
 
 		call PackParent(parent[this], lc + rc + 1, this);
