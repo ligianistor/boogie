@@ -151,8 +151,8 @@ requires (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && 
 // Here, in the actual precondition, I don't give all the parameters that I give when I have the same
 // predicate in the body of the method.
 // This is correct, how the translation works.
-requires (((this==right[opp]) ==> ((packedLeft[op]==false) && (fracLeft[op] > 0.0) && (count[left[op]] == c))) || 
-	(((this == left[opp]) ==> ((packedRight[op]==false) && (fracRight[op] > 0.0) && (count[right[op]] == c))) ||
+requires ((this==right[op]) ==> ((packedLeft[op]==false) && (fracLeft[op] > 0.0) && (count[left[op]] == c))) || 
+	((this == left[op]) ==> ((packedRight[op]==false) && (fracRight[op] > 0.0) && (count[right[op]] == c))) ||
 	(op==null);
 requires (forall y:Ref :: ( ( (y!=this) && (y!=op) ) ==> (packedCount[y] ) ) );
 requires (forall y:Ref :: ((y!=op) ==>  packedLeft[y]));
