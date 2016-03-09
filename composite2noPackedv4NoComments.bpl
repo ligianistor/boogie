@@ -151,12 +151,14 @@ requires (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && 
 // Here, in the actual precondition, I don't give all the parameters that I give when I have the same
 // predicate in the body of the method.
 // This is correct, how the translation works.
-requires ((packedLeft[op]==false) && (fracLeft[op] > 0.0) && (count[left[op]] == c)) || 
-	((packedRight[op]==false) && (fracRight[op] > 0.0) && (count[right[op]] == c)) ||
-	(op==null);
+
+// Only need to add the forall for packedLeft and packedRight if 
+// other packed things are needed apart from those that were specifically mentioned.
+// In this case, we do not need anything else apart from
+// packedLeft[this] and packedRight[this] so I do not need to add the forall.
+
 requires (forall y:Ref :: (((y!=this) && (y!=op) ) ==> (packedCount[y] ) ) );
-requires (forall y:Ref :: ((y!=op) ==>  packedLeft[y]));
-requires (forall y:Ref :: ((y!=op) ==> packedRight[y]));
+
 
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
@@ -214,8 +216,8 @@ if (right[this] != null) {
 	packedCount[or] := false;
 	fracLeft[or] := fracLeft[or] + 0.5;
 	fracRight[or] := fracRight[or] + 0.5;
-  newc := newc + count[right[this]]; 
-  call PackCount(c2, ol2, or2, lc2, rc2, or);
+  	newc := newc + count[right[this]]; 
+	call PackCount(c2, ol2, or2, lc2, rc2, or);
 	packedCount[or] := true;
 	fracLeft[or] := fracLeft[or] - 0.5;
 	fracRight[or] := fracRight[or] - 0.5;
@@ -227,7 +229,7 @@ if (or != null) { fracCount[or] := fracCount[or] - 0.5; }
     
 count[this] := newc; 
 call PackCount(newc, ol, or, c1, c2, this);
-packedCount[this]:=true; 
+packedCount[this] := true; 
 fracLeft[this] := fracLeft[this] - 0.5;
 fracRight[this] := fracRight[this] - 0.5;
 }
@@ -324,6 +326,7 @@ if (parent[this] != null) {
 
 		call updateCount(this, lcc, ol, or, opp, lc, rc, count[opp]);
 
+
 		fracLeft[this] := fracLeft[this] - 0.5;
 		fracRight[this] := fracRight[this] - 0.5;
 		if (opp!=null) { fracCount[opp] := fracCount[opp] / 2.0; }
@@ -383,6 +386,7 @@ if (parent[this] != null) {
 		fracCount[this] := 0.5 + 0.5;
   
 		call updateCount(this, lcc, ol, or, opp, lc, rc, count[opp]);
+
 		fracLeft[this] := fracLeft[this] - 0.5;
 		fracRight[this] := fracRight[this] - 0.5;
 		if (opp!=null) { fracCount[opp] := fracCount[opp] / 2.0; }
