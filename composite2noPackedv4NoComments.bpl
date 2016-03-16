@@ -153,9 +153,16 @@ requires (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && 
 // This is correct, how the translation works.
 
 // Only need to add the forall for packedLeft and packedRight if 
-// other packed things are needed apart from those that were specifically mentioned.
+// other packed things are needed apart from those that were specifically mentioned and also if 
+// there are no calls to other methods inside this method.
+// If there are, then you need to add the requires forall as before, to make sure
+// you catch the pre-conditions of all the methods.
 // In this case, we do not need anything else apart from
-// packedLeft[this] and packedRight[this] so I do not need to add the forall.
+// packedLeft[this] and packedRight[this] so I do not need to add the requires forall to be packed.
+// If we need anything else, then we add the forall.
+
+// TIP: only add a forall if it is really necessary.
+// The less necessary constrainsts you have, the better for the verification.
 
 requires (forall y:Ref :: (((y!=this) && (y!=op) ) ==> (packedCount[y] ) ) );
 
@@ -456,8 +463,10 @@ else {
 }  
 }
 
-procedure setLeft(this: Ref, l:Ref)
-modifies parent, left, count, packedCount, packedLeft, packedRight, packedParent,
+procedure setLeft(this: Ref, l:Ref) 
+// Here I might need to add more because of transitivity,
+// the methods that are called from inside.
+modifies parent, left, count, packedCount, packedLeft, packedParent, packedRight,
 	fracCount, fracParent, fracLeft, fracRight;
 requires this != null;
 requires this!=l;
@@ -472,9 +481,9 @@ requires fracParent[l] > 0.0;
 requires packedParent[l];
 
 requires (forall y:Ref :: packedLeft[y]);
-requires (forall y:Ref :: packedRight[y]);
-requires (forall y:Ref :: packedParent[y]);
 requires (forall y:Ref :: packedCount[y]);
+requires (forall y:Ref ::  packedRight[y] ) ;
+requires (forall y:Ref ::  packedParent[y] ) ;
 ensures packedParent[this];
 ensures fracParent[this] > 0.0;
  {
