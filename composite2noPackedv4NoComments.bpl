@@ -148,28 +148,11 @@ requires (fracCount[this] == 1.0);
 requires (count[this] == c);
 requires (parent[this] == op);
 requires (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (count[op] == c3));
-// Here, in the actual precondition, I don't give all the parameters that I give when I have the same
-// predicate in the body of the method.
-// This is correct, how the translation works.
-
-// Only need to add the forall for packedLeft and packedRight if 
-// other packed things are needed apart from those that were specifically mentioned and also if 
-// there are no calls to other methods inside this method.
-// If there are, then you need to add the requires forall as before, to make sure
-// you catch the pre-conditions of all the methods.
-// In this case, we do not need anything else apart from
-// packedLeft[this] and packedRight[this] so I do not need to add the requires forall to be packed.
-// If we need anything else, then we add the forall.
-
-// TIP: only add a forall if it is really necessary.
-// The less necessary constrainsts you have, the better for the verification.
-
-requires (forall y:Ref :: (((y!=this) && (y!=op) ) ==> (packedCount[y] ) ) );
-
 
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
 ensures (count[this] == c1 + c2 + 1 );  
+
 ensures (forall y:Ref :: ( (y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
 ensures (forall y:Ref :: ( (y!=this) ==> (fracLeft[y] == old(fracLeft[y]) ) ) );
 ensures (forall y:Ref :: (packedRight[y] == old(packedRight[y]) ) );
