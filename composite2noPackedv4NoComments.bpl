@@ -268,9 +268,14 @@ requires (forall y:Ref :: ((y!=this) ==> packedCount[y]));
 requires (forall y:Ref ::  packedLeft[y] ) ;
 requires (forall y:Ref ::  packedRight[y] ) ;
 
-ensures packedParent[this];  
+ensures packedParent[this]; 
+ensures packedCount[this];
+ensures count[this] == lc+rc+1;  
 ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0) );  
 ensures (forall y:Ref :: packedParent[y] );
+
+ensures (forall y:Ref :: packedCount[y]);
+
 //For the one above I also have to look at the post-condition of the methods called
 //inside this method and see if any objects are packed (that were unpacked before entering the method)
 //as a consequence of that.
@@ -301,16 +306,12 @@ if (parent[this] != null) {
 		fracRight[parent[opp]] := fracRight[parent[opp]] + 0.5; 
 	}
 	if (parent[opp] == null) { fracCount[opp] := fracCount[opp] + 0.5; }
-
-	call UnpackCount(count[opp], oll, this, llc, lcc, opp);
+  call UnpackCount(count[opp], left[opp], right[opp], count[left[opp]], count[right[opp]], opp);
 	packedCount[opp] := false;
 	fracLeft[opp] := fracLeft[opp] + 0.5;
 	fracRight[opp] := fracRight[opp] + 0.5;
 
-	assert ((this == right[parent[this]]) || (this == left[parent[this]]) );
 	if (this == right[parent[this]]) {
-		fracRight[opp] := 0.5 + 0.5;
-
 		call UnpackRight(this, lcc, parent[opp], opp);
 		packedRight[opp] := false;
 		if (this != null) { fracCount[this] := fracCount[this] + 0.5; }
@@ -370,14 +371,13 @@ if (parent[this] != null) {
 		
 		fracParent[parent[this]] := fracParent[parent[this]] + 0.001;
 	}
-	else if (this == left[parent[this]]) { 
-		fracLeft[opp] := 0.5 + 0.5;
+	else  { 
 		call UnpackLeft(this, lcc, parent[opp], opp);
 		packedLeft[opp] := false;
 		if (this != null) { fracCount[this] := fracCount[this] + 0.5; }
 		// TODO do I need this now. Why?
 		fracCount[this] := 0.5 + 0.5;
-  
+
 		call updateCount(this, lcc, ol, or, opp, lc, rc, count[opp]);
 
 		fracLeft[this] := fracLeft[this] - 0.5;
@@ -402,7 +402,7 @@ if (parent[this] != null) {
 		call PackLeft(this, lc + rc + 1, parent[opp], opp);
 		packedLeft[opp] := true;
 		if (this != null) { fracCount[this] := fracCount[this] - 0.5;}
-		call updateCountRec(opp, parent[opp], count[opp], this, right[opp], count[left[opp]], lc + rc + 1);
+		call updateCountRec(opp, parent[opp], count[opp], this, right[opp], lc + rc + 1, count[right[opp]]);
 		if (parent[opp] != null) { 
 			fracParent[parent[opp]] := fracParent[parent[opp]] / 2.0; 
 		} 
@@ -420,7 +420,8 @@ if (parent[this] != null) {
 		fracRight[parent[this]] := fracRight[parent[this]] - 0.5;
 		
 		fracParent[parent[this]] := fracParent[parent[this]] + 0.001;
-	}
+
+	} 
 
 }
 else { 

@@ -377,7 +377,6 @@ if (parent[this] != null) {
 	fracLeft[opp] := fracLeft[opp] + 0.5;
 	fracRight[opp] := fracRight[opp] + 0.5;
 
-	assert ((this == right[parent[this]]) || (this == left[parent[this]]) );
 	if (this == right[parent[this]]) {
 		fracRight[opp] := 0.5 + 0.5;
 
