@@ -148,7 +148,7 @@ requires (fracCount[this] == 1.0);
 requires (count[this] == c);
 requires (parent[this] == op);
 requires (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (count[op] == c3));
-
+requires (forall x:Ref :: ((x!=this) && (x!=op) ==>  packedCount[x]));
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
 ensures (count[this] == c1 + c2 + 1 );  
