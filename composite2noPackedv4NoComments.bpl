@@ -270,7 +270,7 @@ requires (forall y:Ref ::  packedRight[y] ) ;
 
 ensures packedParent[this]; 
 ensures packedCount[this];
-ensures count[this] == lc+rc+1;  
+ensures count[this] == count[this];  
 ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0) );  
 ensures (forall y:Ref :: packedParent[y] );
 
