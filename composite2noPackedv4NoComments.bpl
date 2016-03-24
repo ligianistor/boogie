@@ -158,7 +158,6 @@ ensures (forall y:Ref :: ( (y!=this) ==> (fracLeft[y] == old(fracLeft[y]) ) ) );
 ensures (forall y:Ref :: (packedRight[y] == old(packedRight[y]) ) );
 ensures (forall y:Ref :: (packedLeft[y] == old(packedLeft[y]) ) );
 ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
-ensures (forall y:Ref :: ((y!=this) ==> (count[y] == old(count[y]) ) ) );
 ensures (forall y:Ref :: ( (this!=y)  ==> (packedCount[y] == old(packedCount[y])) ) );
 {
 var newc : int;
@@ -269,12 +268,8 @@ requires (forall y:Ref ::  packedLeft[y] ) ;
 requires (forall y:Ref ::  packedRight[y] ) ;
 
 ensures packedParent[this]; 
-ensures packedCount[this];
-ensures count[this] == count[this];  
 ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0) );  
 ensures (forall y:Ref :: packedParent[y] );
-
-ensures (forall y:Ref :: packedCount[y]);
 
 //For the one above I also have to look at the post-condition of the methods called
 //inside this method and see if any objects are packed (that were unpacked before entering the method)
