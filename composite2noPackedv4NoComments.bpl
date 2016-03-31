@@ -268,8 +268,9 @@ requires (forall y:Ref ::  packedLeft[y] ) ;
 requires (forall y:Ref ::  packedRight[y] ) ;
 
 ensures packedParent[this]; 
-ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0) );  
-ensures (forall y:Ref :: packedParent[y] );
+ensures (fracParent[this] > 0.0);
+ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
+ensures (forall y:Ref :: packedParent[y]);
 
 //For the one above I also have to look at the post-condition of the methods called
 //inside this method and see if any objects are packed (that were unpacked before entering the method)
