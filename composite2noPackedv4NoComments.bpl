@@ -135,6 +135,9 @@ procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, op:Ref, c1:int, c2:int, 
 modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight;
 requires this != null;
+// I need to add this to Composite.java
+// Optional optimization: if the arguments are exacly right[this] for this field, so it would be
+// right[this] == right[this]
 requires (op!=null) ==> ( ((packedLeft[op]==false)&& (fracLeft[op]>0.0))  || ((packedRight[op]==false)&& (fracRight[op]>0.0)) );
 requires packedLeft[this];
 requires (fracLeft[this] >= 0.5);
@@ -272,6 +275,9 @@ requires (forall y:Ref ::  packedRight[y] ) ;
 
 ensures packedParent[this]; 
 ensures (fracParent[this] > 0.0);
+// for all fracPred and packedPred in the modifies,
+// look if something like below can be inferred and written.
+//Only if it's easy to write something like this, write it.
 ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
 ensures (forall y:Ref :: packedParent[y]);
 
