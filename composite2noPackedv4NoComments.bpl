@@ -135,6 +135,7 @@ procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, op:Ref, c1:int, c2:int, 
 modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight;
 requires this != null;
+requires (op!=null) ==> ( ((packedLeft[op]==false)&& (fracLeft[op]>0.0))  || ((packedRight[op]==false)&& (fracRight[op]>0.0)) );
 requires packedLeft[this];
 requires (fracLeft[this] >= 0.5);
 requires (left[this] == ol);
@@ -149,6 +150,8 @@ requires (count[this] == c);
 requires (parent[this] == op);
 requires (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (count[op] == c3));
 requires (forall x:Ref :: ((x!=this) && (x!=op) ==>  packedCount[x]));
+requires (forall x:Ref :: ( (x!=op) ==> packedLeft[x]));
+requires (forall x:Ref :: ( (x!=op) ==> packedRight[x]));
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
 ensures (count[this] == c1 + c2 + 1 );  
