@@ -273,6 +273,7 @@ requires (forall y:Ref :: ((y!=this) ==> packedCount[y]));
 requires (forall y:Ref ::  packedLeft[y] ) ;
 requires (forall y:Ref ::  packedRight[y] ) ;
 
+// how do we say in this example which is the invariant?
 ensures packedParent[this]; 
 ensures (fracParent[this] > 0.0);
 // for all fracPred and packedPred in the modifies,
@@ -280,6 +281,9 @@ ensures (fracParent[this] > 0.0);
 //Only if it's easy to write something like this, write it.
 ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
 ensures (forall y:Ref :: packedParent[y]);
+// I am writing ensures forall similar to the ones above for all the
+// global variables from modifies for which I can easily write
+// these ensures forall.
 
 //For the one above I also have to look at the post-condition of the methods called
 //inside this method and see if any objects are packed (that were unpacked before entering the method)
