@@ -1,6 +1,5 @@
 public interface Sum {
     public int calculateSum();
-    public void displaySum();
 }
 
 //on System A 
@@ -18,6 +17,8 @@ class RealSum implements Sum {
     /**
      * Acually calculates the sum.
      */
+// This can be transformed into the
+// iterative version of the sum.
     private void calculateRealSum(int n) {
         this.sum = n * (n+1) / 2;
     }
@@ -28,11 +29,6 @@ class RealSum implements Sum {
     public int calculateSum() { 
        return sum;
     }
-
-	@Override
-	public void displaySum() {
-		System.out.println(sum);	
-	}
 
 }
 
@@ -57,12 +53,6 @@ class ProxySum implements Sum {
         } 
       return realSum.calculateSum();
     }
-    
-	@Override
-	public void displaySum() {
-		System.out.println(realSum.calculateSum());	
-	}
-
 }
 
 class ProxyExample {
@@ -75,15 +65,10 @@ class ProxyExample {
         final Sum sum2 = new ProxySum(3);
         
         sum1.calculateSum(); // calculation necessary
-        sum1.displaySum();
         sum1.calculateSum(); // calculation unnecessary
-        sum1.displaySum();
         sum2.calculateSum(); // calculation necessary
-        sum2.displaySum();
         sum2.calculateSum(); // calculation unnecessary
-        sum2.displaySum();
         sum1.calculateSum(); // calculation unnecessary
-        sum1.displaySum();
     }
 }
 

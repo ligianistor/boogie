@@ -1,3 +1,7 @@
+//In Oprop, the order of declaration of methods matters and you cannot use a method without declaring it first.
+//Same as in C++.
+//TODO
+
 type Ref;
 const null: Ref;
 
@@ -78,6 +82,9 @@ ensures (left[this] == ol);
 ensures (count[ol] == lc);
 ensures (c == lc + rc + 1);
 
+
+// By the fact that I don't require packedParent[op] to be true,
+// I assume that it will be true at some point.
 procedure PackParent(op:Ref, c:int, this:Ref);
 requires (parent[this] == op);
 requires (packedParent[this] == false);

@@ -29,6 +29,16 @@ class StateMultipleUpperCase implements Statelike {
     
 }
 
+
+The other three examples are implementations of the state, proxy and flyweight design patterns.
+
+---
+
+Developing a formal verification system that is powerful, modular, and provides good support for automation is challenging.  In this paper, we explore the expressiveness and modularity of our recently proposed object propositions verification system, using two examples.  The first example is a spreadsheet of simple cells that add their inputs and share their output with other spreadsheet cells.  The second example is a simulator for two queues of jobs, one containing large jobs the other small jobs, along with a producer, consumer, and controller. The examples illustrate challenges for modular reasoning in the presence of shared state.  We specify the examples using object propositions, prove their correctness, and then compare to separation logic specifications with respect to modularity. 
+
+-----
+
+Verifying Software Design Patterns Using Object Propositions: the Observer and the Producer-Consumer Patterns
 --------
 
 class StateContext {
