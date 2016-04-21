@@ -165,6 +165,8 @@ requires (forall x:Ref :: ( (x!=op) ==> packedRight[x]));
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
 ensures (count[this] == c1 + c2 + 1 );  
+ensures (op!=null) ==> ( ((packedLeft[op]==false)&& (fracLeft[op]>0.0))  || ((packedRight[op]==false)&& (fracRight[op]>0.0)) );
+ensures (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (count[op] == c3));
 
 ensures (forall y:Ref :: ( (y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
 ensures (forall y:Ref :: ( (y!=this) ==> (fracLeft[y] == old(fracLeft[y]) ) ) );
@@ -535,7 +537,7 @@ if (parent[l] == null) {
 
 	fracLeft[this] := 0.5 + 0.5;
   
-  call UnpackLeft(null, 0, parent[this], this);
+        call UnpackLeft(null, 0, parent[this], this);
 	packedLeft[this] := false;
 
   	left[this] := l;
