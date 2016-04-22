@@ -290,6 +290,9 @@ ensures (fracParent[this] > 0.0);
 //Only if it's easy to write something like this, write it.
 ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
 ensures (forall y:Ref :: packedParent[y]);
+ensures (forall y:Ref :: packedCount[y]);
+ensures (forall y:Ref :: packedRight[y]);
+ensures (forall y:Ref :: packedLeft[y]);
 // I am writing ensures forall similar to the ones above for all the
 // global variables from modifies for which I can easily write
 // these ensures forall.
@@ -492,6 +495,10 @@ requires (forall y:Ref ::  packedRight[y] ) ;
 requires (forall y:Ref ::  packedParent[y] ) ;
 ensures packedParent[this];
 ensures fracParent[this] > 0.0;
+ensures (forall y:Ref ::  packedParent[y]);
+ensures (forall y:Ref :: packedCount[y]);
+ensures (forall y:Ref :: packedRight[y]);
+ensures (forall y:Ref :: packedLeft[y]);
  {
 var lcc : int;
 var or : Ref;
@@ -585,6 +592,29 @@ if (parent[l] == null) {
 	fracRight[this] := fracRight[this] - 0.5;
 	
 	fracParent[this] := fracParent[this] + 0.001;
+} else {
+	call PackParent(parent[l], count[l], l);
+  	packedParent[l] := true;
+	fracCount[l] := fracCount[l] - 0.5;
+
+	if (parent[l] != null) { 
+		fracParent[parent[l]] := fracParent[parent[l]] / 2.0; 
+	}
+
+	if ((parent[l] != null) && (left[parent[l]] == l)) {
+		fracLeft[parent[l]] := fracLeft[parent[l]] - 0.5;
+	}
+
+	if ((parent[l] != null) && (right[parent[l]] == l)) {
+		fracRight[parent[l]] := fracRight[parent[l]] - 0.5;
+	}
+
+	if (parent[l] == null) {
+		fracCount[l] := fracCount[l] - 0.5;
+	}
+
+
+
 }
    
 }
