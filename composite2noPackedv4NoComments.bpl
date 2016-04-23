@@ -2,6 +2,11 @@
 //Same as in C++.
 //TODO
 
+// TODO For PackParent and UnpackParent (and the other Pack/Unpack procedures) it's ok to add and subtract from the 
+//current values of the fractions, but for the normal procedures it has to be put in the ensures , with old, clauses 
+// how each frac has been modified, if possible to deduce from the other clauses in the postconditions.
+
+
 type Ref;
 const null: Ref;
 
@@ -164,9 +169,12 @@ requires (forall x:Ref :: ( (x!=op) ==> packedLeft[x]));
 requires (forall x:Ref :: ( (x!=op) ==> packedRight[x]));
 ensures (fracCount[this] == 1.0);
 ensures packedCount[this];
-ensures (count[this] == c1 + c2 + 1 );  
+ensures (count[this] == c1 + c2 + 1 ); 
+// Explicitly write in the postconditions the fracs that have changed so that I can deduce the ensures forall related to fracs. 
 ensures (op!=null) ==> ( ((packedLeft[op]==false)&& (fracLeft[op]>0.0))  || ((packedRight[op]==false)&& (fracRight[op]>0.0)) );
 ensures (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (count[op] == c3));
+// For the line below I might need to give the whole object proposition in Oprop.
+ensures (fracLeft[this] >= 0.0) && (fracRight[this] >= 0.0);
 
 ensures (forall y:Ref :: ( (y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
 ensures (forall y:Ref :: ( (y!=this) ==> (fracLeft[y] == old(fracLeft[y]) ) ) );
@@ -289,6 +297,9 @@ ensures (fracParent[this] > 0.0);
 // look if something like below can be inferred and written.
 //Only if it's easy to write something like this, write it.
 ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
+ensures (forall y:Ref :: (old(fracLeft[y]) > 0.0) ==> (fracLeft[y] > 0.0)); 
+ensures (forall y:Ref :: (old(fracRight[y]) > 0.0) ==> (fracRight[y] > 0.0)); 
+ensures (forall y:Ref :: (old(fracCount[y]) > 0.0) ==> (fracCount[y] > 0.0)); 
 ensures (forall y:Ref :: packedParent[y]);
 ensures (forall y:Ref :: packedCount[y]);
 ensures (forall y:Ref :: packedRight[y]);
