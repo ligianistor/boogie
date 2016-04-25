@@ -496,6 +496,10 @@ ensures (forall y:Ref ::  packedParent[y]);
 ensures (forall y:Ref :: packedCount[y]);
 ensures (forall y:Ref :: packedRight[y]);
 ensures (forall y:Ref :: packedLeft[y]);
+ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
+ensures (forall y:Ref :: (old(fracLeft[y]) > 0.0) ==> (fracLeft[y] > 0.0)); 
+ensures (forall y:Ref :: (old(fracRight[y]) > 0.0) ==> (fracRight[y] > 0.0)); 
+ensures (forall y:Ref :: (old(fracCount[y]) > 0.0) ==> (fracCount[y] > 0.0)); 
  {
 var lcc : int;
 var or : Ref;
@@ -609,8 +613,6 @@ if (parent[l] == null) {
 	if (parent[l] == null) {
 		fracCount[l] := fracCount[l] - 0.5;
 	}
-
-
 
 }
    
