@@ -150,6 +150,8 @@ requires this != null;
 // I need to add this to Composite.java
 // Optional optimization: if the arguments are exacly right[this] for this field, so it would be
 // right[this] == right[this]
+//TODO need to split this below in two 
+// and add the free ensures for it and the multiplications after the call
 requires (op!=null) ==> ( ((packedLeft[op]==false)&& (fracLeft[op]>0.0))  || ((packedRight[op]==false)&& (fracRight[op]>0.0)) );
 requires packedLeft[this];
 requires (fracLeft[this] >= 0.5);
@@ -176,19 +178,17 @@ ensures (count[this] == c1 + c2 + 1 );
 ensures (op!=null) ==> ( ((packedLeft[op]==false)&& (fracLeft[op]>0.0))  || ((packedRight[op]==false)&& (fracRight[op]>0.0)) );
 ensures (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (count[op] == c3));
 // TODO For the line below I might need to give the whole object proposition in Oprop.
-ensures (packedLeft[this] && (fracLeft[this] >= 0.0)) && (packedRight[this] && (fracRight[this] >= 0.0));
 //TODO also need to add a free ensures here related to fracLeft and fracRight.
 
-free ensures (fracCount[this] == old(fracCount[this]) - 0.5);
+free ensures (fracCount[this] == old(fracCount[this]) - 1.0);
 free ensures (fracLeft[this] == old(fracLeft[this]) - 0.5);
 free ensures (fracRight[this] == old(fracRight[this]) - 0.5);
 free ensures ((op!=null) ==> (fracCount[op] == old(fracCount[op]) / 2.0));
 
-ensures (forall y:Ref :: ( (y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
-ensures (forall y:Ref :: ( (y!=this) ==> (fracLeft[y] == old(fracLeft[y]) ) ) );
+
 ensures (forall y:Ref :: (packedRight[y] == old(packedRight[y]) ) );
 ensures (forall y:Ref :: (packedLeft[y] == old(packedLeft[y]) ) );
-ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
+
 ensures (forall y:Ref :: ( (this!=y)  ==> (packedCount[y] == old(packedCount[y])) ) );
 {
 var newc : int;
@@ -309,23 +309,20 @@ ensures (fracParent[this] > 0.0);
 // For the postconditions, just do the same thing as today, add the additions and subtraction
 // statements written after the calls.
 
-ensures ((opp!=null) ==> (fracParent[opp] == (old(fracParent[opp]) / 2.0)));
-ensures (((opp!=null) && (left[opp] == this)) ==> (fracLeft[opp] == (old(fracLeft[opp]) - 0.5)));
-ensures (((opp!=null) && (right[opp] == this)) ==> (fracRight[opp] == (old(fracRight[opp]) - 0.5)));
-ensures ((opp==null) ==> (fracCount[this] == (old(fracCount[this]) - 1.0)));
-ensures ((opp!=null) ==> (fracCount[this] == (old(fracCount[this]) - 0.5)));
-ensures (fracLeft[this] == old(fracLeft[this]) - 0.5);
-ensures (fracRight[this] == old(fracRight[this]) - 0.5);
+free ensures ((opp!=null) ==> (fracParent[opp] == (old(fracParent[opp]) / 2.0)));
+free ensures (((opp!=null) && (left[opp] == this)) ==> (fracLeft[opp] == (old(fracLeft[opp]) - 0.5)));
+free ensures (((opp!=null) && (right[opp] == this)) ==> (fracRight[opp] == (old(fracRight[opp]) - 0.5)));
+free ensures ((opp==null) ==> (fracCount[this] == (old(fracCount[this]) - 1.0)));
+free ensures ((opp!=null) ==> (fracCount[this] == (old(fracCount[this]) - 0.5)));
+free ensures (fracLeft[this] == old(fracLeft[this]) - 0.5);
+free ensures (fracRight[this] == old(fracRight[this]) - 0.5);
 
 // for all fracPred and packedPred in the modifies,
 // look if something like below can be inferred and written.
 //Only if it's easy to write something like this, write it.
 // These are general statements, so it's OK to write the additions and subtractions 
 // related to the postconditions of methods after the calls to those methods.
-ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
-ensures (forall y:Ref :: (old(fracLeft[y]) > 0.0) ==> (fracLeft[y] > 0.0)); 
-ensures (forall y:Ref :: (old(fracRight[y]) > 0.0) ==> (fracRight[y] > 0.0)); 
-ensures (forall y:Ref :: (old(fracCount[y]) > 0.0) ==> (fracCount[y] > 0.0)); 
+
 ensures (forall y:Ref :: packedParent[y]);
 ensures (forall y:Ref :: packedCount[y]);
 ensures (forall y:Ref :: packedRight[y]);
@@ -496,11 +493,7 @@ ensures (forall y:Ref ::  packedParent[y]);
 ensures (forall y:Ref :: packedCount[y]);
 ensures (forall y:Ref :: packedRight[y]);
 ensures (forall y:Ref :: packedLeft[y]);
-ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
-ensures (forall y:Ref :: (old(fracLeft[y]) > 0.0) ==> (fracLeft[y] > 0.0)); 
-ensures (forall y:Ref :: (old(fracRight[y]) > 0.0) ==> (fracRight[y] > 0.0)); 
-ensures (forall y:Ref :: (old(fracCount[y]) > 0.0) ==> (fracCount[y] > 0.0)); 
- {
+{
 var lcc : int;
 var or : Ref;
 
