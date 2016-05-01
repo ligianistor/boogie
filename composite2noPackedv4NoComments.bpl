@@ -150,6 +150,9 @@ requires this != null;
 // I need to add this to Composite.java
 // Optional optimization: if the arguments are exacly right[this] for this field, so it would be
 // right[this] == right[this]
+// If I have the exact same requires and ensures, then they annihilate each other and I do not need to write 
+// statements related to them. This refers to the first requires and to the 
+// 14th.
 requires (op!=null) ==> ( ((packedLeft[op]==false)&& (fracLeft[op]>0.0))  || ((packedRight[op]==false)&& (fracRight[op]>0.0)) );
 requires packedLeft[this];
 requires (fracLeft[this] >= 0.5);
@@ -297,7 +300,7 @@ ensures (fracParent[this] > 0.0);
 // look if something like below can be inferred and written.
 //Only if it's easy to write something like this, write it.
 ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
-//ensures (forall y:Ref :: (old(fracLeft[y]) > 0.0) ==> (fracLeft[y] > 0.0)); 
+ensures (forall y:Ref :: (old(fracLeft[y]) > 0.0) ==> (fracLeft[y] > 0.0)); 
 //ensures (forall y:Ref :: (old(fracRight[y]) > 0.0) ==> (fracRight[y] > 0.0)); 
 //ensures (forall y:Ref :: (old(fracCount[y]) > 0.0) ==> (fracCount[y] > 0.0)); 
 ensures (forall y:Ref :: packedParent[y]);
@@ -338,7 +341,8 @@ if (parent[this] != null) {
 		fracRight[parent[opp]] := fracRight[parent[opp]] + 0.5; 
 	}
 	if (parent[opp] == null) { fracCount[opp] := fracCount[opp] + 0.5; }
-  call UnpackCount(count[opp], left[opp], right[opp], count[left[opp]], count[right[opp]], opp);
+// TODO add indentation to show which are annotations and which are the proper statements in the program.
+	call UnpackCount(count[opp], left[opp], right[opp], count[left[opp]], count[right[opp]], opp);
 	packedCount[opp] := false;
 	fracLeft[opp] := fracLeft[opp] + 0.5;
 	fracRight[opp] := fracRight[opp] + 0.5;
@@ -451,7 +455,7 @@ if (parent[this] != null) {
 else { 
 	fracCount[this] := 0.5 + 0.5;
   	call updateCount(this, lcc, ol, or, opp, lc, rc, count[opp]);
-	fracLeft[this] := fracLeft[this] - 0.5;
+	//fracLeft[this] := fracLeft[this] - 0.5;
 	fracRight[this] := fracRight[this] - 0.5;
 	if (opp != null) {
 		fracCount[opp] := fracCount[opp] / 2.0;
@@ -462,9 +466,9 @@ else {
 	packedParent[this] := true; 
 	fracCount[this] := fracCount[this] - 0.5;
 	if (opp!=null) { fracParent[opp] := fracParent[opp] / 2.0; }
-	if ((opp != null) && (left[opp] == this)) {
-		fracLeft[opp] := fracLeft[opp] - 0.5;
-	}
+	//if ((opp != null) && (left[opp] == this)) {
+	//	fracLeft[opp] := fracLeft[opp] - 0.5;
+	//}
 	if ((opp != null) && (right[opp] == this)) {
 		fracRight[opp] := fracRight[opp] - 0.5;
 	}
