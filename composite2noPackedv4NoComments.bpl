@@ -398,8 +398,6 @@ if (parent[this] != null) {
 		}
 		fracLeft[parent[this]] := fracLeft[parent[this]] - 0.5;
 		fracRight[parent[this]] := fracRight[parent[this]] - 0.5;
-		
-		fracParent[parent[this]] := fracParent[parent[this]] + 0.001;
 	}
 	else  { 
 		call UnpackLeft(this, lcc, parent[opp], opp);
@@ -447,9 +445,6 @@ if (parent[this] != null) {
 		}
 		fracLeft[parent[this]] := fracLeft[parent[this]] - 0.5;
 		fracRight[parent[this]] := fracRight[parent[this]] - 0.5;
-		
-		fracParent[parent[this]] := fracParent[parent[this]] + 0.001;
-
 	} 
 
 }
@@ -583,7 +578,9 @@ if (parent[l] == null) {
 		fracCount[l] := fracCount[l] - 0.5;
 	}
 
-	call updateCountRec(this, parent[this], lcc, l, right[this], count[l], count[right[this]]);
+	call updateCountRec(this, parent[this], lcc, l, right[this], count[l], count[right[this]]);	
+	// The fraction statements about fracParent[this] are both in the pre and postcondition
+	// and they annihilate each other.
 	if (parent[this] != null) { 
 		fracParent[parent[this]] := fracParent[parent[this]] / 2.0; } 
 	if ((parent[this] != null) && (left[parent[this]] == this)) {
@@ -597,8 +594,6 @@ if (parent[l] == null) {
 	}
 	fracLeft[this] := fracLeft[this] - 0.5;
 	fracRight[this] := fracRight[this] - 0.5;
-	
-	fracParent[this] := fracParent[this] + 0.001;
 } else {
 	call PackParent(parent[l], count[l], l);
   	packedParent[l] := true;
