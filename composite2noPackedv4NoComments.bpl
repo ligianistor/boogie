@@ -177,7 +177,9 @@ ensures (count[this] == c1 + c2 + 1 );
 ensures (op!=null) ==> ( ((packedLeft[op]==false)&& (fracLeft[op]>0.0))  || ((packedRight[op]==false)&& (fracRight[op]>0.0)) );
 ensures (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (count[op] == c3));
 // For the line below I might need to give the whole object proposition in Oprop.
-ensures (fracLeft[this] >= 0.0) && (fracRight[this] >= 0.0);
+// TODO rethink of the whole proof with > 0.5 instead of >=0.5
+// especially since I cannot give the below except enclosed in an object proposition
+ensures (fracLeft[this] > 0.0) && (fracRight[this] > 0.0);
 
 ensures (forall y:Ref :: ( (y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
 ensures (forall y:Ref :: ( (y!=this) ==> (fracLeft[y] == old(fracLeft[y]) ) ) );
