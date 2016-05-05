@@ -177,8 +177,10 @@ ensures (count[this] == c1 + c2 + 1 );
 ensures (op!=null) ==> ( ((packedLeft[op]==false)&& (fracLeft[op]>0.0))  || ((packedRight[op]==false)&& (fracRight[op]>0.0)) );
 ensures (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (count[op] == c3));
 // For the line below I might need to give the whole object proposition in Oprop.
-// TODO rethink of the whole proof with > 0.5 instead of >=0.5
-// especially since I cannot give the below except enclosed in an object proposition
+// I need to give the below enclosed in an object proposition, but I need to say that the fraction is 
+// >=0.0. This is mostly written, by the programmer, to know what are the fractions that have changed. 
+// Since all fractions are >=0.0, this does not need to be expressed in the fraction manipulations
+// after the call to updateCount().
 ensures (fracLeft[this] >= 0.0) && (fracRight[this] >= 0.0);
 
 ensures (forall y:Ref :: ( (y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
@@ -508,6 +510,8 @@ requires (forall y:Ref ::  packedRight[y] ) ;
 requires (forall y:Ref ::  packedParent[y] ) ;
 ensures packedParent[this];
 ensures fracParent[this] > 0.0;
+ensures fracParent[l] > 0.0;
+ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));
 ensures (forall y:Ref ::  packedParent[y]);
 ensures (forall y:Ref :: packedCount[y]);
 ensures (forall y:Ref :: packedRight[y]);
