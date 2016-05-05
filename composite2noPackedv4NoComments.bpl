@@ -179,7 +179,7 @@ ensures (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (
 // For the line below I might need to give the whole object proposition in Oprop.
 // TODO rethink of the whole proof with > 0.5 instead of >=0.5
 // especially since I cannot give the below except enclosed in an object proposition
-ensures (fracLeft[this] > 0.0) && (fracRight[this] > 0.0);
+ensures (fracLeft[this] >= 0.0) && (fracRight[this] >= 0.0);
 
 ensures (forall y:Ref :: ( (y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
 ensures (forall y:Ref :: ( (y!=this) ==> (fracLeft[y] == old(fracLeft[y]) ) ) );
@@ -298,13 +298,18 @@ requires (forall y:Ref ::  packedRight[y] ) ;
 // how do we say in this example which is the invariant?
 ensures packedParent[this]; 
 ensures (fracParent[this] > 0.0);
+ensures  (opp != null) ==> (fracParent[opp] > 0.0) ;
+// If there are no ensures about some fractions, it means we don't know what happened to them
+// and will not be able to ensure the foralls for them.
+// Whatever ensures we infer they have to be infered from the pre- and post-conditions
+// not from the static analysis of the body methods.
 // for all fracPred and packedPred in the modifies,
 // look if something like below can be inferred and written.
-//Only if it's easy to write something like this, write it.
+// Only if it's easy to write something like this, write it.
 ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
-ensures (forall y:Ref :: (old(fracLeft[y]) > 0.0) ==> (fracLeft[y] > 0.0)); 
-//ensures (forall y:Ref :: (old(fracRight[y]) > 0.0) ==> (fracRight[y] > 0.0)); 
-//ensures (forall y:Ref :: (old(fracCount[y]) > 0.0) ==> (fracCount[y] > 0.0)); 
+// The ensures forall above is weaker than the ones of updateCount().
+// To decide which one to infer, we do a quick scan of the method body.
+
 ensures (forall y:Ref :: packedParent[y]);
 ensures (forall y:Ref :: packedCount[y]);
 ensures (forall y:Ref :: packedRight[y]);
