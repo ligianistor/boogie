@@ -181,6 +181,8 @@ ensures (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (
 // >=0.0. This is mostly written, by the programmer, to know what are the fractions that have changed. 
 // Since all fractions are >=0.0, this does not need to be expressed in the fraction manipulations
 // after the call to updateCount().
+// Or I can write obj@0.0 Pred(), this being a special case of object propositions
+// meaning I don't have a fraction to this predicate anymore. 
 ensures (fracLeft[this] >= 0.0) && (fracRight[this] >= 0.0);
 
 ensures (forall y:Ref :: ( (y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
