@@ -297,7 +297,7 @@ assume (forall y:Ref :: (fracCount[y] >= 0.0) );
 assume (forall y:Ref :: (fracParent[y] >= 0.0) );
 
 if (parent[this] != null) {
-
+// TODO see if I should put a splitFrac here
 	call UnpackParent(parent[opp], count[opp], opp);
 	packedParent[opp] := false;
 	fracCount[opp] := fracCount[opp] + 0.5;
@@ -460,6 +460,7 @@ requires (forall y:Ref ::  packedParent[y] ) ;
 ensures packedParent[this];
 ensures fracParent[this] > 0.0;
 ensures fracParent[l] > 0.0;
+ensures packedParent[l];
 ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));
 ensures (forall y:Ref ::  packedParent[y]);
 ensures (forall y:Ref :: packedCount[y]);
