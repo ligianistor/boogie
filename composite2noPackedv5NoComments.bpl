@@ -152,18 +152,18 @@ ensures packedCount[this];
 ensures (count[this] == c1 + c2 + 1 ); 
 ensures (op!=null) ==> ( ((packedLeft[op]==false)&& (fracLeft[op]>0.0))  || ((packedRight[op]==false)&& (fracRight[op]>0.0)) );
 ensures (op!=null) ==> ((packedCount[op] == false) && (fracCount[op] > 0.0) && (count[op] == c3));
-ensures (fracLeft[this] >= 0.0) && (fracRight[this] >= 0.0);
+ensures (fracLeft[this] >= 0.0) && packedLeft[this] && (fracRight[this] >= 0.0) && packedRight[this];
 
 requires (forall x:Ref :: ((x!=this) && (x!=op) ==>  packedCount[x]));
 requires (forall x:Ref :: ( (x!=op) ==> packedLeft[x]));
 requires (forall x:Ref :: ( (x!=op) ==> packedRight[x]));
 
-ensures (forall y:Ref :: ( (y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
-ensures (forall y:Ref :: ( (y!=this) ==> (fracLeft[y] == old(fracLeft[y]) ) ) );
 ensures (forall y:Ref :: (packedRight[y] == old(packedRight[y]) ) );
 ensures (forall y:Ref :: (packedLeft[y] == old(packedLeft[y]) ) );
-ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
 ensures (forall y:Ref :: ( (this!=y)  ==> (packedCount[y] == old(packedCount[y])) ) );
+ensures (forall y:Ref :: ( (y!=this) ==> (fracRight[y] == old(fracRight[y]) ) ) );
+ensures (forall y:Ref :: ( (y!=this) ==> (fracLeft[y] == old(fracLeft[y]) ) ) );
+ensures (forall y:Ref :: (fracCount[y] == old(fracCount[y]) ) );
 {
 var newc : int;
 var ol1: Ref;
