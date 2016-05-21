@@ -330,8 +330,6 @@ if (parent[this] != null) {
 		fracCount[this] := 0.5 + 0.5;
 
 		call updateCount(this, lcc, ol, or, opp, lc, rc, count[opp]);
-		fracLeft[this] := fracLeft[this] - 0.5;
-		fracRight[this] := fracRight[this] - 0.5;
 		if (opp!=null) { fracCount[opp] := fracCount[opp] / 2.0; }
 
 		fracCount[this] := 1.0;
@@ -377,8 +375,6 @@ if (parent[this] != null) {
 		fracCount[this] := 0.5 + 0.5;
 
 		call updateCount(this, lcc, ol, or, opp, lc, rc, count[opp]);
-		fracLeft[this] := fracLeft[this] - 0.5;
-		fracRight[this] := fracRight[this] - 0.5;
 		if (opp!=null) { fracCount[opp] := fracCount[opp] / 2.0; }
 		fracCount[this] := 1.0;
 
@@ -421,8 +417,6 @@ if (parent[this] != null) {
 else { 
 	fracCount[this] := 0.5 + 0.5;
   	call updateCount(this, lcc, ol, or, opp, lc, rc, count[opp]);
-	fracLeft[this] := fracLeft[this] - 0.5;
-	fracRight[this] := fracRight[this] - 0.5;
 	if (opp != null) {
 		fracCount[opp] := fracCount[opp] / 2.0;
 	}
