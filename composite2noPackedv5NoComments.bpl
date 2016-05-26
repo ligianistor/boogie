@@ -284,6 +284,8 @@ requires (forall y:Ref ::  packedRight[y] ) ;
 
 ensures packedParent[this]; 
 ensures (fracParent[this] > 0.0);
+ensures  (opp != null) ==>
+	(fracParent[opp] > 0.0) && packedParent[opp];
 ensures  (opp != null) ==> (fracParent[opp] > 0.0) ;
 ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
 
