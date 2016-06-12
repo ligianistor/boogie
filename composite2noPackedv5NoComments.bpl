@@ -268,8 +268,8 @@ requires (fracLeft[this] >= 0.5);
 requires (left[this] == ol);
 requires (count[left[this]] == lc);
 
-requires (fracRight[this] >= 0.5);
 requires packedRight[this];
+requires (fracRight[this] >= 0.5);
 requires (right[this] == or);
 requires (count[right[this]] == rc);
 
@@ -286,13 +286,9 @@ ensures packedParent[this];
 ensures (fracParent[this] > 0.0);
 ensures  (opp != null) ==>
 	(fracParent[opp] > 0.0) && packedParent[opp];
-ensures  (opp != null) ==> (fracParent[opp] > 0.0) ;
-ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
 
+ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
 ensures (forall y:Ref :: packedParent[y]);
-ensures (forall y:Ref :: packedCount[y]);
-ensures (forall y:Ref :: packedRight[y]);
-ensures (forall y:Ref :: packedLeft[y]);
 {
 var oll : Ref;
 var orr : Ref;
@@ -454,7 +450,6 @@ requires packedParent[this];
 requires fracParent[this] > 0.0;
 requires fracParent[l] > 0.0;
 requires packedParent[l];
-
 requires (forall y:Ref :: packedLeft[y]);
 requires (forall y:Ref :: packedCount[y]);
 requires (forall y:Ref ::  packedRight[y] ) ;
@@ -465,9 +460,6 @@ ensures fracParent[l] > 0.0;
 ensures packedParent[l];
 ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));
 ensures (forall y:Ref ::  packedParent[y]);
-ensures (forall y:Ref :: packedCount[y]);
-ensures (forall y:Ref :: packedRight[y]);
-ensures (forall y:Ref :: packedLeft[y]);
  {
 var lcc : int;
 var or : Ref;
