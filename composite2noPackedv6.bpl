@@ -348,16 +348,9 @@ if (parent[this] != null) {
 		if (this != null) { fracCount[this] := fracCount[this] - 0.5;}
 
 		call updateCountRec(opp, parent[opp], count[opp], left[opp], this, count[left[opp]], lc + rc + 1);
-
-		if ((parent[opp] != null) && (left[parent[opp]] == opp)) {
-			fracLeft[parent[opp]] := 0.0;
-		}
-		if ((parent[opp] != null) && (right[parent[opp]] == opp)) { 
-			fracRight[parent[opp]] := 0.0;
-		}
-		if (parent[opp] == null) { 
-			fracCount[parent[this]] := 0.0; 
-		}
+		fracLeft[parent[opp]] := 0.0;		
+		fracRight[parent[opp]] := 0.0;
+		fracCount[parent[this]] := 0.0; 
 		fracLeft[parent[this]] := 0.0;
 		fracRight[parent[this]] := 0.0;
 
@@ -388,16 +381,9 @@ if (parent[this] != null) {
 		packedLeft[opp] := true;
 		if (this != null) { fracCount[this] := fracCount[this] - 0.5;}
 		call updateCountRec(opp, parent[opp], count[opp], this, right[opp], lc + rc + 1, count[right[opp]]);
-
-		if ((parent[opp] != null) && (left[parent[opp]] == opp)) {
-			fracLeft[parent[opp]] := 0.0;
-		}
-		if ((parent[opp] != null) && (right[parent[opp]] == opp)) { 
-			fracRight[parent[opp]] := 0.0;
-		}
-		if (parent[opp] == null) { 
-			fracCount[parent[this]] := 0.0; 
-		}
+		fracLeft[parent[opp]] := 0.0;
+		fracRight[parent[opp]] := 0.0;
+		fracCount[parent[this]] := 0.0; 
 		fracLeft[parent[this]] := 0.0;
 		fracRight[parent[this]] := 0.0;
 	} 
@@ -525,15 +511,9 @@ if (parent[l] == null) {
 	}
 
 	call updateCountRec(this, parent[this], lcc, l, right[this], count[l], count[right[this]]);	
-	if ((parent[this] != null) && (left[parent[this]] == this)) {
-		fracLeft[parent[this]] := 0.0;
-	}
-	if ((parent[this] != null) && (right[parent[this]] == this)) { 
-		fracRight[parent[this]] := 0.0;
-	}
-	if (parent[this] == null) { 
-		fracCount[this] := 0.0; 
-	}
+	fracLeft[parent[this]] := 0.0;
+	fracRight[parent[this]] := 0.0;
+	fracCount[this] := 0.0; 
 	fracLeft[this] := 0.0;
 	fracRight[this] := 0.0;
 } else {
