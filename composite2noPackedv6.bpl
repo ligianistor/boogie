@@ -127,7 +127,7 @@ procedure ConstructComposite(count1 :int, left1 : Ref, right1 : Ref, parent1 : R
  	 	 (right[this] == right1) &&
  	 	 (parent[this] == parent1); 
 
-procedure updateCount(this: Ref, c:int, ol:Ref, or:Ref, op:Ref, c1:int, c2:int, c3:int)
+procedure updateCount(c:int, ol:Ref, or:Ref, op:Ref, c1:int, c2:int, c3:int, this: Ref)
 modifies count, packedCount, packedLeft, packedRight, 
 	fracCount, fracLeft, fracRight;
 requires this != null;
@@ -234,7 +234,7 @@ fracLeft[this] := fracLeft[this] - 0.5;
 fracRight[this] := fracRight[this] - 0.5;
 }
 
-procedure updateCountRec(this: Ref, opp: Ref, lcc: int, ol: Ref, or: Ref, lc: int, rc: int)
+procedure updateCountRec(opp: Ref, lcc: int, ol: Ref, or: Ref, lc: int, rc: int, this: Ref)
 modifies count, packedCount, packedLeft, packedRight, packedParent,
 	fracCount, fracParent, fracLeft, fracRight;
 // The requires below has to be added automatically to all procedures.
@@ -327,7 +327,7 @@ if (parent[this] != null) {
   
 		fracCount[this] := 0.5 + 0.5;
 
-		call updateCount(this, lcc, ol, or, opp, lc, rc, count[opp]);
+		call updateCount(lcc, ol, or, opp, lc, rc, count[opp], this);
 
 		call PackParent(parent[this], lc + rc + 1, this);
 		packedParent[this] := true;
@@ -347,7 +347,8 @@ if (parent[this] != null) {
 		packedRight[opp] := true;
 		if (this != null) { fracCount[this] := fracCount[this] - 0.5;}
 
-		call updateCountRec(opp, parent[opp], count[opp], left[opp], this, count[left[opp]], lc + rc + 1);
+		call updateCountRec(parent[opp], count[opp], left[opp], this, count[left[opp]], lc + rc + 1, opp);
+
 		fracLeft[parent[opp]] := 0.0;		
 		fracRight[parent[opp]] := 0.0;
 		fracCount[parent[this]] := 0.0; 
@@ -361,7 +362,7 @@ if (parent[this] != null) {
 		if (this != null) { fracCount[this] := fracCount[this] + 0.5; }
 		fracCount[this] := 0.5 + 0.5;
 
-		call updateCount(this, lcc, ol, or, opp, lc, rc, count[opp]);
+		call updateCount(lcc, ol, or, opp, lc, rc, count[opp], this);
 
 		call PackParent(parent[this], lc + rc + 1, this);
 		packedParent[this] := true;
@@ -380,7 +381,7 @@ if (parent[this] != null) {
 		call PackLeft(this, lc + rc + 1, parent[opp], opp);
 		packedLeft[opp] := true;
 		if (this != null) { fracCount[this] := fracCount[this] - 0.5;}
-		call updateCountRec(opp, parent[opp], count[opp], this, right[opp], lc + rc + 1, count[right[opp]]);
+		call updateCountRec(parent[opp], count[opp], this, right[opp], lc + rc + 1, count[right[opp]], opp);
 		fracLeft[parent[opp]] := 0.0;
 		fracRight[parent[opp]] := 0.0;
 		fracCount[parent[this]] := 0.0; 
@@ -391,7 +392,7 @@ if (parent[this] != null) {
 }
 else { 
 	fracCount[this] := 0.5 + 0.5;
-  	call updateCount(this, lcc, ol, or, opp, lc, rc, count[opp]);
+  	call updateCount(lcc, ol, or, opp, lc, rc, count[opp], this);
 
 	call PackParent(parent[this], lc + rc + 1, this);
 	packedParent[this] := true; 
@@ -409,7 +410,7 @@ else {
 }  
 }
 
-procedure setLeft(this: Ref, l:Ref) 
+procedure setLeft(l:Ref, this: Ref) 
 modifies parent, left, count, packedCount, packedLeft, packedParent, packedRight,
 	fracCount, fracParent, fracLeft, fracRight;
 requires this != null;
@@ -510,7 +511,7 @@ if (parent[l] == null) {
 		fracCount[l] := fracCount[l] - 0.5;
 	}
 
-	call updateCountRec(this, parent[this], lcc, l, right[this], count[l], count[right[this]]);	
+	call updateCountRec(parent[this], lcc, l, right[this], count[l], count[right[this]], this);	
 	fracLeft[parent[this]] := 0.0;
 	fracRight[parent[this]] := 0.0;
 	fracCount[this] := 0.0; 
