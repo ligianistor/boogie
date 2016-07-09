@@ -290,11 +290,6 @@ ensures  (opp != null) ==>
 ensures (forall y:Ref :: (old(fracParent[y]) > 0.0) ==> (fracParent[y] > 0.0));  
 ensures (forall y:Ref :: packedParent[y]);
 {
-var oll : Ref;
-var orr : Ref;
-var llc : int;
-var rrc : int;
-
 assume (forall y:Ref :: (fracRight[y] >= 0.0) );
 assume (forall y:Ref :: (fracLeft[y] >= 0.0) );
 assume (forall y:Ref :: (fracCount[y] >= 0.0) );
