@@ -158,7 +158,6 @@ ensures (fracLeft[this] >= 0.0) && packedLeft[this] && (fracRight[this] >= 0.0) 
 // Each item is one part of the &&, which includes the ifcondition and the right part
 // of it, that might include ||.
 // Those can be disregarded in the ensures forall.
-
 requires (forall x:Ref :: ((x!=this) && (x!=op) ==>  packedCount[x]));
 requires (forall x:Ref :: ( (x!=op) ==> packedLeft[x]));
 requires (forall x:Ref :: ( (x!=op) ==> packedRight[x]));
