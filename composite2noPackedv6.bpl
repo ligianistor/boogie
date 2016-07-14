@@ -186,7 +186,6 @@ newc := 1;
 assume (forall y:Ref :: (fracRight[y] >= 0.0) );
 assume (forall y:Ref :: (fracLeft[y] >= 0.0) );
 assume (forall y:Ref :: (fracCount[y] >= 0.0) );
-assume (forall y:Ref :: (fracParent[y] >= 0.0) );
 call UnpackLeft(ol, c1, op, this);
 packedLeft[this] := false;
 if (ol != null) { fracCount[ol] := fracCount[ol] + 0.5; }
