@@ -1,3 +1,9 @@
+maps=uninterpreted functions in set theory
+defining the semantics of maps
+things what to do with maps
+
+
+
 public interface Sum {
     public int calculateSum();
 }
@@ -15,7 +21,7 @@ class RealSum implements Sum {
     }
 
     /**
-     * Acually calculates the sum.
+     * Actually calculates the sum.
      */
 // This can be transformed into the
 // iterative version of the sum.

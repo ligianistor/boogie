@@ -1,16 +1,33 @@
+// Flyweight is often combined with Composite to implement shared leaf nodes.
+// Taken from https://sourcemaking.com/design_patterns/flyweight
+
 // Instances of College will be the Flyweights
 class College {
-  private final int collegeNumber;
+  private final int collegeNumber; // this is the sharable state
+  private int campusNumber; // this is the non-sharable, that is provided by the client
+// when it calls a method on the college.
 
   College(int number) {
     this.collegeNumber = number;
   }
+
+// We need to know the campusNumber in order to get the return from this 
+// method.
+// I could have used "switch" but we don't have support for it.
+  int getNumberFacilities() {
+	if (campusNumber == 1) {
+		return 3;
+        } else if (campusNumber == 2) {
+		return 4;
+        } else return 5;
+ }
 }
 -----------------
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 // ListOfAvailableColleges acts as a factory and cache for College flyweight objects
+// The client must use this class in order to create "new" College objects
 class ListOfAvailableColleges {
   private Map<Integer, College> listOfColleges = new ConcurrentHashMap<Integer, College>();
 

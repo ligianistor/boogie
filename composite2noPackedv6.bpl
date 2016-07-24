@@ -104,7 +104,6 @@ requires packedParent[this];
 requires (fracParent[this] > 0.0);
 ensures (parent[this] == op);
 ensures (parent[this] != this);
-ensures packedCount[this];
 ensures (fracCount[this] >= 0.5);
 ensures (count[this] == c);
 ensures (parent[this] != null) && (left[op] == this) ==>
