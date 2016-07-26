@@ -4,8 +4,8 @@
 // Instances of College will be the Flyweights
 class College {
   private final int collegeNumber; // this is the sharable state
-  private int campusNumber; // this is the non-sharable, that is provided by the client
-// when it calls a method on the college.
+ // private int campusNumber; // this is the non-sharable, that is provided by the client
+// when it calls a method on the college. It shouldn't be a field, it is provided in the calling method.
 
   College(int number) {
     this.collegeNumber = number;
@@ -14,7 +14,7 @@ class College {
 // We need to know the campusNumber in order to get the return from this 
 // method.
 // I could have used "switch" but we don't have support for it.
-  int getNumberFacilities() {
+  int getNumberFacilities(int campusNumber) {
 	if (campusNumber == 1) {
 		return 3;
         } else if (campusNumber == 2) {
@@ -46,10 +46,16 @@ class ListOfAvailableColleges {
 class StudentApplication {
   private final int studentNumber;
   private final College college;
+  private int campusNumber;
 
-  StudentApplication(int studentNumber, College college) {
+  StudentApplication(int studentNumber, College college, int campusNumber) {
     this.studentNumber = studentNumber;
     this.college = college;
+    this.campusNumber = campusNumber;
+  }
+
+  int getNumberFacilitiesOfCollege() {
+	return college.getNumberFacilities(campusNumber);
   }
 }
 --------------------------------
@@ -62,10 +68,14 @@ public class ApplicationWebsite {
   private final List<StudentApplication> listStudentApplications = new Vector<StudentApplication>();
   private final ListOfAvailableColleges listOfAvailableColleges = new ListOfAvailableColleges();
 
-  void submitApplication(int collegeNumber, int studentNumber) {
+// TODO do I need studentNumber?
+// it does not seem to be used!
+// Same with report() method below.
+  int submitApplicationGetFacilities(int studentNumber, int collegeNumber, int campusNumber) {
     College college = listOfAvailableColleges.lookup(collegeNumber);
-    StudentApplication studentApplication = new StudentApplication(studentNumber, college);
+    StudentApplication studentApplication = new StudentApplication(studentNumber, college, campusNumber);
     listStudentApplications.add(studentApplication);
+    return studentApplication.getNumberFacilitiesOfCollege();
   }
 
   int report() {
@@ -76,22 +86,24 @@ public class ApplicationWebsite {
   public static void main(String[] args) {
     ApplicationWebsite website = new ApplicationWebsite();
 
-    website.submitApplication(1, 2);
-    website.submitApplication(1, 1);
-    website.submitApplication(1, 3);
-    website.submitApplication(1, 897);
-    website.submitApplication(1, 97);
-    website.submitApplication(1, 3);
-    website.submitApplication(2, 3);
-    website.submitApplication(2, 4);
-    website.submitApplication(2, 96);
-    website.submitApplication(2, 552);
-    website.submitApplication(2, 121);
-    website.submitApplication(2, 122);
+    // All these applications are for college number 2, but for different campuses.
+    // They will have the invariant that college number 2 offers, 
+    // but will offer slightly different facilties.
+    // Instead of the returned "facilities" 1 it can be an Integer() object
+    // so I could write an object proposition about it.
+    int facilities1 = website.submitApplicationGetFacilities(1, 2, 1); 
+    int facilities2 = website.submitApplicationGetFacilities(2, 2, 2);
+    int facilities3 = website.submitApplicationGetFacilities(3, 2, 3);
 
-//TODO Add a new function that counts the total applications.
+//I need to state some properties about facilities1, 2 3.
 
-    website.report();
+    // The 3 lines below show the difference between object propositions
+    // and classical invariants. 
+    // We can have 2 instances of College but with different college numbers and hence with different invariants.
+
+    int facilities4 = website.submitApplicationGetFacilities(1, 3, 1); 
+    int facilities5 = website.submitApplicationGetFacilities(2, 3, 2);
+    int facilities6 = website.submitApplicationGetFacilities(3, 3, 3);
   }
 }
 
