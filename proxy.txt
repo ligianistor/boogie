@@ -61,7 +61,7 @@ class ProxySum implements Sum {
     }
 }
 
-class ProxyExample {
+class ProxyClient {
 
    /**
     * Test method

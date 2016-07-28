@@ -1,4 +1,3 @@
-
 class IntCell {
 
 	predicate HigherThanZero() = value->v && v>0
@@ -15,12 +14,14 @@ class IntCell {
 		value = x;
 	}
 
-	int getValue() {
+	Integer getValueInteger() {
+		return new Integer(value);
+	}
+	
+	int getValueInt() {
 		return value;
 	}
-
 }
-
 
 interface Statelike {
 	predicate StateMultipleOf3() = cell -> c && c@1 MultipleOf3()
@@ -28,8 +29,8 @@ interface Statelike {
 	//This field cannot be a primary type, it needs to be an object,
 	//per the Java documentation.
 	final static IntCell cell =  new IntCell(3);    
-	void computeResult(StateContext context, int num); 
-	int getIntCellValue();
+	Integer computeResult(StateContext context, int num); 
+	boolean checkMod3();
 }
 
 class StateMultiplySix implements Statelike {
@@ -38,16 +39,18 @@ class StateMultiplySix implements Statelike {
 
         @Override
 	-> this@1 StateMultipleOfSix(num) && context@1 state15()
-        public void computeResult(final StateContext context, final int num) {
+        public Integer computeResult(final StateContext context, final int num) {
         	context.setState(new StateMultiplyFifteen());
-		cell.setValue(num*6);
-        }
+		cell.setValue(num*15);
+		return cell.getValueInteger();
+        }   
 
-	@Override
-	int getIntCellValue() {
-		return cell.getValue();
-	}
-    
+	boolean checkMod3() {
+		if (cell.getValueInt() % 3) 
+			{ return true; }
+		else 
+			{ return false; }
+	} 
 }
 
 class StateMultiplyFifteen implements Statelike {
@@ -63,17 +66,33 @@ class StateMultiplyFifteen implements Statelike {
 	//We cannot know statically the value of count, so we can't know for 
 	//sure which way the "if"" will go.
 	//In this case the assertion at the end will be less strong.
-	//Predicate CountGt1() is the negation of CountLe1().
 	//Another example can be without "if"
 	-> this@1 StateMultipleOf15() &&  
 	( context@1 state6() || context@1 state15() )
-        public void computeResult(final StateContext context, final int num) {
+	// TODO need to write something about result here.
+        public Integer computeResult(final StateContext context, final int num) {
         	/* Change state after StateMultiplyFifteen's computeResult() gets invoked twice */
         	if(++count > 1) {
             		context.setState(new StateMultiplySix());
         	}
 		cell.setValue(num*15);
-    	}   
+		return cell.getValueInteger();
+    	}  
+
+	//second possible computeResult()
+	public Integer computeResult(final StateContext context, final int num) {
+        	/* Change state after StateMultiplyFifteen's computeResult() gets invoked twice */
+		cell.setValue(num*15);
+            	context.setState(new StateMultiplySix());
+		return cell.getValueInteger();
+    	} 
+
+	boolean checkMod3() {
+		if (cell.getValueInt() % 3) 
+			{ return true; }
+		else 
+			{ return false; }
+	} 
 }
 
 --------------
@@ -101,45 +120,48 @@ class StateContext {
         	myState = newState;
     	}
 
-	-> (this@1 state6() -> this@1 stateContextMultiple6())
+	-> (this@1 state6() -> (this@1 stateContextMultiple6() && (result % 6 == 0)))
 	&&
-	(this@1 state15() -> this@1 stateContextMultiple15())
+	(this@1 state15() -> (this@1 stateContextMultiple15() && (result % 15 == 0)))
 
-	public void computeResult(final int num) {
-        	myState.computeResult(this, num);
+	public Integer computeResult(final int num) {
+        	return myState.computeResult(this, num);
         }
-	
-	@Override
-        (this@1 stateContextMultiple6() -> (result % 6 == 0)) &&
-	(this@1 stateContextMultiple15() -> (result % 15 == 0))
-	int getIntCellStatelike() {
-		return myState.getIntCellValue();
-	}
-}
----------------------
-public class DemoOfClientState {
-    	public static void main(String[] args) {
-        	final StateContext sc = new StateContext();
-		{sc@1 state6() && this@1 stateContextMultiple3()}
-		int result = 0;
-		{... && (result == 0) }
-        	sc.computeResult(1);
-		{ .. & sc@1 stateContextMultiple6() }
-		result = result + sc.getIntCellStatelike();
-		{ result % 6 == 0 }
-	        sc.computeResult(2);
-		result = result + sc.getIntCellStatelike();
-        	sc.computeResult(3);
-		result = result + sc.getIntCellStatelike();
-        	sc.computeResult(4);
-		result = result + sc.getIntCellStatelike();
-        	sc.computeResult(5);
-		result = result + sc.getIntCellStatelike();
-        	sc.computeResult(6);
-		result = result + sc.getIntCellStatelike();
-        	sc.computeResult(7);
-		result = result + sc.getIntCellStatelike();
 
+	boolean checkMod3Context() {
+		return myState.checkMod3();
+	} 
+}
+
+// I need to create a new reference r to StateContext
+// and call a method on r, that relies on some property.
+// And the method that I call on r needs that property.
+---------------------
+public class StateClient {
+	final StateContext sc;
+
+	StateClient(StateContext sc_) {
+		sc = sc_;
+	}
+
+	void checkMultiplicity() {
+		if (!sc.checkMod3Context())
+			throw new Exception();
+	}
+	
+	// Write specs saying that
+	// this program will not throw an error.
+    	public static void main(String[] args) {
+        	final StateContext sc1 = new StateContext();
+		StateClient stateClient = new StateClient(sc1);
+		stateClient.checkMultiplicity();
+		sc1.computeResult(1);
+		stateClient.checkMultiplicity();
+		sc1.computeResult(2);
+		stateClient.checkMultiplicity();
+		sc1.computeResult(3);
+		stateClient.checkMultiplicity();
+		
     }
 }
 -------------

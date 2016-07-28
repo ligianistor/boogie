@@ -11,15 +11,17 @@ class College {
     this.collegeNumber = number;
   }
 
+ Integer getFraternities() {
+	return new Integer(collegeNumber * 2);
+}	// The number of fraternities is an invariant of each flyweight object.
+
 // We need to know the campusNumber in order to get the return from this 
 // method.
 // I could have used "switch" but we don't have support for it.
   int getNumberFacilities(int campusNumber) {
-	if (campusNumber == 1) {
-		return 3;
-        } else if (campusNumber == 2) {
-		return 4;
-        } else return 5;
+	if (campusNumber mod 2 == 0)
+		return campusNumber * 2 + 1;
+        } else return campusNumber * 3;
  }
 }
 -----------------
@@ -37,24 +39,19 @@ class ListOfAvailableColleges {
     return listOfColleges.get(collegeNumber);
   }
 
-  int totalAvailableColleges() {
-    return listOfColleges.size();
-  }
 }
 ---------------------------
 
 class StudentApplication {
-  private final int studentNumber;
-  private final College college;
-  private int campusNumber;
+  private final College college; //intrinsic state
+  private int campusNumber; // extrinsic information
 
-  StudentApplication(int studentNumber, College college, int campusNumber) {
-    this.studentNumber = studentNumber;
+  StudentApplication(College college, int campusNumber) {
     this.college = college;
     this.campusNumber = campusNumber;
   }
 
-  int getNumberFacilitiesOfCollege() {
+  int getNumberFacilities() {
 	return college.getNumberFacilities(campusNumber);
   }
 }
@@ -68,19 +65,13 @@ public class ApplicationWebsite {
   private final List<StudentApplication> listStudentApplications = new Vector<StudentApplication>();
   private final ListOfAvailableColleges listOfAvailableColleges = new ListOfAvailableColleges();
 
-// TODO do I need studentNumber?
-// it does not seem to be used!
-// Same with report() method below.
-  int submitApplicationGetFacilities(int studentNumber, int collegeNumber, int campusNumber) {
+// Each student application is submitted for a college, but the student can choose which campus of that college
+// he or she wants to go to.
+  Integer submitApplicationGetFacilities(int collegeNumber, int campusNumber) {
     College college = listOfAvailableColleges.lookup(collegeNumber);
-    StudentApplication studentApplication = new StudentApplication(studentNumber, college, campusNumber);
+    StudentApplication studentApplication = new StudentApplication(college, campusNumber);
     listStudentApplications.add(studentApplication);
-    return studentApplication.getNumberFacilitiesOfCollege();
-  }
-
-  int report() {
-	  //System.out.println(listOfAvailableColleges.totalAvailableColleges());
-    return listOfAvailableColleges.totalAvailableColleges();
+    return new Integer(studentApplication.getNumberFacilities());
   }
 
   public static void main(String[] args) {
@@ -91,19 +82,21 @@ public class ApplicationWebsite {
     // but will offer slightly different facilties.
     // Instead of the returned "facilities" 1 it can be an Integer() object
     // so I could write an object proposition about it.
-    int facilities1 = website.submitApplicationGetFacilities(1, 2, 1); 
-    int facilities2 = website.submitApplicationGetFacilities(2, 2, 2);
-    int facilities3 = website.submitApplicationGetFacilities(3, 2, 3);
+    Integer facilities1 = website.submitApplicationGetFacilities(2, 1); 
+    Integer facilities2 = website.submitApplicationGetFacilities(2, 2);
+    Integer facilities3 = website.submitApplicationGetFacilities(2, 3);
 
-//I need to state some properties about facilities1, 2 3.
+// Here I could use listOfAvailableColleges to lookup a college and assert a property about it.
+
+// I need to state some properties about facilities1, 2 3.
 
     // The 3 lines below show the difference between object propositions
     // and classical invariants. 
     // We can have 2 instances of College but with different college numbers and hence with different invariants.
 
-    int facilities4 = website.submitApplicationGetFacilities(1, 3, 1); 
-    int facilities5 = website.submitApplicationGetFacilities(2, 3, 2);
-    int facilities6 = website.submitApplicationGetFacilities(3, 3, 3);
+    Integer facilities4 = website.submitApplicationGetFacilities(3, 1); 
+    Integer facilities5 = website.submitApplicationGetFacilities(3, 2);
+    Integer facilities6 = website.submitApplicationGetFacilities(3, 3);
   }
 }
 
