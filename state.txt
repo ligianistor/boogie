@@ -144,9 +144,13 @@ public class StateClient {
 		sc = sc_;
 	}
 
-	void checkMultiplicity() {
+	requires value of sc is a multiple of 3
+	boolean checkMultiplicity() {
 		if (!sc.checkMod3Context())
-			throw new Exception();
+			{
+				return false;
+			}
+		else return true;
 	}
 	
 	// Write specs saying that

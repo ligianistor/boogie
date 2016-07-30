@@ -54,8 +54,32 @@ class StudentApplication {
   int getNumberFacilities() {
 	return college.getNumberFacilities(campusNumber);
   }
+
+ Integer getFraternities() {
+	return college.getFraternities();
+}
 }
 --------------------------------
+
+class OriginHighschool {
+  private StudentApplication studentApp;
+
+OriginHighschool(StudentApplication studentApp_) {
+	studentApplication = studentApplication_;
+}
+
+// has as precondition that studentApp.getFraternities() should be a multiple of 2
+boolean getFraternitiesCollege() {
+	if (studentApp.getFraternities() % 2) {
+		return true;	
+	} else {
+		return false;
+	} 
+}
+
+}
+
+-------------------------------
 
 
 import java.util.List;
@@ -97,6 +121,20 @@ public class ApplicationWebsite {
     Integer facilities4 = website.submitApplicationGetFacilities(3, 1); 
     Integer facilities5 = website.submitApplicationGetFacilities(3, 2);
     Integer facilities6 = website.submitApplicationGetFacilities(3, 3);
+------------------------------------------
+ // A simpler client that does not use the class ApplicationWebsite
+ // but instead uses all the other classes. The idea is the same in principle, whether we use ApplicationWebsite or not.
+College college = new College(1);
+StudentApplication app1 = new Studentapplication(college, 1);
+Studentapplication app2 = new StudentApplication(college, 2);
+OriginHighschool high1 = new OriginHighschool(app1);
+OriginHighschool high2 = new OriginHighschool(app2);
+
+high1.getFraternitiesCollege();
+high2.getFraternitiesCollege();
+
+// This client code should verify
+// by basing itself on the invariant predicate that the College object provides.
   }
 }
 
