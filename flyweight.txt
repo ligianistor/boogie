@@ -45,16 +45,29 @@ class ListOfAvailableColleges {
 class StudentApplication {
   private final College college; //intrinsic state
   private int campusNumber; // extrinsic information
+  int facilities;
+  int collegeNumber;
+
+predicate facilitiesOK() = exists f:int :: facilities -> f &&
+	(f % collegeNumber == 0);
 
   StudentApplication(College college, int campusNumber) {
     this.college = college;
     this.campusNumber = campusNumber;
+    facilities = college.getNumberFacilities(campusNumber);
+    this.collegeNumber = college.getCollegeNumber();
+  }
+
+  int getFacilities() {
+	return facilities;
   }
 
 // Has as precondition that college.getNumberFacilities(campusNumber) % college.getCollegeNumber()
 // should be 0.
-  boolean getNumberFacilities() {
-	return (college.getNumberFacilities(campusNumber) % college.getCollegeNumber() == 0);
+  this@1 facilitiesOK() -->
+  boolean checkNumberFacilities() {
+        
+	return (facilities % college.getCollegeNumber() == 0);
   }
 
 }
@@ -118,8 +131,8 @@ College college = new College(2);
 StudentApplication app1 = new Studentapplication(college, 3);
 Studentapplication app2 = new StudentApplication(college, 5);
 
-app1.getNumberFacilities();
-app2.getNumberFacilities();
+app1.checkNumberFacilities();
+app2.checkNumberFacilities();
 
 // This client code should verify
 // by basing itself on the invariant predicate that the College object provides.
