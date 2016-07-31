@@ -68,6 +68,7 @@ import java.util.Vector;
 public class ApplicationWebsite {
   private final List<StudentApplication> listStudentApplications = new Vector<StudentApplication>();
   private final ListOfAvailableColleges listOfAvailableColleges = new ListOfAvailableColleges();
+  Integer facilities;
 
 // Each student application is submitted for a college, but the student can choose which campus of that college
 // he or she wants to go to.
@@ -78,17 +79,23 @@ public class ApplicationWebsite {
     return new Integer(studentApplication.getNumberFacilities());
   }
 
+// has as precondition that facilities.intValue() is a multiple of x.
+boolean checkIntegerMultiple(int x) {
+	return (facilities.intValue() % x == 0);
+}
+
   public static void main(String[] args) {
     ApplicationWebsite website = new ApplicationWebsite();
 
     // All these applications are for college number 2, but for different campuses.
     // They will have the invariant that college number 2 offers, 
     // but will offer slightly different facilties.
-    // Instead of the returned "facilities" 1 it can be an Integer() object
-    // so I could write an object proposition about it.
-    Integer facilities1 = website.submitApplicationGetFacilities(2, 1); 
-    Integer facilities2 = website.submitApplicationGetFacilities(2, 2);
-    Integer facilities3 = website.submitApplicationGetFacilities(2, 3);
+    facilities = website.submitApplicationGetFacilities(2, 1); 
+    checkIntegerMultiple(2);
+    facilities = website.submitApplicationGetFacilities(2, 2);
+    checkIntegerMultiple(2);
+    facilities = website.submitApplicationGetFacilities(2, 3);
+    checkIntegerMultiple(2);
 
 // Here I could use listOfAvailableColleges to lookup a college and assert a property about it.
 
@@ -98,9 +105,12 @@ public class ApplicationWebsite {
     // and classical invariants. 
     // We can have 2 instances of College but with different college numbers and hence with different invariants.
 
-    Integer facilities4 = website.submitApplicationGetFacilities(3, 1); 
-    Integer facilities5 = website.submitApplicationGetFacilities(3, 2);
-    Integer facilities6 = website.submitApplicationGetFacilities(3, 3);
+    facilities = website.submitApplicationGetFacilities(3, 1);
+    checkIntegerMultiple(3); 
+    facilities = website.submitApplicationGetFacilities(3, 2);
+    checkIntegerMultiple(3);
+    facilities = website.submitApplicationGetFacilities(3, 3);
+    checkIntegerMultiple(3);
 ------------------------------------------
  // A simpler client that does not use the class ApplicationWebsite
  // but instead uses all the other classes. The idea is the same in principle, whether we use ApplicationWebsite or not.
