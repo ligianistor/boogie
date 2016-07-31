@@ -11,17 +11,17 @@ class College {
     this.collegeNumber = number;
   }
 
- Integer getFraternities() {
-	return new Integer(collegeNumber * 2);
-}	// The number of fraternities is an invariant of each flyweight object.
+ int getCollegeNumber() {
+	return collegeNumber;
+ }
 
 // We need to know the campusNumber in order to get the return from this 
 // method.
-// I could have used "switch" but we don't have support for it.
-  int getNumberFacilities(int campusNumber) {
-	if (campusNumber mod 2 == 0)
-		return campusNumber * 2 + 1;
-        } else return campusNumber * 3;
+// The invariant is that numberFacilities is a multiple of collegeNumber.
+// The part that we don't know for sure and that depends on campusNumber is
+// what exactly is the value of numberFacilities.
+  Integer getNumberFacilities(int campusNumber) {
+	return new Integer(campusNumber * collegeNumber);
  }
 }
 -----------------
@@ -51,31 +51,11 @@ class StudentApplication {
     this.campusNumber = campusNumber;
   }
 
-  int getNumberFacilities() {
-	return college.getNumberFacilities(campusNumber);
+// Has as precondition that college.getNumberFacilities(campusNumber) % college.getCollegeNumber()
+// should be 0.
+  boolean getNumberFacilities() {
+	return (college.getNumberFacilities(campusNumber) % college.getCollegeNumber() == 0);
   }
-
- Integer getFraternities() {
-	return college.getFraternities();
-}
-}
---------------------------------
-
-class OriginHighschool {
-  private StudentApplication studentApp;
-
-OriginHighschool(StudentApplication studentApp_) {
-	studentApplication = studentApplication_;
-}
-
-// has as precondition that studentApp.getFraternities() should be a multiple of 2
-boolean getFraternitiesCollege() {
-	if (studentApp.getFraternities() % 2) {
-		return true;	
-	} else {
-		return false;
-	} 
-}
 
 }
 
@@ -124,14 +104,12 @@ public class ApplicationWebsite {
 ------------------------------------------
  // A simpler client that does not use the class ApplicationWebsite
  // but instead uses all the other classes. The idea is the same in principle, whether we use ApplicationWebsite or not.
-College college = new College(1);
-StudentApplication app1 = new Studentapplication(college, 1);
-Studentapplication app2 = new StudentApplication(college, 2);
-OriginHighschool high1 = new OriginHighschool(app1);
-OriginHighschool high2 = new OriginHighschool(app2);
+College college = new College(2);
+StudentApplication app1 = new Studentapplication(college, 3);
+Studentapplication app2 = new StudentApplication(college, 5);
 
-high1.getFraternitiesCollege();
-high2.getFraternitiesCollege();
+app1.getNumberFacilities();
+app2.getNumberFacilities();
 
 // This client code should verify
 // by basing itself on the invariant predicate that the College object provides.
