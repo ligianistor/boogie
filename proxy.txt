@@ -5,18 +5,26 @@ things what to do with maps
 
 
 public interface Sum {
+    predicate sumOK(); // will be defined in the classes
+    // sine we do not declare here the fields that the predicate talks about.
     public int calculateSum();
 }
 
 //on System A 
 class RealSum implements Sum {
 
+   predicate sumOK() = exists s1:int, n1:int :: sum -> s1 && n -> n1 &&
+		( sum == n * (n+1) /2 )
+
+	
+    private int n;
     private int sum = 0;
     /**
      * Constructor
      * @param filename
      */
-    public RealSum(int n) { 
+    public RealSum(int n_) {
+	n = n_; 
         calculateRealSum(n);
     }
 
@@ -40,13 +48,16 @@ class RealSum implements Sum {
 
 //on System B 
 class ProxySum implements Sum {
+
+    predicate sumOK() = exists s1:int, n1:int :: sum -> s1 && n -> n1 &&
+		( sum == n * (n+1) /2 )
     private RealSum realSum = null;
     private int n = 0;
     /**
      * Constructor
      * @param filename 
      */
-    public ProxySum(final int n) { 
+    public ProxySum(int n) { 
         this.n = n; 
     }
 
@@ -61,20 +72,25 @@ class ProxySum implements Sum {
     }
 }
 
-class ProxyClient {
+class ClientSum {
 
-   /**
-    * Test method
-    */
-   public static void main(String[] args) {
-        final Sum sum1 = new ProxySum(5);
-        final Sum sum2 = new ProxySum(3);
-        
-        sum1.calculateSum(); // calculation necessary
-        sum1.calculateSum(); // calculation unnecessary
-        sum2.calculateSum(); // calculation necessary
-        sum2.calculateSum(); // calculation unnecessary
-        sum1.calculateSum(); // calculation unnecessary
-    }
+	Sum sum;
+	ClientSum(Sum sum_) { sum = sum_; }
+	
+	s@1 sumOK() --> 
+	bool checksum() {
+		//simple code about sum, maybe calling a method on sum.
+	}
+
+	main() {
+		Sum s = new Sum(5);
+		ClientSum client = new ClientSum(s);
+		s.calculateSum();
+		client.checkSum();
+		s.calculateSum();
+		client.checksum();
+	}
+
+
 }
 
