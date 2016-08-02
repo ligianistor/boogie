@@ -144,7 +144,7 @@ public class StateClient {
 		sc = sc_;
 	}
 
-	requires value of sc is a multiple of 3
+	sc@1 stateContextMultiple3() -->
 	boolean checkMultiplicity() {
 		if (!sc.checkMod3Context())
 			{

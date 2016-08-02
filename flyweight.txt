@@ -4,11 +4,23 @@
 // Instances of College will be the Flyweights
 class College {
   private final int collegeNumber; // this is the sharable state
+  private final int numberCafeterias; // this is also the sharable state
+// Since I have 2 fields that are sharable state, I can write a predicate like collegeCafeteriasMany()
+// and collegeCafeteriasFew().
+predicate collegeCafeteriasMany() = exists c:int, n: numberCafeterias ::
+	(collegeNumber -> c) && (numberCafeterias -> n) && (n == 10 * c) 
+
+predicate collegeCafeteriasFew() = exists c:int, n: numberCafeterias ::
+	(collegeNumber -> c) && (numberCafeterias -> n) && (n == 4 * c) 
+
+// Different College flyweight objects will be able to satisfy the two different invariants.
+ 
  // private int campusNumber; // this is the non-sharable, that is provided by the client
 // when it calls a method on the college. It shouldn't be a field, it is provided in the calling method.
 
-  College(int number) {
+  College(int number, int multNumber) {
     this.collegeNumber = number;
+    this.numberCafeterias = this.collegeNumber * multNumber;
   }
 
  int getCollegeNumber() {
@@ -127,10 +139,13 @@ boolean checkIntegerMultiple(int x) {
 ------------------------------------------
  // A simpler client that does not use the class ApplicationWebsite
  // but instead uses all the other classes. The idea is the same in principle, whether we use ApplicationWebsite or not.
-College college = new College(2);
+College college = new College(collegeCafeteriasFew())(2, 4);
 StudentApplication app1 = new Studentapplication(college, 3);
 Studentapplication app2 = new StudentApplication(college, 5);
 
+// The method checkNumberFacilities() could have as precondition collegeCafeteriasFew(). 
+// It shows that the invariant that the programmer set in the beggining holds,
+// even though there are the 2 references app1 and app2 that have different extrinsic state.
 app1.checkNumberFacilities();
 app2.checkNumberFacilities();
 
