@@ -6,6 +6,9 @@ things what to do with maps
 
 public interface Sum {
     predicate sumOK(); // will be defined in the classes
+    predicate sumGreater0();
+	// Different objects can satisfy different invariants.
+	// This is the difference between object propositions and classical invariants.
     // sine we do not declare here the fields that the predicate talks about.
     public int calculateSum();
 }
@@ -15,6 +18,7 @@ class RealSum implements Sum {
 
    predicate sumOK() = exists s1:int, n1:int :: sum -> s1 && n -> n1 &&
 		( sum == n * (n+1) /2 )
+ predicate sumGreater0() = exists s1:int :: sum -> s1 && s1 > 0;
 
 	
     private int n;
@@ -51,6 +55,8 @@ class ProxySum implements Sum {
 
     predicate sumOK() = exists s1:int, n1:int :: sum -> s1 && n -> n1 &&
 		( sum == n * (n+1) /2 )
+ predicate sumGreater0() = exists s1:int :: sum -> s1 && s1 > 0;
+
     private RealSum realSum = null;
     private int n = 0;
     /**

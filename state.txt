@@ -24,7 +24,13 @@ class IntCell {
 }
 
 interface Statelike {
-	predicate StateMultipleOf3() = cell -> c && c@1 MultipleOf3()
+	predicate StateMultipleOf3();
+	predicate StateMultipleOf2();
+	// different classes that implement Statelike
+	// could satisfy one of the 2 predicates.
+	// This is the diference from classical invariants, which
+	// can only have one invariant for all objects
+	// of the same class.
 
 	//This field cannot be a primary type, it needs to be an object,
 	//per the Java documentation.
@@ -35,7 +41,9 @@ interface Statelike {
 
 class StateMultiplySix implements Statelike {
 
-	predicate StateMultipleOf6(int n) = cell -> c && c@1 MultipleOf6(n)
+	predicate StateMultipleOf6() = cell -> c && c@1 MultipleOf6()
+	predicate StateMultipleOf3() = cell -> c && c@1 MultipleOf3()
+	predicate StateMultipleOf2() = cell -> c && c@1 MultipleOf2()
 
         @Override
 	-> this@1 StateMultipleOfSix(num) && context@1 state15()
@@ -53,11 +61,14 @@ class StateMultiplySix implements Statelike {
 	} 
 }
 
+// TODO maybe Multiple15 should be Multiple30??
 class StateMultiplyFifteen implements Statelike {
 // We either put all the fields of the derived classes in the interface
 // or the predicates that we use in the exterior should not refer to variables
 // such as "count". 
 	predicate StateMultipleOf15() = cell ->c && c@1 MultipleOf15()
+	predicate StateMultipleOf3() = cell -> c && c@1 MultipleOf3()
+	predicate StateMultipleOf2() = cell -> c && c@1 MultipleOf2()
 
 	/** Counter local to this state */
         private int count = 0;

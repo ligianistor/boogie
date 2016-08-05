@@ -1,3 +1,25 @@
+class IntCell {
+	
+	predicate MultipleOf(int a) = value->v && (v % a == 0)
+
+	int value;
+	IntCell(int x) {
+		value  = x;
+	}
+
+	void setValue(int x) {
+		value = x;
+	}
+
+	Integer getValueInteger() {
+		return new Integer(value);
+	}
+	
+	int getValueInt() {
+		return value;
+	}
+}
+
 // Flyweight is often combined with Composite to implement shared leaf nodes.
 // Taken from https://sourcemaking.com/design_patterns/flyweight
 
@@ -5,6 +27,9 @@
 class College {
   private final int collegeNumber; // this is the sharable state
   private final int numberCafeterias; // this is also the sharable state
+// The sharable state could be a huge image, that had MB of data, but Oprop 
+// does not have support for many advanced data structures and that's why I 
+// restrict the examples mainly to integers.
 // Since I have 2 fields that are sharable state, I can write a predicate like collegeCafeteriasMany()
 // and collegeCafeteriasFew().
 predicate collegeCafeteriasMany() = exists c:int, n: numberCafeterias ::
@@ -14,9 +39,7 @@ predicate collegeCafeteriasFew() = exists c:int, n: numberCafeterias ::
 	(collegeNumber -> c) && (numberCafeterias -> n) && (n == 4 * c) 
 
 // Different College flyweight objects will be able to satisfy the two different invariants.
- 
- // private int campusNumber; // this is the non-sharable, that is provided by the client
-// when it calls a method on the college. It shouldn't be a field, it is provided in the calling method.
+// and this shows the difference between object propositions and classical invariants.
 
   College(int number, int multNumber) {
     this.collegeNumber = number;
@@ -30,10 +53,17 @@ predicate collegeCafeteriasFew() = exists c:int, n: numberCafeterias ::
 // We need to know the campusNumber in order to get the return from this 
 // method.
 // The invariant is that numberFacilities is a multiple of collegeNumber.
+// The interesting part is that it is an invariant that is both about the
+// intrinsic part and about the extrinsic part.
 // The part that we don't know for sure and that depends on campusNumber is
 // what exactly is the value of numberFacilities.
-  Integer getNumberFacilities(int campusNumber) {
-	return new Integer(campusNumber * collegeNumber);
+// The parameter campusNumber is the non-sharable, that is provided by the client
+// when it calls a method on the college. It is not a field, it is provided in the calling method.
+// Instead of using the class Integer, I will use IntCell, like in the state example.
+// It is easier to write predicates for a class that I define.
+  --> result@1 MultipleOf(collegeNumber)
+  IntCell getNumberFacilities(int campusNumber) {
+	return new IntCell(campusNumber * collegeNumber);
  }
 }
 -----------------
@@ -42,6 +72,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 // ListOfAvailableColleges acts as a factory and cache for College flyweight objects
 // The client must use this class in order to create "new" College objects
+// Maybe in this class too I could put IntCell as the key to Map instead of Integer.
 class ListOfAvailableColleges {
   private Map<Integer, College> listOfColleges = new ConcurrentHashMap<Integer, College>();
 
@@ -57,20 +88,21 @@ class ListOfAvailableColleges {
 class StudentApplication {
   private final College college; //intrinsic state
   private int campusNumber; // extrinsic information
-  int facilities;
+  IntCell facilities;
   int collegeNumber;
 
-predicate facilitiesOK() = exists f:int :: facilities -> f &&
-	(f % collegeNumber == 0);
+predicate facilitiesOK() = exists f:IntCell, c:int :: 
+	facilities -> f && collegeNumber -> c &&
+	(f@1 MultipleOf(c));
 
   StudentApplication(College college, int campusNumber) {
     this.college = college;
     this.campusNumber = campusNumber;
-    facilities = college.getNumberFacilities(campusNumber);
+    this.facilities = college.getNumberFacilities(campusNumber);
     this.collegeNumber = college.getCollegeNumber();
   }
 
-  int getFacilities() {
+  IntCell getFacilities() {
 	return facilities;
   }
 
