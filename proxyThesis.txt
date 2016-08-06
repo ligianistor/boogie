@@ -1,50 +1,29 @@
-maps=uninterpreted functions in set theory
-defining the semantics of maps
-things what to do with maps
-
-
-
 public interface Sum {
-    predicate sumOK(); // will be defined in the classes
+    predicate sumOK(); 
     predicate sumGreater0();
-	// Different objects can satisfy different invariants.
-	// This is the difference between object propositions and classical invariants.
-    // since we do not declare here the fields that the predicate talks about.
+
     public int calculateSum();
     public bool sumEven();
 }
 
-//on System A 
 class RealSum implements Sum {
 
-   predicate sumOK() = exists s1:int, n1:int :: sum -> s1 && n -> n1 &&
+ predicate sumOK() = exists s1:int, n1:int :: sum -> s1 && n -> n1 &&
 		( sum == n * (n+1) /2 )
  predicate sumGreater0() = exists s1:int :: sum -> s1 && s1 > 0;
-
 	
     private int n;
     private int sum = 0;
-    /**
-     * Constructor
-     * @param filename
-     */
+
     public RealSum(int n_) {
 	n = n_; 
         calculateRealSum(n);
     }
 
-    /**
-     * Actually calculates the sum.
-     */
-// This can be transformed into the
-// iterative version of the sum.
     private void calculateRealSum(int n) {
         this.sum = n * (n+1) / 2;
     }
 
-    /**
-     * Returns the sum.
-     */
     public int calculateSum() { 
        return sum;
     }
@@ -52,29 +31,21 @@ class RealSum implements Sum {
     public bool sumEven() {
 	return (sum % 2 == 0);
     }
-
 }
 
-//on System B 
 class ProxySum implements Sum {
 
     predicate sumOK() = exists s1:int, n1:int :: sum -> s1 && n -> n1 &&
 		( sum == n * (n+1) /2 )
- predicate sumGreater0() = exists s1:int :: sum -> s1 && s1 > 0;
+    predicate sumGreater0() = exists s1:int :: sum -> s1 && s1 > 0;
 
     private RealSum realSum = null;
     private int n = 0;
-    /**
-     * Constructor
-     * @param filename 
-     */
+ 
     public ProxySum(int n) { 
         this.n = n; 
     }
 
-    /**
-     * Calculates the sum
-     */
     public int calculateSum() {
         if (realSum == null) {
            realSum = new RealSum(n);
@@ -94,7 +65,7 @@ class ClientSum {
 	
 	s@1 sumOK() --> 
 	bool checksum() {
-		//simple code about sum, maybe calling a method on sum.
+		return sum.sumEven();
 	}
 
 	main() {
@@ -105,7 +76,5 @@ class ClientSum {
 		s.calculateSum();
 		client.checksum();
 	}
-
-
 }
 
