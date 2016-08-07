@@ -1,8 +1,8 @@
 class IntCell {
-	
 	predicate MultipleOf(int a) = value->v && (v % a == 0)
 
 	int value;
+
 	IntCell(int x) {
 		value  = x;
 	}
@@ -21,122 +21,126 @@ class IntCell {
 }
 ----------------------------
 class College {
-  private final int collegeNumber; 
-  private final int numberCafeterias; 
+	private final int collegeNumber; 
+	private final int numberCafeterias; 
 
-predicate collegeCafeteriasMany() = exists c:int, n: numberCafeterias ::
-	(collegeNumber -> c) && (numberCafeterias -> n) && (n == 10 * c) 
+	predicate collegeCafeteriasMany() = 
+		exists c:int, n: numberCafeterias ::
+		(collegeNumber -> c) && (numberCafeterias -> n) && 
+		(n == 10 * c) 
 
-predicate collegeCafeteriasFew() = exists c:int, n: numberCafeterias ::
-	(collegeNumber -> c) && (numberCafeterias -> n) && (n == 4 * c) 
+	predicate collegeCafeteriasFew() = exists c:int, n: numberCafeterias ::
+		(collegeNumber -> c) && (numberCafeterias -> n) && (n == 4 * c) 
 
-  College(int number, int multNumber) {
-    this.collegeNumber = number;
-    this.numberCafeterias = this.collegeNumber * multNumber;
-  }
+	College(int number, int multNumber) {
+		this.collegeNumber = number;
+		this.numberCafeterias = this.collegeNumber * multNumber;
+	}
 
- int getCollegeNumber() {
-	return collegeNumber;
- }
+	int getCollegeNumber() {
+		return collegeNumber;
+	}
 
-  --> result@1 MultipleOf(collegeNumber)
-  IntCell getNumberFacilities(int campusNumber) {
-	return new IntCell(campusNumber * collegeNumber);
- }
+	--> result@1 MultipleOf(collegeNumber)
+	IntCell getNumberFacilities(int campusNumber) {
+		return new IntCell(campusNumber * collegeNumber);
+	}
 }
 -----------------
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 class ListOfAvailableColleges {
-  private Map<Integer, College> listOfColleges = new ConcurrentHashMap<Integer, College>();
+	private Map<Integer, College> listOfColleges = 
+		new ConcurrentHashMap<Integer, College>();
 
-  College lookup(int collegeNumber) {
-    if (!listOfColleges.containsKey(collegeNumber))
-      listOfColleges.put(collegeNumber, new College(collegeNumber));
-    return listOfColleges.get(collegeNumber);
-  }
+	College lookup(int collegeNumber) {
+		if (!listOfColleges.containsKey(collegeNumber)) {
+			listOfColleges.put(collegeNumber, new College(collegeNumber));
+		}
+    		return listOfColleges.get(collegeNumber);
+	}
 }
 ---------------------------
+class StudentApplication { 
+	private final College college; 
+	private int campusNumber; 
+	IntCell facilities;
+	int collegeNumber;
 
-class StudentApplication {
-  private final College college; 
-  private int campusNumber; 
-  IntCell facilities;
-  int collegeNumber;
+	predicate facilitiesOK() = exists f:IntCell, c:int :: 
+		facilities -> f && collegeNumber -> c &&
+		(f@1 MultipleOf(c));
 
-predicate facilitiesOK() = exists f:IntCell, c:int :: 
-	facilities -> f && collegeNumber -> c &&
-	(f@1 MultipleOf(c));
+	StudentApplication(College college, int campusNumber) {
+		this.college = college;
+	    	this.campusNumber = campusNumber;
+	    	this.facilities = college.getNumberFacilities(campusNumber);
+	    	this.collegeNumber = college.getCollegeNumber();
+	}
 
-  StudentApplication(College college, int campusNumber) {
-    this.college = college;
-    this.campusNumber = campusNumber;
-    this.facilities = college.getNumberFacilities(campusNumber);
-    this.collegeNumber = college.getCollegeNumber();
-  }
+	IntCell getFacilities() {
+		return facilities;
+	}
 
-  IntCell getFacilities() {
-	return facilities;
-  }
-
-  this@1 facilitiesOK() -->
-  boolean checkNumberFacilities() {
-        
-	return (facilities % college.getCollegeNumber() == 0);
-  }
-
+	this@1 facilitiesOK() -->
+	boolean checkNumberFacilities() {        
+		return (facilities % college.getCollegeNumber() == 0);
+	}
 }
 
 -------------------------------
-
-
 import java.util.List;
 import java.util.Vector;
 
 public class ApplicationWebsite {
-  private final List<StudentApplication> listStudentApplications = new Vector<StudentApplication>();
-  private final ListOfAvailableColleges listOfAvailableColleges = new ListOfAvailableColleges();
-  Integer facilities;
+	private final List<StudentApplication> listStudentApplications = 
+		new Vector<StudentApplication>();
+	private final ListOfAvailableColleges listOfAvailableColleges = 
+		new ListOfAvailableColleges();
+	Integer facilities;
 
-  Integer submitApplicationGetFacilities(int collegeNumber, int campusNumber) {
-    College college = listOfAvailableColleges.lookup(collegeNumber);
-    StudentApplication studentApplication = new StudentApplication(college, campusNumber);
-    listStudentApplications.add(studentApplication);
-    return new Integer(studentApplication.getNumberFacilities());
-  }
+	Integer submitApplicationGetFacilities(
+		int collegeNumber, 
+		int campusNumber
+	) {
+		College college = listOfAvailableColleges.lookup(collegeNumber);
+	    	StudentApplication studentApplication = 
+			new StudentApplication(college, campusNumber);
+	    	listStudentApplications.add(studentApplication);
+	    	return new Integer(studentApplication.getNumberFacilities());
+	}
 
-boolean checkIntegerMultiple(int x) {
-	return (facilities.intValue() % x == 0);
-}
+	boolean checkIntegerMultiple(int x) {
+		return (facilities.intValue() % x == 0);
+	}
 
-  public static void main(String[] args) {
-    ApplicationWebsite website = new ApplicationWebsite();
+	public static void main(String[] args) {
+		ApplicationWebsite website = new ApplicationWebsite();
 
-    facilities = website.submitApplicationGetFacilities(2, 1); 
-    checkIntegerMultiple(2);
-    facilities = website.submitApplicationGetFacilities(2, 2);
-    checkIntegerMultiple(2);
-    facilities = website.submitApplicationGetFacilities(2, 3);
-    checkIntegerMultiple(2);
+		facilities = website.submitApplicationGetFacilities(2, 1); 
+    		checkIntegerMultiple(2);
+    		facilities = website.submitApplicationGetFacilities(2, 2);
+    		checkIntegerMultiple(2);
+    		facilities = website.submitApplicationGetFacilities(2, 3);
+    		checkIntegerMultiple(2);
 
-
-    facilities = website.submitApplicationGetFacilities(3, 1);
-    checkIntegerMultiple(3); 
-    facilities = website.submitApplicationGetFacilities(3, 2);
-    checkIntegerMultiple(3);
-    facilities = website.submitApplicationGetFacilities(3, 3);
-    checkIntegerMultiple(3);
-}
+    		facilities = website.submitApplicationGetFacilities(3, 1);
+    		checkIntegerMultiple(3); 
+    		facilities = website.submitApplicationGetFacilities(3, 2);
+    		checkIntegerMultiple(3);
+    		facilities = website.submitApplicationGetFacilities(3, 3);
+    		checkIntegerMultiple(3);
+	}	
 
 ------------------------------------------
-public static void main(String[] args) {
-	College college = new College(collegeCafeteriasFew())(2, 4);
-	StudentApplication app1 = new Studentapplication(college, 3);
-	Studentapplication app2 = new StudentApplication(college, 5);
+	public static void main(String[] args) {
+		College college = new College(collegeCafeteriasFew())(2, 4);
+		StudentApplication app1 = new Studentapplication(college, 3);
+		Studentapplication app2 = new StudentApplication(college, 5);
 
-	app1.checkNumberFacilities();
-	app2.checkNumberFacilities();
-  }
+		app1.checkNumberFacilities();
+		app2.checkNumberFacilities();
+	}
 }
 

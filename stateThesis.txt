@@ -34,7 +34,6 @@ interface Statelike {
 }
 
 class StateMultiplySix implements Statelike {
-
 	predicate StateMultipleOf6() = cell -> c && c@1 MultipleOf6()
 	predicate StateMultipleOf3() = cell -> c && c@1 MultipleOf3()
 	predicate StateMultipleOf2() = cell -> c && c@1 MultipleOf2()
@@ -47,10 +46,11 @@ class StateMultiplySix implements Statelike {
         }   
 
 	boolean checkMod3() {
-		if (cell.getValueInt() % 3) 
-			{ return true; }
-		else 
-			{ return false; }
+		if (cell.getValueInt() % 3) {
+			return true; 
+		} else { 
+			return false; 
+		}
 	} 
 }
 
@@ -60,7 +60,6 @@ class StateMultiplyFifteen implements Statelike {
 	predicate StateMultipleOf2() = cell -> c && c@1 MultipleOf2()
 
         private int count = 0;
-
 
 	-> this@1 StateMultipleOf15() &&  
 	( context@1 state6() || context@1 state15() )
@@ -79,10 +78,11 @@ class StateMultiplyFifteen implements Statelike {
     	} 
 
 	boolean checkMod3() {
-		if (cell.getValueInt() % 3) 
-			{ return true; }
-		else 
-			{ return false; }
+		if (cell.getValueInt() % 3) {
+			return true; 
+		} else { 
+			return false; 
+		}
 	} 
 }
 
@@ -128,11 +128,11 @@ public class StateClient {
 
 	sc@1 stateContextMultiple3() -->
 	boolean checkMultiplicity() {
-		if (!sc.checkMod3Context())
-			{
-				return false;
-			}
-		else return true;
+		if (!sc.checkMod3Context()) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 	
     	public static void main(String[] args) {
@@ -144,9 +144,7 @@ public class StateClient {
 		sc1.computeResult(2);
 		stateClient.checkMultiplicity();
 		sc1.computeResult(3);
-		stateClient.checkMultiplicity();
-		
+		stateClient.checkMultiplicity();		
     }
 }
--------------
-	
+

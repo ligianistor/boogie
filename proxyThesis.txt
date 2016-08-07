@@ -1,65 +1,62 @@
 public interface Sum {
-    predicate sumOK(); 
-    predicate sumGreater0();
+	predicate sumOK(); 
+	predicate sumGreater0();
 
-    public int calculateSum();
-    public bool sumEven();
+	public int calculateSum();
+	public bool sumEven();
 }
 
 class RealSum implements Sum {
-
- predicate sumOK() = exists s1:int, n1:int :: sum -> s1 && n -> n1 &&
+	predicate sumOK() = exists s1:int, n1:int :: sum -> s1 && n -> n1 &&
 		( sum == n * (n+1) /2 )
- predicate sumGreater0() = exists s1:int :: sum -> s1 && s1 > 0;
+	predicate sumGreater0() = exists s1:int :: sum -> s1 && s1 > 0;
 	
-    private int n;
-    private int sum = 0;
+	private int n;
+	private int sum = 0;
 
-    public RealSum(int n_) {
-	n = n_; 
-        calculateRealSum(n);
-    }
+	public RealSum(int n_) {
+		n = n_; 
+        	calculateRealSum(n);
+	}
 
-    private void calculateRealSum(int n) {
-        this.sum = n * (n+1) / 2;
-    }
+	private void calculateRealSum(int n) {
+		this.sum = n * (n+1) / 2;
+	}
 
-    public int calculateSum() { 
-       return sum;
-    }
+	public int calculateSum() { 
+		return sum;
+	}
 
-    public bool sumEven() {
-	return (sum % 2 == 0);
-    }
+	public bool sumEven() {
+		return (sum % 2 == 0);
+	}
 }
 
 class ProxySum implements Sum {
-
-    predicate sumOK() = exists s1:int, n1:int :: sum -> s1 && n -> n1 &&
+	predicate sumOK() = exists s1:int, n1:int :: sum -> s1 && n -> n1 &&
 		( sum == n * (n+1) /2 )
-    predicate sumGreater0() = exists s1:int :: sum -> s1 && s1 > 0;
+	predicate sumGreater0() = exists s1:int :: sum -> s1 && s1 > 0;
 
-    private RealSum realSum = null;
-    private int n = 0;
+	private RealSum realSum = null;
+    	private int n = 0;
  
-    public ProxySum(int n) { 
-        this.n = n; 
-    }
+    	public ProxySum(int n) { 
+        	this.n = n; 
+    	}
 
-    public int calculateSum() {
-        if (realSum == null) {
-           realSum = new RealSum(n);
-        } 
-      return realSum.calculateSum();
-    }
+    	public int calculateSum() {
+        	if (realSum == null) {
+           		realSum = new RealSum(n);
+        	} 
+      		return realSum.calculateSum();
+    	}
 
-    public bool sumEven() {
-	return (sum % 2 == 0);
-    }
+    	public bool sumEven() {
+		return (sum % 2 == 0);
+    	}
 }
 
 class ClientSum {
-
 	Sum sum;
 	ClientSum(Sum sum_) { sum = sum_; }
 	
