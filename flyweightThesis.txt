@@ -22,19 +22,19 @@ class IntCell {
 ----------------------------
 class College {
 	private final int collegeNumber; 
-	private final int numberCafeterias; 
+	private final int numberBuildings; 
 
-	predicate collegeCafeteriasMany() = 
-		exists c:int, n: numberCafeterias ::
-		(collegeNumber -> c) && (numberCafeterias -> n) && 
+	predicate collegeBuildingsMany() = 
+		exists c:int, n: numberBuildings ::
+		(collegeNumber -> c) && (numberBuildings -> n) && 
 		(n == 10 * c) 
 
-	predicate collegeCafeteriasFew() = exists c:int, n: numberCafeterias ::
-		(collegeNumber -> c) && (numberCafeterias -> n) && (n == 4 * c) 
+	predicate collegeBuildingsFew() = exists c:int, n: numberBuildings ::
+		(collegeNumber -> c) && (numberBuildings -> n) && (n == 4 * c) 
 
 	College(int number, int multNumber) {
 		this.collegeNumber = number;
-		this.numberCafeterias = this.collegeNumber * multNumber;
+		this.numberBuildings = this.collegeNumber * multNumber;
 	}
 
 	int getCollegeNumber() {
@@ -69,9 +69,10 @@ class StudentApplication {
 	int collegeNumber;
 
 	predicate facilitiesOK() = exists f:IntCell, c:int :: 
-		facilities -> f && collegeNumber -> c &&
+		this.facilities -> f && this.collegeNumber -> c &&
 		(f@1 MultipleOf(c));
 
+	-->this@1 facilitiesOK()
 	StudentApplication(College college, int campusNumber) {
 		this.college = college;
 	    	this.campusNumber = campusNumber;
@@ -85,7 +86,7 @@ class StudentApplication {
 
 	this@1 facilitiesOK() -->
 	boolean checkNumberFacilities() {        
-		return (facilities % college.getCollegeNumber() == 0);
+		return (facilities % collegeNumber == 0);
 	}
 }
 
@@ -98,44 +99,32 @@ public class ApplicationWebsite {
 		new Vector<StudentApplication>();
 	private final ListOfAvailableColleges listOfAvailableColleges = 
 		new ListOfAvailableColleges();
-	Integer facilities;
 
-	Integer submitApplicationGetFacilities(
+	-->((multNumber == 4) -> result@1 collegeBuildingsFew()) &&
+	   ((multNumber == 10) -> result@1 collegeBuildingsMany())
+	College submitApplicationGetCollege(
 		int collegeNumber, 
+		int multNumber,
 		int campusNumber
 	) {
 		College college = listOfAvailableColleges.lookup(collegeNumber);
 	    	StudentApplication studentApplication = 
-			new StudentApplication(college, campusNumber);
+			new StudentApplication(college, campusNumber, multNumber);
 	    	listStudentApplications.add(studentApplication);
-	    	return new Integer(studentApplication.getNumberFacilities());
-	}
-
-	boolean checkIntegerMultiple(int x) {
-		return (facilities.intValue() % x == 0);
+	    	return college;
 	}
 
 	public static void main(String[] args) {
 		ApplicationWebsite website = new ApplicationWebsite();
 
-		facilities = website.submitApplicationGetFacilities(2, 1); 
-    		checkIntegerMultiple(2);
-    		facilities = website.submitApplicationGetFacilities(2, 2);
-    		checkIntegerMultiple(2);
-    		facilities = website.submitApplicationGetFacilities(2, 3);
-    		checkIntegerMultiple(2);
+    		College college1 = website.submitApplicationGetCollege(2, 4, 2);
 
-    		facilities = website.submitApplicationGetFacilities(3, 1);
-    		checkIntegerMultiple(3); 
-    		facilities = website.submitApplicationGetFacilities(3, 2);
-    		checkIntegerMultiple(3);
-    		facilities = website.submitApplicationGetFacilities(3, 3);
-    		checkIntegerMultiple(3);
+		College college2 = website.submitApplicationGetCollege(3, 10, 3);
 	}	
 
 ------------------------------------------
 	public static void main(String[] args) {
-		College college = new College(collegeCafeteriasFew())(2, 4);
+		College college = new College(collegeBuildingsFew())(2, 4);
 		StudentApplication app1 = new Studentapplication(college, 3);
 		Studentapplication app2 = new StudentApplication(college, 5);
 

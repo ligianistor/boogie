@@ -38,7 +38,7 @@ class StateMultiplySix implements Statelike {
 	predicate StateMultipleOf3() = cell -> c && c@1 MultipleOf3()
 	predicate StateMultipleOf2() = cell -> c && c@1 MultipleOf2()
 
-	-> this@1 StateMultipleOfSix(num) && context@1 state15()
+	--> this@1 StateMultipleOfSix(num) && context@1 state15()
         public Integer computeResult(final StateContext context, final int num) {
         	context.setState(new StateMultiplyFifteen());
 		cell.setValue(num*15);
