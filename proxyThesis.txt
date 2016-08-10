@@ -66,12 +66,14 @@ class ClientSum {
 	}
 
 	main() {
-		Sum s = new Sum(5);
+		Sum s = new Sum(sumOK())(5);
 		ClientSum client = new ClientSum(s);
 		s.calculateSum();
 		client.checkSum();
 		s.calculateSum();
 		client.checksum();
+
+		Sum s2 = new Sum(sumGreater0())(7);
 	}
 }
 

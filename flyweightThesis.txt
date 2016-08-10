@@ -122,10 +122,8 @@ public class ApplicationWebsite {
 
 	public static void main(String[] args) {
 		ApplicationWebsite website = new ApplicationWebsite();
-
     		College college1 = website.submitApplicationGetCollege(2, 4, 2);
 		college1.checkFewBuildings();
-
 		College college2 = website.submitApplicationGetCollege(3, 10, 3);
 		college2.checkManyBuildings();
 	}	
@@ -133,7 +131,7 @@ public class ApplicationWebsite {
 ------------------------------------------
 	public static void main(String[] args) {
 		College college = new College(collegeBuildingsFew())(2, 4);
-		StudentApplication app1 = new Studentapplication(college, 3);
+		StudentApplication app1 = new StudentApplication(college, 3);
 		Studentapplication app2 = new StudentApplication(college, 5);
 
 		app1.checkNumberFacilities();
