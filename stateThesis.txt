@@ -4,6 +4,7 @@ class IntCell {
 	predicate MultipleOf3() = value->v && (v % 3 == 0)
 	predicate MultipleOf6() = value->v && (v % 6 == 0)
 	predicate MultipleOf15() = value->v && (v % 15 == 0)
+// TODO might need to add MultippleOf2()
 
 	int value;
 	IntCell(int x) {
@@ -30,7 +31,9 @@ interface Statelike {
 
 	final static IntCell cell =  new IntCell(3);    
 	Integer computeResult(StateContext context, int num); 
+	Integer computeResult2(StateContext context, int num);
 	boolean checkMod3();
+	boolean checkMod2();
 }
 
 class StateMultiplySix implements Statelike {
@@ -41,9 +44,16 @@ class StateMultiplySix implements Statelike {
 	--> this@1 StateMultipleOfSix(num) && context@1 state15()
         public Integer computeResult(final StateContext context, final int num) {
         	context.setState(new StateMultiplyFifteen());
-		cell.setValue(num*15);
+		cell.setValue(num*6);
 		return cell.getValueInteger();
-        }   
+        } 
+
+	--> this@1 StateMultipleOfTen(num) && context@1 state10()
+        public Integer computeResult2(final StateContext context, final int num) {
+        	context.setState(new StateMultiplyTen());
+		cell.setValue(num*10);
+		return cell.getValueInteger();
+        }  
 
 	boolean checkMod3() {
 		if (cell.getValueInt() % 3) {
@@ -51,7 +61,15 @@ class StateMultiplySix implements Statelike {
 		} else { 
 			return false; 
 		}
-	} 
+	}
+ 
+	boolean checkMod2() {
+		if (cell.getValueInt() % 2) {
+			return true; 
+		} else { 
+			return false; 
+		}
+	}
 }
 
 class StateMultiplyFifteen implements Statelike {
@@ -77,6 +95,12 @@ class StateMultiplyFifteen implements Statelike {
 		return cell.getValueInteger();
     	} 
 
+	public Integer computeResult2(final StateContext context, final int num) {
+		cell.setValue(num*10);
+            	context.setState(new StateMultiplySix());
+		return cell.getValueInteger();
+    	} 
+
 	boolean checkMod3() {
 		if (cell.getValueInt() % 3) {
 			return true; 
@@ -84,6 +108,50 @@ class StateMultiplyFifteen implements Statelike {
 			return false; 
 		}
 	} 
+
+	boolean checkMod2() {
+		if (cell.getValueInt() % 2) {
+			return true; 
+		} else { 
+			return false; 
+		}
+	}
+}
+
+class StateMultiplyTen implements Statelike {
+	predicate StateMultipleOf10() = cell -> c && c@1 MultipleOf10()
+	predicate StateMultipleOf3() = cell -> c && c@1 MultipleOf3()
+	predicate StateMultipleOf2() = cell -> c && c@1 MultipleOf2()
+
+	--> this@1 StateMultipleOfSix(num) && context@1 state15()
+        public Integer computeResult(final StateContext context, final int num) {
+        	context.setState(new StateMultiplyFifteen());
+		cell.setValue(num*6);
+		return cell.getValueInteger();
+        } 
+
+	--> this@1 StateMultipleOfTen(num) && context@1 state10()
+        public Integer computeResult2(final StateContext context, final int num) {
+        	context.setState(new StateMultiplyTen());
+		cell.setValue(num*10);
+		return cell.getValueInteger();
+        }  
+
+	boolean checkMod3() {
+		if (cell.getValueInt() % 3) {
+			return true; 
+		} else { 
+			return false; 
+		}
+	}
+ 
+	boolean checkMod2() {
+		if (cell.getValueInt() % 2) {
+			return true; 
+		} else { 
+			return false; 
+		}
+	}
 }
 
 --------------
@@ -92,9 +160,11 @@ class StateContext {
 
 	predicate state6() = myState instanceof StateMultiplySix
 	predicate state15() = myState instanceof StateMultiplyFifteen
+	predicate state10() = myState instanceof StateMultiplyTen
 	predicate stateContextMultiple3() = myState@1 StateMultipleOf3()
 	predicate stateContextMultiple6() = myState@1 StateMultipleOf6()
 	predicate stateContextMultiple15() = myState@1 StateMultipleOf15()
+	predicate stateContextMultiple10() = myState@1 StateMultipleOf10()
 
 	-> this@1 state6() &&  this@1 stateContextMultiple3()
     	StateContext() {
@@ -113,8 +183,24 @@ class StateContext {
         	return myState.computeResult(this, num);
         }
 
+	-> (this@1 state6() -> (this@1 stateContextMultiple6() && (result % 6 == 0)))
+	&&
+	(this@1 state10() -> (this@1 stateContextMultiple10() && (result % 10 == 0)))
+
+	public Integer computeResult2(final int num) {
+        	return myState.computeResult2(this, num);
+        }
+
+// TODO write another function computeResult2() that
+// will become parallel to the current example, but it will switch between state6 and state10.
+// Need to write a new main for that function, that exemplifies it.
+
 	boolean checkMod3Context() {
 		return myState.checkMod3();
+	} 
+
+	boolean checkMod2Context() {
+		return myState.checkMod2();
 	} 
 }
 
@@ -127,8 +213,17 @@ public class StateClient {
 	}
 
 	sc@1 stateContextMultiple3() -->
-	boolean checkMultiplicity() {
+	boolean checkMultiplicity3() {
 		if (!sc.checkMod3Context()) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	sc@1 stateContextMultiple2() -->
+	boolean checkMultiplicity2() {
+		if (!sc.checkMod2Context()) {
 			return false;
 		} else {
 			return true;
@@ -138,13 +233,23 @@ public class StateClient {
     	public static void main(String[] args) {
         	final StateContext sc1 = new StateContext();
 		StateClient stateClient = new StateClient(sc1);
-		stateClient.checkMultiplicity();
+		stateClient.checkMultiplicity3();
 		sc1.computeResult(1);
-		stateClient.checkMultiplicity();
+		stateClient.checkMultiplicity3();
 		sc1.computeResult(2);
-		stateClient.checkMultiplicity();
+		stateClient.checkMultiplicity3();
 		sc1.computeResult(3);
-		stateClient.checkMultiplicity();		
+		stateClient.checkMultiplicity3();
+
+        	final StateContext sc2 = new StateContext();
+		StateClient stateClient2 = new StateClient(sc2);
+		stateClient2.checkMultiplicity2();
+		sc2.computeResult2(1);
+		stateClient2.checkMultiplicity2();
+		sc2.computeResult2(2);
+		stateClient2.checkMultiplicity2();
+		sc2.computeResult2(3);
+		stateClient2.checkMultiplicity2();				
     }
 }
 
