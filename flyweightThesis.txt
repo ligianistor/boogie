@@ -25,11 +25,11 @@ class College {
 	private final int numberBuildings; 
 
 	predicate collegeBuildingsMany() = 
-		exists c:int, n: numberBuildings ::
+		exists c:int, n:int ::
 		(collegeNumber -> c) && (numberBuildings -> n) && 
 		(n == 10 * c) 
 
-	predicate collegeBuildingsFew() = exists c:int, n: numberBuildings ::
+	predicate collegeBuildingsFew() = exists c:int, n:int ::
 		(collegeNumber -> c) && (numberBuildings -> n) && (n == 4 * c) 
 
 	College(int number, int multNumber) {
@@ -44,6 +44,16 @@ class College {
 	--> result@1 MultipleOf(collegeNumber)
 	IntCell getNumberFacilities(int campusNumber) {
 		return new IntCell(campusNumber * collegeNumber);
+	}
+
+	this@1 collegeBuildingsFew() -->
+	bool checkFewBuildings() {
+		return (numberBuildings == 4 * collegeNumber);
+	}
+
+	this@1 collegeBuildingsMany() -->
+	bool checkManyBuildings() {
+		return (numberBuildings == 10 * collegeNumber);
 	}
 }
 -----------------
@@ -80,10 +90,6 @@ class StudentApplication {
 	    	this.collegeNumber = college.getCollegeNumber();
 	}
 
-	IntCell getFacilities() {
-		return facilities;
-	}
-
 	this@1 facilitiesOK() -->
 	boolean checkNumberFacilities() {        
 		return (facilities % collegeNumber == 0);
@@ -118,8 +124,10 @@ public class ApplicationWebsite {
 		ApplicationWebsite website = new ApplicationWebsite();
 
     		College college1 = website.submitApplicationGetCollege(2, 4, 2);
+		college1.checkFewBuildings();
 
 		College college2 = website.submitApplicationGetCollege(3, 10, 3);
+		college2.checkManyBuildings();
 	}	
 
 ------------------------------------------
