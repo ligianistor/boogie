@@ -27,7 +27,7 @@ interface Statelike {
 	predicate StateMultipleOf3();
 	predicate StateMultipleOf2();
 
-	final static IntCell cell =  new IntCell(3);    
+	final static IntCell cell;    
 	Integer computeResult(StateContext context, int num); 
 	Integer computeResult2(StateContext context, int num);
 	boolean checkMod3();
@@ -54,19 +54,11 @@ class StateMultiplySix implements Statelike {
         }  
 
 	boolean checkMod3() {
-		if (cell.getValueInt() % 3) {
-			return true; 
-		} else { 
-			return false; 
-		}
+		return (cell.getValueInt() % 3 == 0);
 	}
  
 	boolean checkMod2() {
-		if (cell.getValueInt() % 2) {
-			return true; 
-		} else { 
-			return false; 
-		}
+		return (cell.getValueInt() % 2 == 0);
 	}
 }
 
@@ -102,19 +94,11 @@ class StateMultiplyFifteen implements Statelike {
     	} 
 
 	boolean checkMod3() {
-		if (cell.getValueInt() % 3) {
-			return true; 
-		} else { 
-			return false; 
-		}
+		return (cell.getValueInt() % 3 == 0);
 	} 
 
 	boolean checkMod2() {
-		if (cell.getValueInt() % 2) {
-			return true; 
-		} else { 
-			return false; 
-		}
+		return (cell.getValueInt() % 2 == 0);
 	}
 }
 
@@ -138,19 +122,11 @@ class StateMultiplyTen implements Statelike {
         }  
 
 	boolean checkMod3() {
-		if (cell.getValueInt() % 3) {
-			return true; 
-		} else { 
-			return false; 
-		}
+		return (cell.getValueInt() % 3 == 0);
 	}
  
 	boolean checkMod2() {
-		if (cell.getValueInt() % 2) {
-			return true; 
-		} else { 
-			return false; 
-		}
+		return (cell.getValueInt() % 2 == 0);
 	}
 }
 
