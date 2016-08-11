@@ -1,6 +1,4 @@
 class IntCell {
-
-	predicate HigherThanZero() = value->v && v>0
 	predicate MultipleOf3() = value->v && (v % 3 == 0)
 	predicate MultipleOf2() = value->v && (v % 2 == 0)
 	predicate MultipleOf6() = value->v && (v % 6 == 0)
