@@ -2,9 +2,9 @@ class IntCell {
 
 	predicate HigherThanZero() = value->v && v>0
 	predicate MultipleOf3() = value->v && (v % 3 == 0)
+	predicate MultipleOf2() = value->v && (v % 2 == 0)
 	predicate MultipleOf6() = value->v && (v % 6 == 0)
 	predicate MultipleOf15() = value->v && (v % 15 == 0)
-// TODO might need to add MultippleOf2()
 
 	int value;
 	IntCell(int x) {
@@ -41,17 +41,17 @@ class StateMultiplySix implements Statelike {
 	predicate StateMultipleOf3() = cell -> c && c@1 MultipleOf3()
 	predicate StateMultipleOf2() = cell -> c && c@1 MultipleOf2()
 
-	--> this@1 StateMultipleOfSix(num) && context@1 state15()
+	--> this@1 StateMultipleOfSix() && context@1 state15()
         public Integer computeResult(final StateContext context, final int num) {
         	context.setState(new StateMultiplyFifteen());
 		cell.setValue(num*6);
 		return cell.getValueInteger();
         } 
 
-	--> this@1 StateMultipleOfTen(num) && context@1 state10()
+	--> this@1 StateMultipleOfSix() && context@1 state10()
         public Integer computeResult2(final StateContext context, final int num) {
         	context.setState(new StateMultiplyTen());
-		cell.setValue(num*10);
+		cell.setValue(num*6);
 		return cell.getValueInteger();
         }  
 
@@ -89,15 +89,17 @@ class StateMultiplyFifteen implements Statelike {
 		return cell.getValueInteger();
     	}  
 
+	--> this@1 StateMultipleOf15() && context@1 state6()
 	public Integer computeResult(final StateContext context, final int num) {
 		cell.setValue(num*15);
             	context.setState(new StateMultiplySix());
 		return cell.getValueInteger();
     	} 
 
+	--> this@1 StateMultipleOf15() && context@1 state10()
 	public Integer computeResult2(final StateContext context, final int num) {
-		cell.setValue(num*10);
-            	context.setState(new StateMultiplySix());
+		cell.setValue(num*15);
+            	context.setState(new StateMultiplyTen());
 		return cell.getValueInteger();
     	} 
 
@@ -123,16 +125,16 @@ class StateMultiplyTen implements Statelike {
 	predicate StateMultipleOf3() = cell -> c && c@1 MultipleOf3()
 	predicate StateMultipleOf2() = cell -> c && c@1 MultipleOf2()
 
-	--> this@1 StateMultipleOfSix(num) && context@1 state15()
+	--> this@1 StateMultipleOf10() && context@1 state15()
         public Integer computeResult(final StateContext context, final int num) {
         	context.setState(new StateMultiplyFifteen());
-		cell.setValue(num*6);
+		cell.setValue(num*10);
 		return cell.getValueInteger();
         } 
 
-	--> this@1 StateMultipleOfTen(num) && context@1 state10()
+	--> this@1 StateMultipleOf10() && context@1 state6()
         public Integer computeResult2(final StateContext context, final int num) {
-        	context.setState(new StateMultiplyTen());
+        	context.setState(new StateMultiplySix());
 		cell.setValue(num*10);
 		return cell.getValueInteger();
         }  
