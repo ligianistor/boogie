@@ -101,10 +101,13 @@ import java.util.List;
 import java.util.Vector;
 
 public class ApplicationWebsite {
-	private final List<StudentApplication> listStudentApplications = 
-		new Vector<StudentApplication>();
-	private final ListOfAvailableColleges listOfAvailableColleges = 
-		new ListOfAvailableColleges();
+	private final List<StudentApplication> listStudentApplications;
+	private final ListOfAvailableColleges listOfAvailableColleges;
+
+	public ApplicationWebsite() {
+		listStudentApplications = new Vector<StudentApplication>()
+		listOfAvailableColleges = new ListOfAvailableColleges();
+	}
 
 	-->((multNumber == 4) -> result@1 collegeBuildingsFew()) &&
 	   ((multNumber == 10) -> result@1 collegeBuildingsMany())
@@ -122,17 +125,23 @@ public class ApplicationWebsite {
 
 	public static void main(String[] args) {
 		ApplicationWebsite website = new ApplicationWebsite();
+		{}
     		College college1 = website.submitApplicationGetCollege(2, 4, 2);
+		{college1@1 collegeBuildingsFew()}
 		college1.checkFewBuildings();
 		College college2 = website.submitApplicationGetCollege(3, 10, 3);
+		{college2@1 collegeBuildingsMany()}
 		college2.checkManyBuildings();
 	}	
 
 ------------------------------------------
 	public static void main(String[] args) {
 		College college = new College(collegeBuildingsFew())(2, 4);
+		{college@1 collegeBuildingsFew()}
 		StudentApplication app1 = new StudentApplication(college, 3);
+		{app1@1 facilitiesOK()}
 		Studentapplication app2 = new StudentApplication(college, 5);
+		{app2@1 facilitiesOK()}
 
 		app1.checkNumberFacilities();
 		app2.checkNumberFacilities();
