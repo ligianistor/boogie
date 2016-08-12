@@ -47,12 +47,12 @@ class College {
 	}
 
 	this@1 collegeBuildingsFew() -->
-	bool checkFewBuildings() {
+	boolean checkFewBuildings() {
 		return (numberBuildings == 4 * collegeNumber);
 	}
 
 	this@1 collegeBuildingsMany() -->
-	bool checkManyBuildings() {
+	boolean checkManyBuildings() {
 		return (numberBuildings == 10 * collegeNumber);
 	}
 }
