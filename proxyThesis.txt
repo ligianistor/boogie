@@ -3,7 +3,7 @@ public interface Sum {
 	predicate sumGreater0();
 
 	public int calculateSum();
-	public bool sumEven();
+	public boolean sumEven();
 }
 
 class RealSum implements Sum {
@@ -27,7 +27,7 @@ class RealSum implements Sum {
 		return sum;
 	}
 
-	public bool sumEven() {
+	public boolean sumEven() {
 		return (sum % 2 == 0);
 	}
 }
@@ -51,7 +51,7 @@ class ProxySum implements Sum {
       		return realSum.calculateSum();
     	}
 
-    	public bool sumEven() {
+    	public boolean sumEven() {
 		return (sum % 2 == 0);
     	}
 }
@@ -61,7 +61,7 @@ class ClientSum {
 	ClientSum(Sum sum_) { sum = sum_; }
 	
 	s@1 sumOK() --> 
-	bool checksum() {
+	boolean checkSum() {
 		return sum.sumEven();
 	}
 
