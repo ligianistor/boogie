@@ -167,9 +167,6 @@ class StateContext {
         	return myState.computeResult2(this, num);
         }
 
-// computeResult2() is parallel to the current computeResult(), 
-// but it switches between state6 and state10.
-
 	this@1 stateContextMultiple3() -->
 	boolean checkMultiplicity3() {
 		if (!sc.checkMod3Context()) {
