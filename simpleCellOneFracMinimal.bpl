@@ -25,24 +25,24 @@ procedure UnpackPredVal(v:int, this: Ref);
 
 procedure PackPredNext(obj:Ref, this: Ref);
 	requires (next[this] == obj) &&
-		(fracPredVal[obj] == 0.34) &&
+		(fracPredVal[obj] >= 0.34) &&
 		(packedPredNext[this] == false);
 
 procedure UnpackPredNext(obj:Ref, this: Ref);
 	requires packedPredNext[this] &&
 		(fracPredNext[this] > 0.0);
 	ensures	(next[this] == obj) &&
-		(fracPredVal[obj] == 0.34);
+		(fracPredVal[obj] >= 0.34);
 
 procedure changeVal(this: Ref, r: int)
 	modifies packedPredVal,val;
 	requires packedPredVal[this] && 
-		(fracPredVal[this] == 1.0) &&
+		(fracPredVal[this] >= 1.0) &&
 		(r < 15);
 	requires (forall x:Ref :: packedPredVal[x]);
 	requires (forall x:Ref :: packedPredNext[x]);
 	ensures packedPredVal[this] &&
-		(fracPredVal[this] == 1.0);
+		(fracPredVal[this] >= 1.0);
 	ensures (forall x:Ref :: (packedPredVal[x] == old(packedPredVal[x])));
 {
 	call UnpackPredVal(val[this], this);
@@ -63,15 +63,23 @@ procedure main()
 	var b : Ref;
 
 	call ConstructSimpleCell(2,null,c);
+	packedPredVal[c] := false; // I only add this assignment 
+	// when it's after a call to the constructor and
+	// I know the predicate that it's going to pack to.
+	call PackPredVal(2, c);
 	packedPredVal[c] := true;
 	fracPredVal[c] := 1.0;
 
 	call ConstructSimpleCell(2,c,a);
+	packedPredNext[a] := false;
+	call PackPredNext(c, a);
 	packedPredNext[a] := true;
 	fracPredNext[a] := 1.0;
 	fracPredVal[c] := fracPredVal[c] - 0.34;
 	
 	call ConstructSimpleCell(3,c,b);
+	packedPredNext[b] := false;
+	call PackPredNext(c, b);
 	packedPredNext[b] := true;
 	fracPredNext[b] := 1.0;
 	fracPredVal[c] := fracPredVal[c] - 0.34;
