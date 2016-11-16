@@ -1,8 +1,6 @@
 type Ref;
-type FractionType = [Ref] real;
-type PackedType = [Ref] bool;
-var packedOK: PackedType;
-var fracOK: FractionType;
+var packedOK: [Ref] bool;
+var fracOK: [Ref] real;
 const null: Ref;
 
 var val: [Ref]int;
