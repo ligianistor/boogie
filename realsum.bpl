@@ -27,7 +27,11 @@ procedure UnpackSumGreater0RealSum(s1:real, this:Ref);
 requires packedSumGreater0RealSum[this];
 ensures (sum[this] == s1) && (s1 > 0.0);
 
-procedure ConstructRealSum(n1:int, this:Ref)
+procedure ConstructRealSum(this:Ref);
+ensures n[this] == 0;
+ensures sum[this] == 0;
+
+procedure sumConstrRealSum(n1:int, this:Ref)
 modifies n, sum;
 {
 n[this]:=n1;

@@ -1,5 +1,22 @@
 var sumClient : [Ref]Ref;
-var instanceof: [Ref]int;
+var instanceof: [Ref]int; // maybe this should be declared in the interface Sum
+
+var packedClientSumOK : [Ref]bool;
+var fracClientSumOK : [Ref]real;
+var packedClientSumGreater0 : [Ref]bool;
+var fracClientSumGreater0 : [Ref]real;
+
+procedure PackClientSumOK(this:Ref);
+requires (packedClientSumOK[this] == false);
+
+procedure UnpackClientSumOK(this:Ref);
+requires packedClientSumOK[this];
+
+procedure PackClientSumGreater0(this:Ref);
+requires (packedClientSumGreater0[this] == false);
+
+procedure UnpackClientSumGreater0(this:Ref);
+requires packedClientSumGreater0[this];
 
 procedure ConstructClientSum(sum1:Ref, this:Ref);
 ensures sumClient[this] == sum1;
@@ -35,27 +52,92 @@ call r:=sumIsGreater0RealSum(sumClient[this]);
 }
 }
 
-procedure main() 
+procedure main(this:Ref) 
 {
 var s,s2:Ref;
 var client1, client2:Ref;
 var client3, client4:Ref;
-call ConstructProxySum(5,s);
-call 
-	Sum s = new ProxySum(sumOK()[])(5);
-	ClientSum client1 = new ClientSum(s);
-	ClientSum client2 = new ClientSum(s);
-	s.calculateSum();
-	client1.checkSumIsOK();
-	s.calculateSum();
-	client2.checkSumIsOK();
+var temp : real;
+var temp1 : real;
+var temp2 : bool;
 
-	Sum s2 = new ProxySum(sumGreater0()[])(7);
-	ClientSum client3 = new ClientSum(s2);
-	ClientSum client4 = new ClientSum(s2);
-	s2.calculateSum();
-	client3.checkSumGreater0();
-	s2.calculateSum();
-	client4.checkSumGreater0();
+assume (forall y:Ref :: (fracSumOKProxySum[y] >= 0.0) );
+assume (forall y:Ref :: (fracSumGreater0ProxySum[y] >= 0.0) );
+
+assume (forall y:Ref :: (fracSumOKRealSum[y] >= 0.0) );
+assume (forall y:Ref :: (fracSumGreater0RealSum[y] >= 0.0) );
+
+call ConstructProxySum(s);
+call sumConstrProxySum(5, s);
+packedSumOKProxySum[s] := false;
+call PackSumOKProxySum(sum[s],n[s],s);
+packedSumOKProxySum[s] := true;
+fracSumOKProxySum[s] := 1.0;
+
+call ConstructClientSum(s, client1);
+packedClientSumOK[client1] := false;
+call PackClientSumOK(client1);
+packedClientSumOK[client1] := true;
+fracClientSumOK[client1] := 1.0;
+
+call ConstructClientSum(s, client2);
+packedClientSumOK[client2] := false;
+call PackClientSumOK(client2);
+packedClientSumOK[client2] := true;
+fracClientSumOK[client2] := 1.0;
+
+if (instanceof[s] == 1) {
+	call temp := calculateSumProxySum(s);
+} else {
+	call temp := calculateSumRealSum(s);
+}
+
+call temp2 := checkSumIsOK(client1);
+
+if (instanceof[s] == 1) {
+	call temp := calculateSumProxySum(s);
+} else {
+	call temp := calculateSumRealSum(s);
+}
+
+call temp2 := checkSumIsOK(client2);
+
+//------
+
+call ConstructProxySum(s2);
+call sumConstrProxySum(7, s2);
+packedSumGreater0ProxySum[s2] := false;
+call PackSumGreater0ProxySum(sum[s2],s2);
+packedSumGreater0ProxySum[s2] := true;
+fracSumGreater0ProxySum[s2] := 1.0;
+
+call ConstructClientSum(s2, client3);
+packedClientSumGreater0[client3] := false;
+call PackClientSumGreater0(client3);
+packedClientSumGreater0[client3] := true;
+fracClientSumGreater0[client3] := 1.0;
+
+call ConstructClientSum(s2, client4);
+packedClientSumGreater0[client4] := false;
+call PackClientSumGreater0(client4);
+packedClientSumGreater0[client4] := true;
+fracClientSumGreater0[client4] := 1.0;
+
+if (instanceof[s2] == 1) {
+	call temp1 := calculateSumProxySum(s2);
+} else {
+	call temp1 := calculateSumRealSum(s2);
+}
+
+call temp2 := checkSumGreater0(client3);
+
+if (instanceof[s2] == 1) {
+	call temp1 := calculateSumProxySum(s2);
+} else {
+	call temp1 := calculateSumRealSum(s2);
+}
+
+call temp2 := checkSumGreater0(client4);
+
 }
 

@@ -23,7 +23,11 @@ procedure UnpackSumGreater0ProxySum(s1:real, this:Ref);
 requires packedSumGreater0ProxySum[this];
 ensures (sum[this] == s1) && (s1 > 0.0);
 
-procedure ConstructProxySum(n1:int, this:Ref)
+procedure ConstructProxySum(this:Ref);
+ensures n[this] == 0;
+ensures sum[this] == 0;
+
+procedure sumConstrProxySum(n1:int, this:Ref)
 modifies n,sum;
 {
   var temp: real;
@@ -36,7 +40,7 @@ modifies n,sum;
 { 
   var temp : real;
 if (realSum[this]==null) {
-	call ConstructRealSum(n[this], realSum[this]);
+	call sumConstrRealSum(n[this], realSum[this]);
 }
 
 	call temp := calculateSumRealSum(realSum[this]);
