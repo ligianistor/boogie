@@ -67,8 +67,7 @@ assume (forall y:Ref :: (fracSumGreater0ProxySum[y] >= 0.0) );
 assume (forall y:Ref :: (fracSumOKRealSum[y] >= 0.0) );
 assume (forall y:Ref :: (fracSumGreater0RealSum[y] >= 0.0) );
 
-call ConstructProxySum(s);
-call sumConstrProxySum(5, s);
+call ConstructProxySum(0,0,s);
 packedSumOKProxySum[s] := false;
 call PackSumOKProxySum(sum[s],n[s],s);
 packedSumOKProxySum[s] := true;
@@ -87,25 +86,24 @@ packedClientSumOK[client2] := true;
 fracClientSumOK[client2] := 1.0;
 
 if (instanceof[s] == 1) {
-	call temp := calculateSumProxySum(s);
+	call temp := calculateSumProxySum(5,s);
 } else {
-	call temp := calculateSumRealSum(s);
+	call temp := calculateSumRealSum(5,s);
 }
 
 call temp2 := checkSumIsOK(client1);
 
 if (instanceof[s] == 1) {
-	call temp := calculateSumProxySum(s);
+	call temp := calculateSumProxySum(5,s);
 } else {
-	call temp := calculateSumRealSum(s);
+	call temp := calculateSumRealSum(5,s);
 }
 
 call temp2 := checkSumIsOK(client2);
 
 //------
 
-call ConstructProxySum(s2);
-call sumConstrProxySum(7, s2);
+call ConstructProxySum(0,0,s2);
 packedSumGreater0ProxySum[s2] := false;
 call PackSumGreater0ProxySum(sum[s2],s2);
 packedSumGreater0ProxySum[s2] := true;
@@ -124,17 +122,17 @@ packedClientSumGreater0[client4] := true;
 fracClientSumGreater0[client4] := 1.0;
 
 if (instanceof[s2] == 1) {
-	call temp1 := calculateSumProxySum(s2);
+	call temp1 := calculateSumProxySum(7,s2);
 } else {
-	call temp1 := calculateSumRealSum(s2);
+	call temp1 := calculateSumRealSum(7,s2);
 }
 
 call temp2 := checkSumGreater0(client3);
 
 if (instanceof[s2] == 1) {
-	call temp1 := calculateSumProxySum(s2);
+	call temp1 := calculateSumProxySum(7,s2);
 } else {
-	call temp1 := calculateSumRealSum(s2);
+	call temp1 := calculateSumRealSum(7,s2);
 }
 
 call temp2 := checkSumGreater0(client4);
