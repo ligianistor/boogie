@@ -41,10 +41,13 @@ procedure ConstructRealSum(n1:int, s:Ref, this:Ref);
 ensures n[this] == n1;
 ensures sum[this] == s;
 
-procedure calculateRealSum(n1: int, this:Ref) 
+procedure calculateRealSum(n1:int, this:Ref) returns (r:real)
 modifies sum;
+requires packedBasicFieldsRealSum[this] && fracBasicFieldsRealSum[this]==1.0
+ensures packedSumOKRealSum[this] && fracSumOKRealSum[this]==1.0
 {
 	sum[this] := n1 * (n1 + 1) / 2;
+	r := sum[this];
 }
 
 procedure calculateSumRealSum(n1:int, this:Ref)  returns (r:real)

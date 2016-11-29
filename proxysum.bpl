@@ -33,9 +33,9 @@ procedure UnpackSumGreater0ProxySum(s1:real, this:Ref);
 requires packedSumGreater0ProxySum[this];
 ensures (sum[this] == s1) && (s1 > 0.0);
 
-procedure ConstructProxySum(this:Ref);
-ensures n[this] == 0;
-ensures sum[this] == 0;
+procedure ConstructProxySum(n1:int, s1:Ref, this:Ref);
+ensures n[this] == n1;
+ensures sum[this] == s1;
 
 procedure calculateSumProxySum(n1:int, this:Ref)  returns (r:real)
 modifies n,sum;
