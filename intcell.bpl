@@ -5,17 +5,23 @@ var value: [Ref]int;
 var packedMultipleOf: [Ref] bool;
 var fracMultipleOf: [Ref] real;
 
-var packedMultipleOf3: [Ref] bool;
-var fracMultipleOf3: [Ref] real;
+var packedMultipleOf21: [Ref] bool;
+var fracMultipleOf21: [Ref] real;
 
-var packedMultipleOf2: [Ref] bool;
-var fracMultipleOf2: [Ref] real;
+var packedMultipleOf16: [Ref] bool;
+var fracMultipleOf16: [Ref] real;
 
-var packedMultipleOf6: [Ref] bool;
-var fracMultipleOf6: [Ref] real;
+var packedMultipleOf15: [Ref] bool;
+var fracMultipleOf15: [Ref] real;
 
-var packedMultipleOf18: [Ref] bool;
-var fracMultipleOf18: [Ref] real;
+var packedMultipleOf14: [Ref] bool;
+var fracMultipleOf14: [Ref] real;
+
+var packedMultipleOf33: [Ref] bool;
+var fracMultipleOf33: [Ref] real;
+
+var packedMultipleOf4: [Ref] bool;
+var fracMultipleOf4: [Ref] real;
 
 
 function modulo(x:int, y:int) returns (int);
@@ -37,18 +43,28 @@ procedure UnpackMultipleOf(a: int, v:int, this:Ref);
 requires packedMultipleOf[this];
 ensures	(value[this] == v) && (modulo(v,a) == 0); 
 
-procedure PackMultipleOf3(v:int, this:Ref);
-requires (packedMultipleOf3[this]==false) &&
- 	(value[this] == v) && (modulo(v,3) == 0); 
+procedure PackMultipleOf21(v:int, this:Ref);
+requires (packedMultipleOf21[this]==false) &&
+ 	(value[this] == v) && (modulo(v,21) == 0); 
 
-procedure UnpackMultipleOf3(v:int, this:Ref);
-requires packedMultipleOf3[this];
-ensures	(value[this] == v) && (modulo(v,3) == 0); 
+procedure UnpackMultipleOf21(v:int, this:Ref);
+requires packedMultipleOf21[this];
+ensures	(value[this] == v) && (modulo(v,21) == 0); 
 
-//predicate MultipleOf2() = value->v && (v % 2 == 0) 
-//predicate MultipleOf6() = value->v && (v % 6 == 0) 
-//predicate MultipleOf18() = value->v && (v % 18 == 0) 
-//maybe these can be expressed through MultipleOf
+procedure PackMultipleOf16(v:int, this:Ref);
+requires (packedMultipleOf16[this]==false) &&
+ 	(value[this] == v) && (modulo(v,16) == 0); 
+
+procedure UnpackMultipleOf16(v:int, this:Ref);
+requires packedMultipleOf16[this];
+ensures	(value[this] == v) && (modulo(v,16) == 0);
+
+//predicate MultipleOf21() = this.value->v && (v % 21 == 0) 
+//predicate MultipleOf16() = this.value->v && (v % 16 == 0) 
+//predicate MultipleOf15() = this.value->v && (v % 15 == 0) 
+//predicate MultipleOf14() = this.value->v && (v % 14 == 0) 
+//predicate MultipleOf33() = this.value->v && (v % 33 == 0) 
+//predicate MultipleOf4() = this.value->v && (v % 4 == 0) 
 
 procedure ConstructIntCell(x: int, this: Ref);
 	ensures (value[this] == x);
