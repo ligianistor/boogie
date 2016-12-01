@@ -2,7 +2,8 @@ type Ref;
 
 const null: Ref;
 
-var cell: [Ref]Ref;
+var cell : [Ref]Ref;
+var instanceof : [Ref]int;
 
 var packedBasicFieldsStateLive: [Ref] bool;
 var fracBasicFieldsStateLive: [Ref] real;
