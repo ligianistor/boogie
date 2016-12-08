@@ -38,7 +38,7 @@ requires (cell[this] == c);
 requires (fracMultipleOf14[c] == 1.0);
 
 procedure UnpackStateMultipleOf2StateLive(c:Ref, this:Ref)
-requires packedStateMultipleOf32tateLive[this];
+requires packedStateMultipleOf2StateLive[this];
 ensures (cell[this] == c);
 ensures (fracMultipleOf14[c] == 1.0);
 
@@ -55,8 +55,8 @@ ensures packedStateLimbo[context] && (fracStateLimbo[context] >= 1.0)
 {
 var s : Ref;
 // call constructor of s 
-// StateLike s = new StateLive()[];
-call setValue(num*33, cell[this]);
+// StateLike s = new StateLimbo()[];
+call setValue(num*15, cell[this]);
 call setState(s, context);
 r:=cell[this];
 }
