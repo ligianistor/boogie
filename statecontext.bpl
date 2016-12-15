@@ -60,26 +60,4 @@ if (instanceof[myState[this]]) == 1) {
 
 }
 
-public IntCell computeResult2SC(int num) 
-ensures (this#1 stateContextMultiple2())
-ensures (this#1.0 stateLive() ~=> (this#1.0 stateSleep())) 
-&& 
-(this#1.0 stateSleep() ~=> (this#1.0 stateLimbo())) 
-&&
-(this#1.0 stateLimbo() ~=> (this#1.0 stateLive()))
-{ 
-	return myState.computeResult2(this, num); 
-} 
-
-boolean stateContextCheckMultiplicity3() 
-requires this#1.0 stateContextMultiple3() 
-{ 
-	return myState.checkMod3(); 
-} 
-
-boolean stateContextCheckMultiplicity2() 
-requires this#1.0 stateContextMultiple2() 
-{ 
-	return myState.checkMod2(); 
-} 
 
