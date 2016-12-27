@@ -1,16 +1,32 @@
 type MapIntCollege = [int] Ref;
 
 // Each ApplicationWebsite will have its own map of college.
+// This field is common with ApplicationWebsite.
+
 var mapOfColleges : [Ref]MapIntCollege; 
 
 var maxSize : [Ref]int;
-var size : [Ref]int;
 
 // the type of packed and frac is different here because 
-// we are dealing with maps and they have an extra index , the key, 
+// we are dealing with maps and they have an extra index, the key, 
 // that we need in order to get to the value.
 var packedIsEntryNull : [Ref, int]bool;
 var fracIsEntryNull : [Ref, int]real;
+
+var packedMapOfCollegesField : [Ref]bool;
+var fracMapOfCollegesField : [Ref]real;
+
+procedure PackMapOfCollegesField(m:MapIntCollege, this:Ref);
+requires packedMapOfCollegesField[this] == false;
+requires mapOfColleges[this] == m;
+
+
+	predicate MapOfCollegesField() = exists m:map<int, College> :: mapOfColleges -> m
+			
+	predicate KeyValuePair(int key, College value) = 
+			exists m:map<int, College> :: mapOfColleges -> m && (mapOfColleges[key] == value)
+
+
 
 procedure PackIsEntryNull(key1 : int, m:MapIntCollege, this:Ref);
 requires  (packedIsEntryNull[this] == false);
@@ -21,6 +37,7 @@ procedure ConstructMapCollege(m: MapIntCollege, max:int, s:int, this: Ref);
 		&& (size[this] == s)
 
 procedure makeMapNull(i : int, this:Ref)
+modifies mapOfColleges;
 ensures (forall j:int :: (j<=i) => packedIsEntryNull[this, j])
 {
 if (i==0) {
@@ -30,29 +47,44 @@ if (i==0) {
 }
 }
 
-procedure containsKey(key1: int) returns (b:bool) {
+procedure containsKey(key1: int) returns (b:bool) 
+{
 	b := true;
 	if (mapOfColleges[this][key1] == null) {
 		b := false;	
 	} 
 }
 	
-procedure put(key1 : int, college1: Ref, this:Ref) {
+procedure put(key1 : int, college1: Ref, this:Ref) 
+modifies mapOfColleges;
+{
 	mapOfColleges[this][key1] := college1;	
 }
 	
-procedure get(key1:int) returns (c:Ref)
+procedure get(key1:int, this:Ref) returns (c:Ref)
 
 {
-	c := 	mapOfColleges[this][key1];
+	c := mapOfColleges[this][key1];
 }
 	
-College lookup(int collegeNumber, int multNumber) {
-	if (!this.containsKey(collegeNumber)) {
-		this.put(collegeNumber, new College(collegeNumber, multNumber));
+procedure lookup(collegeNumber:int, this:Ref) returns (r:Ref)
+modifies
+requires packedMapOfCollegesField[this] &&
+	(fracMapOfCollegesField[this] == 1.0);
+ensures packedKeyValuePair[this] &&
+	(fracKeyValuePair[this] == 1.0);
+//ensures this#1.0 KeyValuePair(collegeNumber, result)
+{
+var temp:bool;
+var c:Ref;
+call temp := containsKey(collegeNumber, this);
+if (temp == false) 
+	{
+		call ConstructCollege(collegeNumber, c);
+		//TODO add statements after constructing object
+		call put(collegeNumber, c, this);
 	}
-		return this.get(collegeNumber);
+call r:= get(collegeNumber, this);
 }
-
 
 

@@ -1,15 +1,17 @@
-var mapOfAvailableColleges : [Ref]MapIntCollege;
+// Each ApplicationWebsite has its own map of college
+// I use mapOfColleges from mapcollege.bpl
+//var mapOfAvailableColleges : [Ref]MapIntCollege;
 
 var packedApplicationWebsiteField : [Ref]bool;
 var fracApplicationWebsiteField : [Ref]real;
 
 procedure PackApplicationWebsiteField(m: MapIntCollege, this:Ref);
 requires (packedApplicationWebsiteField[this]==false) &&
- 	(mapOfAvailableColleges[this] == m); 
+ 	(mapOfColleges[this] == m); 
 
 procedure UnpackApplicationWebsiteField(m: MapIntCollege, this:Ref);
 requires packedApplicationWebsiteField[this];
-ensures	(mapOfAvailableColleges[this] == m); 
+ensures	(mapOfColleges[this] == m); 
 
 procedure submitApplicationGetCollege(int collegeNumber) returns (r: Ref)
 // TODO add modifies
@@ -22,7 +24,7 @@ ensures ( packedCollegeBuildingsFew[result] &&
 	(fracCollegeBuildingsMany[result] > 0.0) );
 {
 	var college : Ref;
-	call college := lookup(collegeNumber, mapOfAvailableColleges[this]);
+	call college := lookup(collegeNumber, mapOfColleges[this]);
 	// might be able to say var r : Ref from the beginning
 	r := college;
 }
