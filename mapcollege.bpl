@@ -47,7 +47,12 @@ if (i==0) {
 }
 }
 
-procedure containsKey(key1: int) returns (b:bool) 
+procedure containsKey(key1: int) returns (b:bool)
+requires packedMapOfCollegesField[this] &&
+	(fracMapOfCollegesField[this] == 1.0);
+//requires this#1.0 MapOfCollegesField()
+//ensures (b == true) && (exists c:College ==> (this#1.0 KeyValuePair(key1, c))	 ||
+//	(b == false) && (this#1.0 KeyValuePair(key1, null)) 
 {
 	b := true;
 	if (mapOfColleges[this][key1] == null) {
@@ -57,18 +62,28 @@ procedure containsKey(key1: int) returns (b:bool)
 	
 procedure put(key1 : int, college1: Ref, this:Ref) 
 modifies mapOfColleges;
+requires packedMapOfCollegesField[this] &&
+	(fracMapOfCollegesField[this] == 1.0);
+ensures packedKeyValuePair[this] &&
+	(fracKeyValuePair[this] == 1.0);
 {
 	mapOfColleges[this][key1] := college1;	
 }
 	
 procedure get(key1:int, this:Ref) returns (c:Ref)
-
+requires packedMapOfCollegesField[this] &&
+	(fracMapOfCollegesField[this] == 1.0);
+ensures packedKeyValuePair[this] &&
+	(fracKeyValuePair[this] == 1.0);
+// TODO make sure fraction values are right
+//requires this#1.0 MapOfCollegesField()
+//ensures this#1.0 KeyValuePair(key1, result)
 {
 	c := mapOfColleges[this][key1];
 }
 	
 procedure lookup(collegeNumber:int, this:Ref) returns (r:Ref)
-modifies
+modifies mapOfColleges;
 requires packedMapOfCollegesField[this] &&
 	(fracMapOfCollegesField[this] == 1.0);
 ensures packedKeyValuePair[this] &&
