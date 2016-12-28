@@ -46,9 +46,42 @@ call r:= stateContextCheckMultiplicity2(scon[this]);
  
 procedure main(this:Ref)
 {
-var st1:Ref;
-call ConstructStateLive(st1);
+var i1, i2:Ref;
+var st1 : Ref;
+var scontext1 : Ref;
+var sclient1, sclient2, sclient3, sclient4 : Ref;
 
+assume (i1!=i2);
+assume (sclient1 != sclient2);
+assume (sclient3 != sclient4);
+
+call ConstructIntCell(15, i1);
+packedMultipleOf15[i1] := false;
+call PackMultipleOf15(i1);
+packedMultipleOf15[i1] := true;
+
+	Statelike st1 = new StateLive(StateMultipleOf3())(i1);
+	StateContext scontext1 = new StateContext(stateContextMultiple3()[], stateLive()[])(st1); 
+	StateClient sclient1 = new StateClient(stateClientMultiple3()[])(scontext1);
+	StateClient sclient2 = new StateClient(stateClientMultiple3()[])(scontext1);
+	scontext1.computeResult(1); 
+	sclient1.stateClientCheckMultiplicity3(); 
+	scontext1.computeResult(2); 
+	sclient2.stateClientCheckMultiplicity3(); 
+	scontext1.computeResult(3); 
+	sclient1.stateClientCheckMultiplicity3(); 
+
+	IntCell i2 = new IntCell(MultipleOf2())(14);
+	Statelike st2 = new StateLive(StateMultipleOf2())(i2);
+	StateContext scontext2 = new StateContext(stateContextMultiple2()[], stateLive()[])(st2); 
+	StateClient sclient3 = new StateClient(stateClientMultiple2()[])(scontext2);
+	StateClient sclient4 = new StateClient(stateClientMultiple2()[])(scontext2); 
+	scontext2.computeResult2(1); 
+	sclient3.stateClientCheckMultiplicity2(); 
+	scontext2.computeResult2(2); 
+	sclient4.stateClientCheckMultiplicity2();  
+	scontext2.computeResult2(3); 
+	sclient3.stateClientCheckMultiplicity2(); 			
 }
 
 				
