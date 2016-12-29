@@ -25,7 +25,7 @@ procedure PackCollegeFields(c: int, e:int, this:Ref);
 requires (packedCollegeFields[this]==false) &&
  	(collegeNumber[this] == c) && (endowment[this] == e); 
 
-procedure UnpackCollegeFields(c: int, e:int, this:Ref);
+procedure UnpackCollegeFields(c:int, e:int, this:Ref);
 requires packedCollegeFields[this];
 ensures	(collegeNumber[this] == c);
 ensures (endowment[this] == e);
@@ -81,6 +81,10 @@ ensures packedMultipleOf[r] &&
 //ensures result#1 MultipleOf(this.collegeNumber)
 {
 	call ConstructIntCell(collegeNumber[this] * campusNumber, r);
+	packedMultipleOf[r] := false;
+	call PackMultipleOf(collegeNumber[this], collegeNumber[this] * campusNumber, r)
+	packedMultipleOf[r] := true;
+	fracMultipleOf[r] := 1.0;
 }
 
 procedure checkFewFacilities(num:int) returns (b:bool)

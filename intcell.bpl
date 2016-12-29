@@ -35,6 +35,7 @@ axiom (forall x:int, y:int :: {modulo(x,y)}
     ((x <= 0) &&(y < 0) ==> (y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
    ); 
 
+// TODO maybe need to add a field value that holds a, the one we divide by
 procedure PackMultipleOf(a: int, v:int, this:Ref);
 requires (packedMultipleOf[this]==false) &&
  	(value[this] == v) && (modulo(v,a) == 0); 

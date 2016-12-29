@@ -46,7 +46,7 @@ call r:= stateContextCheckMultiplicity2(scon[this]);
  
 procedure main(this:Ref)
 {
-var i1, i2:Ref;
+var i1, i2 : Ref;
 var st1 : Ref;
 var scontext1 : Ref;
 var sclient1, sclient2, sclient3, sclient4 : Ref;
@@ -59,30 +59,78 @@ call ConstructIntCell(15, i1);
 packedMultipleOf15[i1] := false;
 call PackMultipleOf15(i1);
 packedMultipleOf15[i1] := true;
+fracMultipleOf15[i1] := 1.0;
 
-	Statelike st1 = new StateLive(StateMultipleOf3())(i1);
-	StateContext scontext1 = new StateContext(stateContextMultiple3()[], stateLive()[])(st1); 
-	StateClient sclient1 = new StateClient(stateClientMultiple3()[])(scontext1);
-	StateClient sclient2 = new StateClient(stateClientMultiple3()[])(scontext1);
-	scontext1.computeResult(1); 
-	sclient1.stateClientCheckMultiplicity3(); 
-	scontext1.computeResult(2); 
-	sclient2.stateClientCheckMultiplicity3(); 
-	scontext1.computeResult(3); 
-	sclient1.stateClientCheckMultiplicity3(); 
+call ConstructStateLive(i1, st1);
+packedStateMultipleOf3StateLive[st1] := false;
+call PackStateMultipleOf3StateLive(i1, st1);
+packedStateMultipleOf3StateLive[st1] := true;
+fracStateMultipleOf3StateLive[st1] := 1.0;
 
-	IntCell i2 = new IntCell(MultipleOf2())(14);
-	Statelike st2 = new StateLive(StateMultipleOf2())(i2);
-	StateContext scontext2 = new StateContext(stateContextMultiple2()[], stateLive()[])(st2); 
-	StateClient sclient3 = new StateClient(stateClientMultiple2()[])(scontext2);
-	StateClient sclient4 = new StateClient(stateClientMultiple2()[])(scontext2); 
-	scontext2.computeResult2(1); 
-	sclient3.stateClientCheckMultiplicity2(); 
-	scontext2.computeResult2(2); 
-	sclient4.stateClientCheckMultiplicity2();  
-	scontext2.computeResult2(3); 
-	sclient3.stateClientCheckMultiplicity2(); 			
+instanceof[st1] := 1;
+
+call ConstructStateContext(st1, scontext1);
+packedStateContextMultiple3[scontext1] := false;
+call PackStateContextMultiple3(st1, scontext1);
+packedStateContextMultiple3[scontext1] := true;
+fracStateContextMultiple3[scontext1] := 1.0;
+
+call ConstructStateClient(scontext1, sclient1);
+packedStateClientMultiple3[sclient1] := false;
+call PackStateClientMultiple3(scontext1, sclient1);
+packedStateClientMultiple3[sclient1] := true;
+fracStateClientMultiple3[sclient1] := 1.0;
+
+call ConstructStateClient(scontext1, sclient2);
+packedStateClientMultiple3[sclient2] := false;
+call PackStateClientMultiple3(scontext1, sclient2);
+packedStateClientMultiple3[sclient2] := true;
+fracStateClientMultiple3[sclient2] := 1.0;
+
+call computeResult(1, scontext1);
+call stateClientCheckMultiplicity3(sclient1); 
+call computeResult(2, scontext1); 
+call stateClientCheckMultiplicity3(sclient2); 
+call computeResult(3, scontext1); 
+call stateClientCheckMultiplicity3(sclient1); 
+
+call ConstructIntCell(14, i2);
+packedMultipleOf14[i2] := false;
+call PackMultipleOf14(i2);
+packedMultipleOf14[i2] := true;
+fracMultipleOf14[i2] := 1.0;
+
+call ConstructStateLive(i2, st2);
+packedStateMultipleOf2StateLive[st2] := false;
+call PackStateMultipleOf2StateLive(i2, st2);
+packedStateMultipleOf2StateLive[st2] := true;
+fracStateMultipleOf2StateLive[st2] := 1.0;
+
+instanceof[st2] := 1;
+
+call ConstructStateContext(st2, scontext2);
+packedStateContextMultiple2[scontext2] := false;
+call PackStateContextMultiple2(st2, scontext2);
+packedStateContextMultiple2[scontext2] := true;
+fracStateContextMultiple2[scontext2] := 1.0;
+
+call ConstructStateClient(scontext2, sclient3);
+packedStateClientMultiple2[sclient3] := false;
+call PackStateClientMultiple2(scontext2, sclient3);
+packedStateClientMultiple2[sclient3] := true;
+fracStateClientMultiple2[sclient3] := 1.0;
+
+call ConstructStateClient(scontext2, sclient4);
+packedStateClientMultiple2[sclient4] := false;
+call PackStateClientMultiple2(scontext2, sclient4);
+packedStateClientMultiple2[sclient4] := true;
+fracStateClientMultiple2[sclient4] := 1.0;
+
+call computeResult2(1, scontext2);
+call stateClientCheckMultiplicity2(sclient3); 
+call computeResult2(2, scontext2); 
+call stateClientCheckMultiplicity2(sclient4); 
+call computeResult2(3, scontext2); 
+call stateClientCheckMultiplicity2(sclient3); 			
 }
-
-				
 
