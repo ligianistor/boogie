@@ -96,7 +96,11 @@ call temp := containsKey(collegeNumber, this);
 if (temp == false) 
 	{
 		call ConstructCollege(collegeNumber, c);
-		//TODO add statements after constructing object
+		packedCollegeFields[c] := false;
+		call PackCollegeFields(collegeNumber, c);
+		packedCollegeFields[c] := true;
+		fracCollegeFields[c] := 1.0;
+
 		call put(collegeNumber, c, this);
 	}
 call r:= get(collegeNumber, this);

@@ -21,14 +21,14 @@ procedure UnpackCollegeNumberField(c: int, this:Ref);
 requires packedCollegeNumberField[this];
 ensures	(collegeNumber[this] == c);
 
-procedure PackCollegeFields(c: int, e:int, this:Ref);
+procedure PackCollegeFields(c: int, this:Ref);
 requires (packedCollegeFields[this]==false) &&
- 	(collegeNumber[this] == c) && (endowment[this] == e); 
+ 	(collegeNumber[this] == c) && (endowment[this] == c*1000 - 5); 
 
-procedure UnpackCollegeFields(c:int, e:int, this:Ref);
+procedure UnpackCollegeFields(c:int, this:Ref);
 requires packedCollegeFields[this];
 ensures	(collegeNumber[this] == c);
-ensures (endowment[this] == e);
+ensures (endowment[this] == c*1000 - 5);
 
 procedure PackCollegeFacilitiesMany(num:int, c:int, this:Ref);
 requires (packedCollegeFacilitiesMany[this] == false);
