@@ -50,13 +50,17 @@ procedure main(this:Ref)
 
 	call ConstructStudentApplication(college, 3, app1);
 	packedStudentAppFacilitiesFew[app1] := false;
-	call PackStudentAppFacilitiesFew()
-	
-	// StudentApplication app1 = new StudentApplication(StudentAppFacilitiesFew())(college, 3);
+	call PackStudentAppFacilitiesFew(college, 3, app1);
+	packedStudentAppFacilitiesFew[app1] := true;
+	fracStudentAppFacilitiesFew[app1] := 1.0;
+	fracCollegeFacilitiesFew[college] := fracCollegeFacilitiesFew[college] / 2.0;
 
 	call ConstructStudentApplication(college, 2, app2);
-	
-	// StudentApplication app2 = new StudentApplication(StudentAppFacilitiesFew())(college, 2);
+	packedStudentAppFacilitiesFew[app2] := false;
+	call PackStudentAppFacilitiesFew(college, 2, app2);
+	packedStudentAppFacilitiesFew[app2] := true;
+	fracStudentAppFacilitiesFew[app2] := 1.0;
+	fracCollegeFacilitiesFew[college] := fracCollegeFacilitiesFew[college] / 2.0;
 
 	call checkFewFacilities(app1);
 	call changeApplicationFew(34, app1);
@@ -67,12 +71,18 @@ procedure main(this:Ref)
 	call college2 := submitApplicationGetCollege(56, website);
 
 	call ConstructStudentApplication(college2, 45, app3);
-	
-	// StudentApplication app3 = new StudentApplication(StudentAppFacilitiesMany())(college2, 45);
+	packedStudentAppFacilitiesMany[app3] := false;
+	call PackStudentAppFacilitiesMany(college2, 45, app3);
+	packedStudentAppFacilitiesMany[app3] := true;
+	fracStudentAppFacilitiesMany[app3] := 1.0;
+	fracCollegeFacilitiesMany[college] := fracCollegeFacilitiesMany[college2] / 2.0;
 
 	call ConstructStudentApplication(college2, 97, app4);
-	
-	// StudentApplication app4 = new StudentApplication(StudentAppFacilitiesMany())(college2, 97);
+	packedStudentAppFacilitiesMany[app4] := false;
+	call PackStudentAppFacilitiesMany(college2, 97, app4);
+	packedStudentAppFacilitiesMany[app4] := true;
+	fracStudentAppFacilitiesMany[app4] := 1.0;
+	fracCollegeFacilitiesMany[college2] := fracCollegeFacilitiesMany[college2] / 2.0;
 
 	call checkFewFacilities(app3);
 	call changeApplicationFew(78, app3);
