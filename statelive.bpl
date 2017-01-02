@@ -20,6 +20,7 @@ requires (cell[this] == c);
 
 procedure UnpackBasicFieldsStateLive(c: Ref, this: Ref)
 requires packedBasicFieldsStateLive[this];
+requires fracBasicFieldsStateLive[this] > 0.0;
 ensures (cell[this] == c);
 
 procedure PackStateMultipleOf3StateLive(c:Ref, this:Ref)
@@ -29,6 +30,7 @@ requires (fracMultipleOf15[c] == 1.0);
 
 procedure UnpackStateMultipleOf3StateLive(c:Ref, this:Ref)
 requires packedStateMultipleOf3StateLive[this];
+requires fracStateMultipleOf3StateLive[this] > 0.0;
 ensures (cell[this] == c);
 ensures (fracMultipleOf15[c] == 1.0);
 
@@ -39,14 +41,15 @@ requires (fracMultipleOf14[c] == 1.0);
 
 procedure UnpackStateMultipleOf2StateLive(c:Ref, this:Ref)
 requires packedStateMultipleOf2StateLive[this];
+requires fracStateMultipleOf2StateLive[this] > 0.0;
 ensures (cell[this] == c);
 ensures (fracMultipleOf14[c] == 1.0);
 
 procedure ConstructStateLive(this:Ref);
-ensures
-{	var temp:Ref;
+{	
+	var temp:Ref;
 	call ConstructIntCell(0, temp);
-	call ConstructStateLive(temp, cell[this])
+	call ConstructStateLive(temp, cell[this]);
 }
 
 procedure ConstructStateLive(c:Ref, this:Ref);
@@ -55,10 +58,8 @@ ensures cell[this] == c;
 	cell[this] := c;
 }
 
-
-
 procedure computeResultStateLive(context:Ref, num:int) returns (r:Ref)
-modifies
+modifies cell;
 requires packedBasicFieldsStateLive[this] && (fracBasicFieldsStateLive[this] >= 1.0);
 requires packedBasicFieldsContext[context] && (fracBasicFieldsContext[context] >= 1.0);
 ensures packedStateMultipleOf3StateLive[this] && (fracStateMultipleOf3StateLive[this] >= 1.0);
@@ -71,7 +72,6 @@ call setValue(num*15, cell[this]);
 call setState(s, context);
 r:=cell[this];
 }
-
 
 procedure computeResult2StateLive(context:Ref, num:int) returns (r:Ref)
 modifies cell;

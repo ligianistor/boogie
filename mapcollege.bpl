@@ -20,13 +20,10 @@ procedure PackMapOfCollegesField(m:MapIntCollege, this:Ref);
 requires packedMapOfCollegesField[this] == false;
 requires mapOfColleges[this] == m;
 
-
-	predicate MapOfCollegesField() = exists m:map<int, College> :: mapOfColleges -> m
+predicate MapOfCollegesField() = exists m:map<int, College> :: mapOfColleges -> m
 			
-	predicate KeyValuePair(int key, College value) = 
-			exists m:map<int, College> :: mapOfColleges -> m && (mapOfColleges[key] == value)
-
-
+predicate KeyValuePair(int key, College value) = 
+	exists m:map<int, College> :: mapOfColleges -> m && (mapOfColleges[key] == value)
 
 procedure PackIsEntryNull(key1 : int, m:MapIntCollege, this:Ref);
 requires  (packedIsEntryNull[this] == false);

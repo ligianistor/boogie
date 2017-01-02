@@ -19,6 +19,7 @@ requires (packedCollegeNumberField[this]==false) &&
 
 procedure UnpackCollegeNumberField(c: int, this:Ref);
 requires packedCollegeNumberField[this];
+requires fracCollegeNumberField[this] > 0.0;
 ensures	(collegeNumber[this] == c);
 
 procedure PackCollegeFields(c: int, this:Ref);
@@ -27,6 +28,7 @@ requires (packedCollegeFields[this]==false) &&
 
 procedure UnpackCollegeFields(c:int, this:Ref);
 requires packedCollegeFields[this];
+requires fracCollegeFields[this] > 0.0;
 ensures	(collegeNumber[this] == c);
 ensures (endowment[this] == c*1000 - 5);
 
@@ -38,6 +40,7 @@ requires (collegeNumber[this] == c) && (num >= 10 * c);
 
 procedure UnpackCollegeFacilitiesMany(num:int, c:int, this:Ref);
 requires packedCollegeFacilitiesMany[this];
+requires fracCollegeFacilitiesMany[this] > 0.0;
 //TODO all Unpack procedures need to refer to frac also, 
 // not only to packed.
 ensures (collegeNumber[this] == c) && (num >= 10 * c);
@@ -48,6 +51,7 @@ requires (collegeNumber[this] == c) && (num <= 4 * c);
 
 procedure UnpackCollegeFacilitiesFew(num:int, c:int, this:Ref);
 requires packedCollegeFacilitiesFew[this];
+requires fracCollegeFacilitiesFew[this] > 0.0;
 ensures (collegeNumber[this] == c) && (num <= 4 * c);
 
 procedure ConstructCollege(number:int, this:Ref) 

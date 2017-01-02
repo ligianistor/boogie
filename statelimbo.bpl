@@ -13,6 +13,7 @@ requires (cell[this] == c);
 
 procedure UnpackBasicFieldsStateLimbo(c: Ref, this: Ref)
 requires packedBasicFieldsStateLimbo[this];
+requires fracBasicFieldsStateLimbo[this] > 0.0;
 ensures (cell[this] == c);
 
 procedure PackStateMultipleOf3StateLimbo(c:Ref, this:Ref)
@@ -22,6 +23,7 @@ requires (fracMultipleOf21[c] == 1.0);
 
 procedure UnpackStateMultipleOf3StateLimbo(c:Ref, this:Ref)
 requires packedStateMultipleOf3StateLimbo[this];
+requires fracStateMultipleOf3StateLimbo[this] > 0.0;
 ensures (cell[this] == c);
 ensures (fracMultipleOf21[c] == 1.0);
 
@@ -32,14 +34,15 @@ requires (fracMultipleOf16[c] == 1.0);
 
 procedure UnpackStateMultipleOf2StateLimbo(c:Ref, this:Ref)
 requires packedStateMultipleOf2StateLimbo[this];
+requires fracStateMultipleOf2StateLimbo[this] > 0.0;
 ensures (cell[this] == c);
 ensures (fracMultipleOf16[c] == 1.0);
 
 procedure ConstructStateLimbo(this:Ref);
-ensures
-{	var temp:Ref;
+{	
+	var temp:Ref;
 	call ConstructIntCell(0, temp);
-	call ConstructStateLimbo(temp, cell[this])
+	call ConstructStateLimbo(temp, cell[this]);
 }
 
 procedure ConstructStateLimbo(c:Ref, this:Ref);
@@ -50,7 +53,7 @@ ensures cell[this] == c;
 
 
 procedure computeResultStateLimbo(context:Ref, num:int) returns (r:Ref)
-modifies
+modifies cell;
 requires packedBasicFieldsStateLimbo[this] && (fracBasicFieldsStateLimbo[this] >= 1.0);
 requires packedBasicFieldsContext[context] && (fracBasicFieldsContext[context] >= 1.0);
 ensures packedStateMultipleOf3StateLimbo[this] && (fracStateMultipleOf3StateLimbo[this] >= 1.0);
@@ -84,7 +87,7 @@ requires packedStateMultipleOf3StateLimbo[this] && (fracStateMultipleOf3StateLim
 ensures packedStateMultipleOf3StateLimbo[this] && (fracStateMultipleOf3StateLimbo[this] >= 1.0);
 {
 var temp : int;
-call temp :=getValueInt(cell[this]);
+call temp := getValueInt(cell[this]);
 r:= (modulo(temp, 3) == 0);
 }
 

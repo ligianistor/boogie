@@ -18,6 +18,7 @@ requires (instanceof[m] == 3) ==> (fracStateMultipleOf2StateSleep[this] >= 1.0);
 
 procedure UnpackStateContextMultiple2(m:Ref, this:Ref);
 requires packedStateContextMultiple2[this];
+requires fracStateContextMultiple2[this] > 0.0;
 ensures (myState[this] == m);
 ensures (instanceof[m] == 1) ==> (fracStateMultipleOf2StateLive[this] >= 1.0);
 ensures (instanceof[m] == 2) ==> (fracStateMultipleOf2StateLimbo[this] >= 1.0);

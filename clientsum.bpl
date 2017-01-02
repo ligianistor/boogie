@@ -13,12 +13,14 @@ requires (packedClientSumOK[this] == false);
 
 procedure UnpackClientSumOK(this:Ref);
 requires packedClientSumOK[this];
+requires fracClientSumOK[this] > 0.0;
 
 procedure PackClientSumGreater0(this:Ref);
 requires (packedClientSumGreater0[this] == false);
 
 procedure UnpackClientSumGreater0(this:Ref);
 requires packedClientSumGreater0[this];
+requires fracClientSumGreater0[this] > 0.0;
 
 procedure ConstructClientSum(sum1:Ref, this:Ref);
 ensures sumClient[this] == sum1;

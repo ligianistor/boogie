@@ -11,13 +11,13 @@ requires (packedApplicationWebsiteField[this]==false) &&
 
 procedure UnpackApplicationWebsiteField(m: MapIntCollege, this:Ref);
 requires packedApplicationWebsiteField[this];
+requires fracApplicationWebsiteField[this] > 0.0;
 ensures	(mapOfColleges[this] == m); 
 
 procedure submitApplicationGetCollege(int collegeNumber) returns (r: Ref)
-// TODO add modifies
+modifies mapOfColleges;
 requires packedApplicationWebsiteField[this] && 
 	(fracApplicationWebsiteField[this] > 0.0);
-
 ensures ( packedCollegeBuildingsFew[result] && 
 	(fracCollegeBuildingsFew[result] > 0.0) ) ||
 	( packedCollegeBuildingsMany[result] &&
@@ -30,7 +30,7 @@ ensures ( packedCollegeBuildingsFew[result] &&
 }
 
 procedure main(this:Ref) 
-// TODO add modifies
+modifies mapOfColleges;
 {
 	var website : Ref;
 	var college, college2 : Ref;
@@ -88,5 +88,3 @@ procedure main(this:Ref)
 	call changeApplicationFew(78, app3);
 	call checkFewFacilities(app4);
 }
-
-

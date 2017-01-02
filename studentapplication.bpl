@@ -29,6 +29,7 @@ requires (college[this] == col) && (campusNumber[this] == c) &&
 
 procedure UnpackStudentAppFacilitiesMany(col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesMany[this];
+requires fracStudentAppFacilitiesMany[this] > 0.0;
 ensures (college[this] == col) && (campusNumber[this] == c) &&
 	packedCollegeFacilitiesMany[col] &&
 	(fracCollegeFacilitiesMany[col] > 0.0);
@@ -42,6 +43,7 @@ requires (college[this] == col) && (campusNumber[this] == c) &&
 
 procedure UnpackStudentAppFacilitiesFew(col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesFew[this];
+requires fracStudentAppFacilitiesFew[this] > 0.0;
 ensures (college[this] == col) && (campusNumber[this] == c) &&
 	packedCollegeFacilitiesFew[col] &&
 	(fracCollegeFacilitiesFew[col] > 0.0);

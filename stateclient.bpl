@@ -13,6 +13,7 @@ requires (fracStateContextMultiple2[s] > 0.0);
 
 procedure UnpackStateClientMultiple2(s:Ref, this:Ref)
 requires packedStateClientMultiple2[this];
+requires fracStateClientMultiple2[this] > 0.0;
 ensures (scon[this] == s);
 ensures (fracStateContextMultiple2[s] > 0.0);
 
@@ -23,6 +24,7 @@ requires (fracStateContextMultiple3[s] > 0.0);
 
 procedure UnpackStateClientMultiple3(s:Ref, this:Ref)
 requires packedStateClientMultiple3[this];
+requires fracStateClientMultiple3[this] > 0.0;
 ensures (scon[this] == s);
 ensures (fracStateContextMultiple3[s] > 0.0);
 

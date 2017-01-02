@@ -42,6 +42,7 @@ requires (packedMultipleOf[this]==false) &&
 
 procedure UnpackMultipleOf(a: int, v:int, this:Ref);
 requires packedMultipleOf[this];
+requires fracMultipleOf[this] > 0.0;
 ensures	(value[this] == v) && (modulo(v,a) == 0); 
 
 procedure PackMultipleOf21(v:int, this:Ref);
@@ -50,6 +51,7 @@ requires (packedMultipleOf21[this]==false) &&
 
 procedure UnpackMultipleOf21(v:int, this:Ref);
 requires packedMultipleOf21[this];
+requires fracMultipleOf21[this] > 0.0;
 ensures	(value[this] == v) && (modulo(v,21) == 0); 
 
 procedure PackMultipleOf16(v:int, this:Ref);
@@ -58,14 +60,44 @@ requires (packedMultipleOf16[this]==false) &&
 
 procedure UnpackMultipleOf16(v:int, this:Ref);
 requires packedMultipleOf16[this];
+requires fracMultipleOf16[this] > 0.0;
 ensures	(value[this] == v) && (modulo(v,16) == 0);
 
-//predicate MultipleOf21() = this.value->v && (v % 21 == 0) 
-//predicate MultipleOf16() = this.value->v && (v % 16 == 0) 
-//predicate MultipleOf15() = this.value->v && (v % 15 == 0) 
-//predicate MultipleOf14() = this.value->v && (v % 14 == 0) 
-//predicate MultipleOf33() = this.value->v && (v % 33 == 0) 
-//predicate MultipleOf4() = this.value->v && (v % 4 == 0) 
+procedure PackMultipleOf15(v:int, this:Ref);
+requires (packedMultipleOf15[this]==false) &&
+ 	(value[this] == v) && (modulo(v,15) == 0); 
+
+procedure UnpackMultipleOf15(v:int, this:Ref);
+requires packedMultipleOf15[this];
+requires fracMultipleOf15[this] > 0.0;
+ensures	(value[this] == v) && (modulo(v,15) == 0);
+
+procedure PackMultipleOf14(v:int, this:Ref);
+requires (packedMultipleOf14[this]==false) &&
+ 	(value[this] == v) && (modulo(v,14) == 0); 
+
+procedure UnpackMultipleOf14(v:int, this:Ref);
+requires packedMultipleOf14[this];
+requires fracMultipleOf14[this] > 0.0;
+ensures	(value[this] == v) && (modulo(v,14) == 0);
+
+procedure PackMultipleOf33(v:int, this:Ref);
+requires (packedMultipleOf33[this]==false) &&
+ 	(value[this] == v) && (modulo(v,33) == 0); 
+
+procedure UnpackMultipleOf33(v:int, this:Ref);
+requires packedMultipleOf33[this];
+requires fracMultipleOf33[this] > 0.0;
+ensures	(value[this] == v) && (modulo(v,33) == 0);
+
+procedure PackMultipleOf4(v:int, this:Ref);
+requires (packedMultipleOf4[this]==false) &&
+ 	(value[this] == v) && (modulo(v,4) == 0); 
+
+procedure UnpackMultipleOf4(v:int, this:Ref);
+requires packedMultipleOf4[this];
+requires fracMultipleOf4[this] > 0.0;
+ensures	(value[this] == v) && (modulo(v,4) == 0);
 
 procedure ConstructIntCell(x: int, this: Ref);
 	ensures (value[this] == x);

@@ -13,34 +13,37 @@ requires (cell[this] == c);
 
 procedure UnpackBasicFieldsStateSleep(c: Ref, this: Ref)
 requires packedBasicFieldsStateSleep[this];
+requires fracBasicFieldsStateSleep[this] > 0.0;
 ensures (cell[this] == c);
 
 procedure PackStateMultipleOf3StateSleep(c:Ref, this:Ref)
-requires (packedStateMultipleOf3StateSleep[this] ==false);
+requires (packedStateMultipleOf3StateSleep[this] == false);
 requires (cell[this] == c);
 requires (fracMultipleOf33[c] == 1.0);
 
 procedure UnpackStateMultipleOf3StateSleep(c:Ref, this:Ref)
 requires packedStateMultipleOf3StateSleep[this];
+requires fracStateMultipleOf3StateSleep[this] > 0.0;
 ensures (cell[this] == c);
 ensures (fracMultipleOf33[c] == 1.0);
 
 procedure PackStateMultipleOf2StateSleep(c:Ref, this:Ref)
-requires (packedStateMultipleOf2StateSleep[this] ==false);
+requires (packedStateMultipleOf2StateSleep[this] == false);
 requires (cell[this] == c);
 // should this be fracMultipleOf2??
 requires (fracMultipleOf4[c] == 1.0);
 
 procedure UnpackStateMultipleOf2StateSleep(c:Ref, this:Ref)
 requires packedStateMultipleOf2StateSleep[this];
+requires fracStateMultipleOf2StateSleep[this] > 0.0;
 ensures (cell[this] == c);
 ensures (fracMultipleOf4[c] == 1.0);
 
 procedure ConstructStateSleep(this:Ref);
-ensures
-{	var temp:Ref;
+{	
+	var temp:Ref;
 	call ConstructIntCell(0, temp);
-	call ConstructStateSleep(temp, cell[this])
+	call ConstructStateSleep(temp, cell[this]);
 }
 
 procedure ConstructStateSleep(c:Ref, this:Ref);
@@ -50,7 +53,7 @@ ensures cell[this] == c;
 }
 
 procedure computeResultStateSleep(context:Ref, num:int) returns (r:Ref)
-modifies
+modifies cell;
 requires packedBasicFieldsStateSleep[this] && (fracBasicFieldsStateSleep[this] >= 1.0);
 requires packedBasicFieldsContext[context] && (fracBasicFieldsContext[context] >= 1.0);
 ensures packedStateMultipleOf3StateSleep[this] && (fracStateMultipleOf3StateSleep[this] >= 1.0);
@@ -63,7 +66,6 @@ call setValue(num*33, cell[this]);
 call setState(s, context);
 r:=cell[this];
 }
-
 
 procedure computeResult2StateSleep(context:Ref, num:int) returns (r:Ref)
 modifies cell;
