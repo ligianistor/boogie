@@ -35,8 +35,18 @@ requires packedStateMultipleOf2StateLimbo[this];
 ensures (cell[this] == c);
 ensures (fracMultipleOf16[c] == 1.0);
 
-procedure ConstructStateLive(c:Ref, this:Ref);
+procedure ConstructStateLimbo(this:Ref);
+ensures
+{	var temp:Ref;
+	call ConstructIntCell(0, temp);
+	call ConstructStateLimbo(temp, cell[this])
+}
+
+procedure ConstructStateLimbo(c:Ref, this:Ref);
 ensures cell[this] == c;
+{	
+	cell[this] := c;
+}
 
 
 procedure computeResultStateLimbo(context:Ref, num:int) returns (r:Ref)
@@ -47,7 +57,7 @@ ensures packedStateMultipleOf3StateLimbo[this] && (fracStateMultipleOf3StateLimb
 ensures packedStateSleep[context] && (fracStateSleep[context] >= 1.0)
 {
 var s : Ref;
-// call constructor of s 
+call ConstructStateSleep(s);
 // StateLike s = new StateSleep()[];
 call setValue(num*21, cell[this]);
 call setState(s, context);
@@ -62,7 +72,7 @@ ensures packedStateMultipleOf2StateLimbo[this] && (fracStateMultipleOf2StateLimb
 ensures packedStateLive[context] && (fracStateLive[context] >= 1.0)
 {
 var s : Ref;
-// call constructor of s 
+call ConstructStateLive(s);
 // StateLike s = new StateLive()[];
 call setValue(num*16, cell[this]);
 call setState(s, context);
