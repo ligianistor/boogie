@@ -26,9 +26,9 @@ ensures (instanceof[m] == 3) ==> (fracStateMultipleOf2StateSleep[this] >= 1.0);
 
 //	predicate BasicFieldsContext() = exists m:StateLike :: this.myState -> m
 
-//	predicate stateLive() = myState instanceof StateLive
-//	predicate stateSleep() = myState instanceof StateSleep
-//	predicate stateLimbo() = myState instanceof StateLimbo
+//	predicate stateLive() = instanceof[myState]==1;
+//	predicate stateSleep() = instanceof[myState]==3;
+//	predicate stateLimbo() = instanceof[myState]==2;
 //	predicate stateContextMultiple2() = myState#1 StateMultipleOf2() 
 //	predicate stateContextMultiple3() = myState#1 StateMultipleOf3() 
 	

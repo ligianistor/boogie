@@ -434,6 +434,15 @@ var myState: [Ref]Ref;
 var packedBasicFieldsContext : [Ref]bool;
 var fracBasicFieldsContext : [Ref]real;
 
+var packedStateLive :[Ref]bool;
+var fracStateLive :[Ref]real;
+
+var packedStateLimbo :[Ref]bool;
+var fracStateLimbo :[Ref]real;
+
+var packedStateSleep :[Ref]bool;
+var fracStateSleep :[Ref]real;
+
 var packedStateContextMultiple2 : [Ref]bool;
 var fracStateContextMultiple2 : [Ref]real;
 
@@ -455,11 +464,56 @@ ensures (instanceof[m] == 1) ==> (fracStateMultipleOf2StateLive[this] >= 1.0);
 ensures (instanceof[m] == 2) ==> (fracStateMultipleOf2StateLimbo[this] >= 1.0);
 ensures (instanceof[m] == 3) ==> (fracStateMultipleOf2StateSleep[this] >= 1.0);
 
+procedure PackBasicFieldsContext(m:Ref, this:Ref);
+requires packedBasicFieldsContext[this] == false;
+requires (myState[this] == m);
+
+procedure UnpackBasicFieldsContext(m:Ref, this:Ref);
+requires packedBasicFieldsContext[this];
+requires fracBasicFieldsContext[this] > 0.0;
+ensures (myState[this] == m);
+
+procedure PackStateLive(m:Ref, this:Ref);
+requires packedStateLive[this] == false;
+requires fracStateLive[this] > 0.0;
+requires (myState[this] == m);
+requires instanceof[m]==1;
+
+procedure UnpackStateLive(m:Ref, this:Ref);
+requires packedStateLive[this];
+ensures (myState[this] == m);
+ensures instanceof[m]==1;
+
+procedure PackStateLimbo(m:Ref, this:Ref);
+requires packedStateLimbo[this] == false;
+requires fracStateLimbo[this] > 0.0;
+requires (myState[this] == m);
+requires instanceof[m]==2;
+
+procedure UnpackStateLimbo(m:Ref, this:Ref);
+requires  packedStateLimbo[this];
+ensures (myState[this] == m);
+ensures instanceof[m]==2;
+
+procedure PackStateSleep(m:Ref, this:Ref);
+requires packedStateSleep[this] == false;
+requires fracStateSleep[this] > 0.0;
+requires (myState[this] == m);
+requires instanceof[m]==3;
+
+procedure UnpackStateSleep(m:Ref, this:Ref);
+requires packedStateSleep[this];
+ensures (myState[this] == m);
+ensures instanceof[m]==3;
+
+
+
 //	predicate BasicFieldsContext() = exists m:StateLike :: this.myState -> m
 
-//	predicate stateLive() = myState instanceof StateLive
-//	predicate stateSleep() = myState instanceof StateSleep
-//	predicate stateLimbo() = myState instanceof StateLimbo
+//	predicate stateLive() =  exists m:StateLike :: this.myState -> m && instanceof[m]==1;
+//	predicate stateLimbo() = exists m:StateLike :: this.myState -> m && instanceof[m]==2;
+//	predicate stateSleep() = exists m:StateLike :: this.myState -> m && instanceof[m]==3;
+
 //	predicate stateContextMultiple2() = myState#1 StateMultipleOf2() 
 //	predicate stateContextMultiple3() = myState#1 StateMultipleOf3() 
 	
@@ -480,20 +534,74 @@ modifies myState;
 procedure computeResultSC(num: int, this:Ref) returns (r:Ref)
 ensures packedStateContextMultiple3[this];
 ensures fracStateContextMultiple3[this] >= 1.0;
-ensures (old(instanceof[mystate[this]]) == 1) ==> (instanceof[mystate[this]] == 2);
-ensures (old(instanceof[mystate[this]]) == 2) ==> (instanceof[mystate[this]] == 3);
-ensures (old(instanceof[mystate[this]]) == 3) ==> (instanceof[mystate[this]] == 1);
+ensures (old(instanceof[myState[this]]) == 1) ==> (instanceof[myState[this]] == 2);
+ensures (old(instanceof[myState[this]]) == 2) ==> (instanceof[myState[this]] == 3);
+ensures (old(instanceof[myState[this]]) == 3) ==> (instanceof[myState[this]] == 1);
 {
 var temp : Ref;
 if (instanceof[myState[this]] == 1) {
 	call temp := computeResultStateLive(this, num, myState[this]);
-} else if (instanceof[mystate[this]] == 2) {
+} else if (instanceof[myState[this]] == 2) {
 	call temp := computeResultStateLimbo(this, num, myState[this]);
 } else {
 	call temp := computeResultStateSleep(this, num, myState[this]);
 }
-
 }
+
+procedure computeResult2SC(num: int, this:Ref) returns (r:Ref)
+ensures packedStateContextMultiple2[this];
+ensures fracStateContextMultiple2[this] >= 1.0;
+//TODO should not access myState like this, but through the right predicate
+// maybe StateLive(old[this])
+// TODO need to add something about fractions related to the below
+ensures (old(instanceof[myState[this]]) == 1) ==> (instanceof[myState[this]] == 3);
+ensures (old(instanceof[myState[this]]) == 3) ==> (instanceof[myState[this]] == 2);
+ensures (old(instanceof[myState[this]]) == 2) ==> (instanceof[myState[this]] == 1);
+{
+var temp : Ref;
+if (instanceof[myState[this]] == 1) {
+	call temp := computeResult2StateLive(this, num, myState[this]);
+} else if (instanceof[myState[this]] == 2) {
+	call temp := computeResult2StateLimbo(this, num, myState[this]);
+} else {
+	call temp := computeResult2StateSleep(this, num, myState[this]);
+}
+r:=temp;
+}
+
+procedure stateContextCheckMultiplicity3(this:Ref) returns (b:bool) 
+requires packedStateContextMultiple3[this];
+requires fracStateContextMultiple3[this] == 1.0;
+ensures packedStateContextMultiple3[this];
+ensures fracStateContextMultiple3[this] == 1.0;
+{ 
+var temp : Ref;
+if (instanceof[myState[this]] == 1) {
+	call temp := checkMod3StateLive(myState[this]);
+} else if (instanceof[myState[this]] == 2) {
+	call temp := checkMod3StateLimbo(myState[this]);
+} else {
+	call temp := checkMod3StateSleep(myState[this]);
+}
+b := temp;
+} 
+
+procedure stateContextCheckMultiplicity2(this:Ref) returns (b:bool) 
+requires packedStateContextMultiple2[this];
+requires fracStateContextMultiple2[this] == 1.0;
+ensures packedStateContextMultiple2[this];
+ensures fracStateContextMultiple2[this]== 1.0;
+{ 
+var temp : Ref;
+if (instanceof[myState[this]] == 1) {
+	call temp := checkMod2StateLive(myState[this]);
+} else if (instanceof[myState[this]] == 2) {
+	call temp := checkMod2StateLimbo(myState[this]);
+} else {
+	call temp := checkMod2StateSleep(myState[this]);
+}
+b := temp;
+} 
 
 //--------------------------------
 
@@ -554,13 +662,14 @@ procedure main(this:Ref)
 {
 var i1, i2 : Ref;
 var st1, st2 : Ref;
-var scontext1 : Ref;
+var scontext1, scontext2 : Ref;
 var sclient1, sclient2, sclient3, sclient4 : Ref;
 
 assume (i1 != i2);
 assume (st1 != st2);
 assume (sclient1 != sclient2);
 assume (sclient3 != sclient4);
+assume (scontext1 != scontext2);
 
 call ConstructIntCell(15, i1);
 packedMultipleOf15[i1] := false;
@@ -633,11 +742,11 @@ call PackStateClientMultiple2(scontext2, sclient4);
 packedStateClientMultiple2[sclient4] := true;
 fracStateClientMultiple2[sclient4] := 1.0;
 
-call computeResult2(1, scontext2);
+call computeResult2SC(1, scontext2);
 call stateClientCheckMultiplicity2(sclient3); 
-call computeResult2(2, scontext2); 
+call computeResult2SC(2, scontext2); 
 call stateClientCheckMultiplicity2(sclient4); 
-call computeResult2(3, scontext2); 
+call computeResult2SC(3, scontext2); 
 call stateClientCheckMultiplicity2(sclient3); 			
 }
 
