@@ -18,7 +18,8 @@ requires (sum[this] == s1) && (n[this]==n1);
 procedure UnpackBasicFieldsRealSum(s1:real, n1:int, this:Ref);
 requires packedBasicFieldsRealSum[this];
 requires fracBasicFieldsRealSum[this] > 0.0;
-ensures (sum[this] == s1) && (n[this]==n1);
+ensures (sum[this] == s1);
+ensures	(n[this]==n1);
 
 procedure PackSumOKRealSum(s1:real, n1:int, this:Ref);
 requires (packedSumOKRealSum[this] == false);
@@ -28,8 +29,9 @@ requires (sum[this] == s1) && (n[this]==n1) &&
 procedure UnpackSumOKRealSum(s1:real, n1:int, this:Ref);
 requires packedSumOKRealSum[this];
 requires fracSumOKRealSum[this] > 0.0;
-ensures (sum[this] == s1) && (n[this]==n1) &&
-	( s1 == n1 * (n1+1) / 2 );
+ensures (sum[this] == s1);
+ensures	(n[this]==n1);
+ensures	( s1 == n1 * (n1+1) / 2 );
 
 procedure PackSumGreater0RealSum(s1:real, this:Ref);
 requires (packedSumGreater0RealSum[this] == false);
@@ -38,7 +40,8 @@ requires (sum[this] == s1) && (s1 > 0.0);
 procedure UnpackSumGreater0RealSum(s1:real, this:Ref);
 requires packedSumGreater0RealSum[this];
 requires fracSumGreater0RealSum[this] > 0.0;
-ensures (sum[this] == s1) && (s1 > 0.0);
+ensures (sum[this] == s1);
+ensures	(s1 > 0.0);
 
 procedure ConstructRealSum(n1:int, s:Ref, this:Ref);
 ensures n[this] == n1;
@@ -46,8 +49,10 @@ ensures sum[this] == s;
 
 procedure calculateRealSum(n1:int, this:Ref) returns (r:real)
 modifies sum;
-requires packedBasicFieldsRealSum[this] && (fracBasicFieldsRealSum[this] == 1.0);
-ensures packedSumOKRealSum[this] && (fracSumOKRealSum[this]==1.0);
+requires packedBasicFieldsRealSum[this];
+requires (fracBasicFieldsRealSum[this] == 1.0);
+ensures packedSumOKRealSum[this];
+ensures	(fracSumOKRealSum[this]==1.0);
 {
 	sum[this] := n1 * (n1 + 1) / 2;
 	r := sum[this];
@@ -55,8 +60,10 @@ ensures packedSumOKRealSum[this] && (fracSumOKRealSum[this]==1.0);
 
 procedure calculateSumRealSum(n1:int, this:Ref)  returns (r:real)
 modifies n, sum;
-requires packedBasicFieldsRealSum[this] && (fracBasicFieldsRealSum[this] == 1.0);
-ensures packedSumOKRealSum[this] && (fracSumOKRealSum[this] == 1.0);
+requires packedBasicFieldsRealSum[this];
+requires (fracBasicFieldsRealSum[this] == 1.0);
+ensures packedSumOKRealSum[this];
+ensures	(fracSumOKRealSum[this] == 1.0);
 
 { 
         n[this]:=n1;
@@ -90,7 +97,8 @@ requires (sum[this] == s1) && (n[this]==n1);
 procedure UnpackBasicFieldsProxySum(s1:real, n1:int, this:Ref);
 requires packedBasicFieldsProxySum[this];
 requires fracBasicFieldsProxySum[this] > 0.0;
-ensures (sum[this] == s1) && (n[this]==n1);
+ensures (sum[this] == s1);
+ensures	(n[this]==n1);
 
 procedure PackSumOKProxySum(s1:real, n1:int, this:Ref);
 requires (packedSumOKProxySum[this] == false);
@@ -100,8 +108,9 @@ requires (sum[this] == s1) && (n[this]==n1) &&
 procedure UnpackSumOKProxySum(s1:real, n1:int, this:Ref);
 requires packedSumOKProxySum[this];
 requires fracSumOKProxySum[this] > 0.0;
-ensures (sum[this] == s1) && (n[this]==n1) &&
-	( s1 == n1 * (n1+1) / 2 );
+ensures (sum[this] == s1);
+ensures	(n[this]==n1);
+ensures	( s1 == n1 * (n1+1) / 2 );
 
 procedure PackSumGreater0ProxySum(s1:real, this:Ref);
 requires (packedSumGreater0ProxySum[this] == false);
@@ -110,7 +119,8 @@ requires (sum[this] == s1) && (s1 > 0.0);
 procedure UnpackSumGreater0ProxySum(s1:real, this:Ref);
 requires packedSumGreater0ProxySum[this];
 requires fracSumGreater0ProxySum[this] > 0.0;
-ensures (sum[this] == s1) && (s1 > 0.0);
+ensures (sum[this] == s1);
+ensures	(s1 > 0.0);
 
 procedure ConstructProxySum(n1:int, s1:Ref, this:Ref);
 ensures n[this] == n1;
@@ -191,6 +201,7 @@ requires (instanceof[sumClient[this]] == 1) ==>
 requires (instanceof[sumClient[this]] == 2)==> 
 	((fracSumGreater0RealSum[sumClient[this]] == 1.0) &&
          packedSumGreater0RealSum[sumClient[this]]);
+ensures	
 {
 if (instanceof[sumClient[this]] == 1) {
 call r:=sumIsGreater0ProxySum(sumClient[this]);
