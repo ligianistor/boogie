@@ -191,19 +191,21 @@ ensures cell[this] == c;
 procedure computeResultStateLive(context:Ref, num:int, this:Ref) returns (r:Ref)
 modifies cell, value, myState, instanceof;
 requires packedBasicFieldsStateLive[this];
-requires (fracBasicFieldsStateLive[this] >= 1.0);
+requires (fracBasicFieldsStateLive[this] > 0.0);
 requires packedBasicFieldsContext[context];
-requires (fracBasicFieldsContext[context] >= 1.0);
+requires (fracBasicFieldsContext[context] > 0.0);
 ensures packedStateMultipleOf3StateLive[this];
-ensures	(fracStateMultipleOf3StateLive[this] >= 1.0);
+ensures	(fracStateMultipleOf3StateLive[this] > 0.0);
 ensures packedStateLimbo[context];
-ensures	(fracStateLimbo[context] >= 1.0);
+ensures	(fracStateLimbo[context] > 0.0);
 {
 var s : Ref;
 call ConstructStateLimbo(s);
+instanceof[s]:=2;
 // StateLike s = new StateLimbo()[];
-call setValue(num*15, cell[this]);
 call setState(s, context);
+assert packedStateLimbo[context];
+call setValue(num*15, cell[this]);
 r:=cell[this];
 }
 
@@ -321,9 +323,9 @@ ensures	(fracStateSleep[context] >= 1.0);
 var s : Ref;
 call ConstructStateSleep(s);
 // StateLike s = new StateSleep()[];
-call setValue(num*21, cell[this]);
 call setState(s, context);
-r:=cell[this];
+call setValue(num*21, cell[this]);
+r := cell[this];
 }
 
 procedure computeResult2StateLimbo(context:Ref, num:int, this:Ref) returns (r:Ref)
@@ -593,6 +595,12 @@ modifies myState, instanceof;
 //TODO these need to be in predicates
 ensures myState[this] == newState;
 ensures instanceof[myState[this]] == instanceof[newState];
+
+ensures ((old(instanceof[newState]) == 1) ==> ( packedStateLive[this] && (fracStateLive[this] > 0.0)))
+        &&
+	((old(instanceof[newState] == 2)) ==> ( packedStateLimbo[this] && (fracStateLimbo[this] > 0.0)))
+	&&
+	((old(instanceof[newState] == 3)) ==> ( packedStateSleep[this] && (fracStateSleep[this] > 0.0)));
 { 
 	myState[this] := newState; 
 	instanceof[myState[this]] := instanceof[newState];
