@@ -50,9 +50,9 @@ ensures sum[this] == s;
 procedure calculateRealSum(n1:int, this:Ref) returns (r:real)
 modifies sum;
 requires packedBasicFieldsRealSum[this];
-requires (fracBasicFieldsRealSum[this] == 1.0);
+requires (fracBasicFieldsRealSum[this] > 0.0);
 ensures packedSumOKRealSum[this];
-ensures	(fracSumOKRealSum[this]==1.0);
+ensures	(fracSumOKRealSum[this] > 0.0);
 {
 	sum[this] := n1 * (n1 + 1) / 2;
 	r := sum[this];
@@ -61,9 +61,9 @@ ensures	(fracSumOKRealSum[this]==1.0);
 procedure calculateSumRealSum(n1:int, this:Ref)  returns (r:real)
 modifies n, sum;
 requires packedBasicFieldsRealSum[this];
-requires (fracBasicFieldsRealSum[this] == 1.0);
+requires (fracBasicFieldsRealSum[this] > 0.0);
 ensures packedSumOKRealSum[this];
-ensures	(fracSumOKRealSum[this] == 1.0);
+ensures	(fracSumOKRealSum[this] > 0.0);
 
 { 
         n[this]:=n1;
@@ -180,10 +180,10 @@ ensures sumClient[this] == sum1;
 
 procedure checkSumIsOK(this:Ref) returns (r:bool)
 requires (instanceof[sumClient[this]] == 1) ==> 
-	((fracSumOKProxySum[sumClient[this]] == 1.0) &&
+	((fracSumOKProxySum[sumClient[this]] > 0.0) &&
          packedSumOKProxySum[sumClient[this]] );
 requires (instanceof[sumClient[this]] == 2)==> 
-	((fracSumOKRealSum[sumClient[this]] == 1.0) &&
+	((fracSumOKRealSum[sumClient[this]] > 0.0) &&
          packedSumOKRealSum[sumClient[this]]);
 {
 if (instanceof[sumClient[this]] == 1) {
@@ -196,10 +196,10 @@ call r:=sumIsOKRealSum(sumClient[this]);
 
 procedure checkSumGreater0(this:Ref) returns (r:bool)
 requires (instanceof[sumClient[this]] == 1) ==> 
-	((fracSumGreater0ProxySum[sumClient[this]] == 1.0) &&
+	((fracSumGreater0ProxySum[sumClient[this]] > 0.0) &&
          packedSumGreater0ProxySum[sumClient[this]] );
 requires (instanceof[sumClient[this]] == 2)==> 
-	((fracSumGreater0RealSum[sumClient[this]] == 1.0) &&
+	((fracSumGreater0RealSum[sumClient[this]] > 0.0) &&
          packedSumGreater0RealSum[sumClient[this]]);
 ensures	
 {
