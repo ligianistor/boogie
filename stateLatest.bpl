@@ -681,8 +681,6 @@ r := temp;
 procedure computeResult2SC(num: int, this:Ref) returns (r:Ref)
 modifies cell, value, myState, instanceof, packedStateLive, fracStateLive
          , packedStateLimbo, fracStateLimbo, packedStateSleep, fracStateSleep;
-ensures packedStateContextMultiple2[this];
-ensures fracStateContextMultiple2[this] > 0.0;
 //TODO should not access myState like this, but through the right predicate
 // maybe StateLive(old[this])
 // TODO need to add something about fractions related to the below
@@ -704,7 +702,8 @@ requires (instanceof[myState[this]] == 3) ==> (
       packedBasicFieldsContext[this] &&
        (fracBasicFieldsContext[this] > 0.0)
 );
-
+ensures packedStateContextMultiple2[this];
+ensures fracStateContextMultiple2[this] > 0.0;
 ensures (old(instanceof[myState[this]]) == 1) ==> 
         (packedStateSleep[this] && (fracStateSleep[this] > 0.0));
 ensures (old(instanceof[myState[this]]) == 3) ==> 
