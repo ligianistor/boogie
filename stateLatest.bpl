@@ -55,9 +55,9 @@ modifies value, divider,
 //requires (fracBasicIntCell[this] == 1.0); 
 requires (fracMultipleOf[this] == 1.0);
 requires packedMultipleOf[this];
-requires (divider[this] == 21) || (divider[this] == 16) ||
-	(divider[this] == 15) || (divider[this] == 14) ||
-	(divider[this] == 33) || (divider[this] == 4);
+//requires (divider[this] == 21) || (divider[this] == 16) ||
+//	(divider[this] == 15) || (divider[this] == 14) ||
+//	(divider[this] == 33) || (divider[this] == 4);
 ensures (divider[this] == divi);
 ensures (fracMultipleOf[this] == 1.0);
 ensures packedMultipleOf[this];
@@ -110,6 +110,7 @@ ensures (divider[cell[this]] == 14);
 
 procedure ConstructStateLive(this:Ref)
 modifies cell;
+//ensures (forall y:Ref :: ( (y!=this) ==> (cell[y] == old(cell[y]) ) ) );
 {	
 	var temp:Ref;
 	call ConstructIntCell(0, temp);
@@ -129,6 +130,8 @@ modifies cell, value, myState, instanceof, packedStateLive, fracStateLive, packe
          , divider, packedMultipleOf, fracMultipleOf;
 requires instanceof[this] == 1;
 requires (packedStateMultipleOf3StateLive[this]==false);
+requires (fracMultipleOf[cell[this]] == 1.0);
+requires packedMultipleOf[cell[this]];
 requires (fracStateMultipleOf3StateLive[this] > 0.0);
 requires packedStateContextMultiple3[context];
 requires (fracStateContextMultiple3[context] > 0.0);
@@ -138,13 +141,13 @@ ensures packedStateLimbo[context];
 ensures	(fracStateLimbo[context] > 0.0);
 {
 var s : Ref;
+call setValue(num*15, 15, cell[this]);
+call PackStateMultipleOf3StateLive(cell[this], this);
+packedStateMultipleOf3StateLive[this] := true;
 call ConstructStateLimbo(s);
 instanceof[s]:=2;
 // StateLike s = new StateLimbo()[];
 call setState(s, context);
-call setValue(num*15, 15, cell[this]);
-call PackStateMultipleOf3StateLive(cell[this], this);
-packedStateMultipleOf3StateLive[this] := true;
 r := cell[this];
 }
 
@@ -155,6 +158,8 @@ modifies cell, value, myState, instanceof, packedStateLive, fracStateLive
 requires instanceof[this] == 1;
 requires (packedStateMultipleOf2StateLive[this]==false);
 requires (fracStateMultipleOf2StateLive[this] > 0.0);
+requires (fracMultipleOf[cell[this]] == 1.0);
+requires packedMultipleOf[cell[this]];
 requires packedStateContextMultiple2[context];
 requires (fracStateContextMultiple2[context] > 0.0);
 ensures packedStateMultipleOf2StateLive[this];
@@ -163,11 +168,11 @@ ensures packedStateSleep[context];
 ensures	(fracStateSleep[context] > 0.0);
 {
 var s : Ref;
+call setValue(num*14, 14, cell[this]);
 call ConstructStateSleep(s);
 instanceof[s] := 3;
 // StateLike s = new StateSleep()[];
 call setState(s, context);
-call setValue(num*14, 14, cell[this]);
 r:=cell[this];
 }
 
@@ -251,6 +256,8 @@ modifies cell, value, myState, instanceof, packedStateLive, fracStateLive
 requires instanceof[this] == 2;
 requires packedStateMultipleOf3StateLimbo[this];
 requires (fracStateMultipleOf3StateLimbo[this] > 0.0);
+requires (fracMultipleOf[cell[this]] == 1.0);
+requires packedMultipleOf[cell[this]];
 requires packedStateContextMultiple3[context];
 requires (fracStateContextMultiple3[context] > 0.0);
 ensures packedStateMultipleOf3StateLimbo[this];
@@ -259,11 +266,11 @@ ensures packedStateSleep[context];
 ensures	(fracStateSleep[context] > 0.0);
 {
 var s : Ref;
+call setValue(num*21,21, cell[this]);
 call ConstructStateSleep(s);
 instanceof[s]:=3;
 // StateLike s = new StateSleep()[];
 call setState(s, context);
-call setValue(num*21,21, cell[this]);
 r := cell[this];
 }
 
@@ -275,6 +282,8 @@ requires instanceof[this] == 2;
 requires packedStateMultipleOf2StateLimbo[this];
 requires (fracStateMultipleOf2StateLimbo[this] > 0.0);
 requires packedStateContextMultiple2[context];
+requires (fracMultipleOf[cell[this]] == 1.0);
+requires packedMultipleOf[cell[this]];
 requires (fracStateContextMultiple2[context] > 0.0);
 ensures packedStateMultipleOf2StateLimbo[this];
 ensures	(fracStateMultipleOf2StateLimbo[this] > 0.0);
@@ -282,11 +291,11 @@ ensures packedStateLive[context];
 ensures	(fracStateLive[context] > 0.0);
 {
 var s : Ref;
+call setValue(num*16, 16, cell[this]);
 call ConstructStateLive(s);
 instanceof[s]:=1;
 // StateLike s = new StateLive()[];
 call setState(s, context);
-call setValue(num*16, 16, cell[this]);
 r:=cell[this];
 }
 
@@ -368,6 +377,8 @@ modifies cell, value, myState, instanceof, packedStateLive, fracStateLive
 requires instanceof[this] == 3;
 requires packedStateMultipleOf3StateSleep[this];
 requires (fracStateMultipleOf3StateSleep[this] > 0.0);
+requires (fracMultipleOf[cell[this]] == 1.0);
+requires packedMultipleOf[cell[this]];
 requires packedStateContextMultiple3[context];
 requires (fracStateContextMultiple3[context] > 0.0);
 ensures packedStateMultipleOf3StateSleep[this];
@@ -376,10 +387,10 @@ ensures packedStateLive[context];
 ensures	(fracStateLive[context] > 0.0);
 {
 var s : Ref;
+call setValue(num*33, 33, cell[this]);
 call ConstructStateLive(s);
 instanceof[s]:=1;
 // StateLike s = new StateLive()[];
-call setValue(num*33, 33, cell[this]);
 call setState(s, context);
 r:=cell[this];
 }
@@ -391,6 +402,8 @@ modifies cell, value, myState, instanceof, packedStateLive, fracStateLive
 requires instanceof[this] == 3;
 requires packedStateMultipleOf2StateSleep[this];
 requires (fracStateMultipleOf2StateSleep[this] > 0.0);
+requires (fracMultipleOf[cell[this]] == 1.0);
+requires packedMultipleOf[cell[this]];
 requires packedStateContextMultiple2[context];
 requires (fracStateContextMultiple2[context] > 0.0);
 ensures packedStateMultipleOf2StateSleep[this];
@@ -399,11 +412,11 @@ ensures packedStateLimbo[context];
 ensures	(fracStateLimbo[context] > 0.0);
 {
 var s : Ref;
+call setValue(num*14, 14, cell[this]);
 call ConstructStateLimbo(s);
 instanceof[s]:=2;
 // StateLike s = new StateLimbo()[];
 call setState(s, context);
-call setValue(num*14, 14, cell[this]);
 r:=cell[this];
 }
 
