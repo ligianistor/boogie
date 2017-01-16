@@ -575,19 +575,20 @@ ensures	((old(instanceof[newState] == 3)) ==> ( packedStateSleep[this] && (fracS
 procedure computeResultSC(num: int, this:Ref) returns (r:Ref)
 modifies cell, value, myState, instanceof, packedStateLive, fracStateLive,
         packedStateMultipleOf3StateLive , packedStateLimbo, fracStateLimbo
-        , packedStateSleep, fracStateSleep, divider, packedMultipleOf, fracMultipleOf;
+        , packedStateSleep, fracStateSleep, divider, packedMultipleOf, fracMultipleOf,
+        packedStateContextMultiple3;
 requires packedStateContextMultiple3[this];
 requires fracStateContextMultiple3[this] > 0.0;
 requires (instanceof[myState[this]] == 1) ==> (
-      packedStateMultipleOf3StateLive[myState[this]] &&
+      (packedStateMultipleOf3StateLive[myState[this]]== false) &&
       (fracStateMultipleOf3StateLive[myState[this]] > 0.0)
 );
 requires (instanceof[myState[this]] == 2) ==> (
-      packedStateMultipleOf3StateLimbo[myState[this]] &&
+      (packedStateMultipleOf3StateLimbo[myState[this]]== false) &&
       (fracStateMultipleOf3StateLimbo[myState[this]] > 0.0)
 );
 requires (instanceof[myState[this]] == 3) ==> (
-      packedStateMultipleOf3StateSleep[myState[this]] &&
+      (packedStateMultipleOf3StateSleep[myState[this]]== false) &&
       (fracStateMultipleOf3StateSleep[myState[this]] > 0.0)
 );
 ensures packedStateContextMultiple3[this];
@@ -604,6 +605,7 @@ ensures (old(instanceof[myState[this]]) == 3) ==>
 {
 var temp : Ref;
 call UnpackStateContextMultiple3(myState[this], this);
+packedStateContextMultiple3[this] := false;
 if (instanceof[myState[this]] == 1) {
 	call temp := computeResultStateLive(this, num, myState[this]);
 } else if (instanceof[myState[this]] == 2) {
