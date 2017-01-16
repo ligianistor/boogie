@@ -2,27 +2,12 @@ type Ref;
 const null: Ref;
 
 var value: [Ref]int;
+var divider : [Ref]int;
 var packedMultipleOf: [Ref] bool;
 var fracMultipleOf: [Ref] real;
 
-var packedMultipleOf21: [Ref] bool;
-var fracMultipleOf21: [Ref] real;
-
-var packedMultipleOf16: [Ref] bool;
-var fracMultipleOf16: [Ref] real;
-
-var packedMultipleOf15: [Ref] bool;
-var fracMultipleOf15: [Ref] real;
-
-var packedMultipleOf14: [Ref] bool;
-var fracMultipleOf14: [Ref] real;
-
-var packedMultipleOf33: [Ref] bool;
-var fracMultipleOf33: [Ref] real;
-
-var packedMultipleOf4: [Ref] bool;
-var fracMultipleOf4: [Ref] real;
-
+var packedBasicIntCell: [Ref] bool;
+var fracBasicIntCell: [Ref] real;
 
 function modulo(x:int, y:int) returns (int);
 axiom (forall x:int, y:int :: {modulo(x,y)} 
@@ -35,99 +20,79 @@ axiom (forall x:int, y:int :: {modulo(x,y)}
     ((x <= 0) &&(y < 0) ==> (y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
    ); 
 
-// TODO maybe need to add a field value that holds a, the one we divide by
+// TODO need to be able to go from BasicIntCell to one of
+// the more complex predicates and back.
+procedure PackBasicIntCell(a: int, v:int, this:Ref);
+requires (packedBasicIntCell[this]==false);
+requires (value[this] == v);
+requires (divider[this] == a);
+
+procedure UnpackBasicIntCell(a: int, v:int, this:Ref);
+requires packedBasicIntCell[this];
+requires fracBasicIntCell[this] > 0.0;
+ensures	(value[this] == v);
+ensures (divider[this] == a);
+
 procedure PackMultipleOf(a: int, v:int, this:Ref);
 requires (packedMultipleOf[this]==false);
 requires (value[this] == v);
+requires (divider[this] == a);
 requires (modulo(v,a) == 0); 
 
 procedure UnpackMultipleOf(a: int, v:int, this:Ref);
 requires packedMultipleOf[this];
 requires fracMultipleOf[this] > 0.0;
 ensures	(value[this] == v);
+ensures (divider[this] == a);
 ensures	(modulo(v,a) == 0); 
-
-procedure PackMultipleOf21(v:int, this:Ref);
-requires (packedMultipleOf21[this]==false);
-requires (value[this] == v);
-requires (modulo(v,21) == 0); 
-
-procedure UnpackMultipleOf21(v:int, this:Ref);
-requires packedMultipleOf21[this];
-requires fracMultipleOf21[this] > 0.0;
-ensures	(value[this] == v);
-ensures	(modulo(v,21) == 0); 
-
-procedure PackMultipleOf16(v:int, this:Ref);
-requires (packedMultipleOf16[this]==false);
-requires (value[this] == v);
-requires (modulo(v,16) == 0); 
-
-procedure UnpackMultipleOf16(v:int, this:Ref);
-requires packedMultipleOf16[this];
-requires fracMultipleOf16[this] > 0.0;
-ensures	(value[this] == v);
-ensures	(modulo(v,16) == 0);
-
-procedure PackMultipleOf15(v:int, this:Ref);
-requires (packedMultipleOf15[this]==false);
-requires (value[this] == v);
-requires (modulo(v,15) == 0); 
-
-procedure UnpackMultipleOf15(v:int, this:Ref);
-requires packedMultipleOf15[this];
-requires fracMultipleOf15[this] > 0.0;
-ensures	(value[this] == v);
-ensures	(modulo(v,15) == 0);
-
-procedure PackMultipleOf14(v:int, this:Ref);
-requires (packedMultipleOf14[this]==false);
-requires (value[this] == v);
-requires (modulo(v,14) == 0); 
-
-procedure UnpackMultipleOf14(v:int, this:Ref);
-requires packedMultipleOf14[this];
-requires fracMultipleOf14[this] > 0.0;
-ensures	(value[this] == v);
-ensures	(modulo(v,14) == 0);
-
-procedure PackMultipleOf33(v:int, this:Ref);
-requires (packedMultipleOf33[this]==false);
-requires (value[this] == v);
-requires (modulo(v,33) == 0); 
-
-procedure UnpackMultipleOf33(v:int, this:Ref);
-requires packedMultipleOf33[this];
-requires fracMultipleOf33[this] > 0.0;
-ensures	(value[this] == v);
-ensures	(modulo(v,33) == 0);
-
-procedure PackMultipleOf4(v:int, this:Ref);
-requires (packedMultipleOf4[this]==false);
-requires (value[this] == v);
-requires (modulo(v,4) == 0); 
-
-procedure UnpackMultipleOf4(v:int, this:Ref);
-requires packedMultipleOf4[this];
-requires fracMultipleOf4[this] > 0.0;
-ensures	(value[this] == v);
-ensures	(modulo(v,4) == 0);
 
 procedure ConstructIntCell(x: int, this: Ref);
 ensures (value[this] == x);
 
-procedure setValue(x: int, this: Ref) 
-modifies value;
+procedure setValueMultiple3(x: int, divi:int, this: Ref) 
+modifies value, divider,
+      packedMultipleOf, fracMultipleOf;
+//requires (fracBasicIntCell[this] == 1.0); 
+requires (fracMultipleOf[this] > 0.0);
+requires packedMultipleOf[this];
+//requires (divider[this] == 21) || 
+//	(divider[this] == 15) ||
+//	(divider[this] == 33) ;
+ensures (divider[this] == divi);
+ensures (fracMultipleOf[this] > 0.0);
+ensures packedMultipleOf[this];
 {
 	value[this] := x;
+  divider[this] := divi;
+}
+
+procedure setValueMultiple2(x: int, divi:int, this: Ref) 
+modifies value, divider,
+      packedMultipleOf, fracMultipleOf;
+//requires (fracBasicIntCell[this] == 1.0); 
+requires (fracMultipleOf[this] > 0.0);
+requires packedMultipleOf[this];
+//requires  (divider[this] == 16) ||
+//	 (divider[this] == 14) ||
+//	 (divider[this] == 4);
+ensures (divider[this] == divi);
+ensures (fracMultipleOf[this] > 0.0);
+ensures packedMultipleOf[this];
+{
+	value[this] := x;
+  divider[this] := divi;
 }
 
 procedure getValueInt(this: Ref) returns (r:int)
 {
 	r:=value[this];
 }
-
 //-------------------
+
+var packedCollegeBuildingsFew : [Ref] bool;
+var fracCollegeBuildingsFew : [Ref] real;
+var packedCollegeBuildingsMany : [Ref] bool;
+var fracCollegeBuildingsMany : [Ref] real;
 
 var collegeNumber :[Ref]int;
 var endowment : [Ref]int;
@@ -226,28 +191,6 @@ ensures packedMultipleOf[r] &&
 	fracMultipleOf[r] := 1.0;
 }
 
-procedure checkFewFacilities(num:int, this:Ref) returns (b:bool)
-requires packedCollegeFacilitiesFew[this];
-requires (fracCollegeFacilitiesFew[this] > 0.0);
-//requires this#1 collegeFacilitiesFew(num)
-ensures packedCollegeFacilitiesFew[this];
-ensures	(fracCollegeFacilitiesFew[this] > 0.0);
-//ensures this#1 collegeFacilitiesFew(num)
-{
-	b := (num <= 4 * collegeNumber[this]);
-}
-
-procedure checkManyFacilities(num:int, this:Ref) returns (b:bool)
-requires packedCollegeFacilitiesMany[this];
-requires (fracCollegeFacilitiesMany[this] > 0.0);
-//requires this#1 collegeFacilitiesMany(num)
-ensures packedCollegeFacilitiesMany[this];
-ensures	(fracCollegeFacilitiesMany[this] > 0.0);
-//ensures this#1 collegeFacilitiesMany(num)
-{
-	b := (num >= 10 * collegeNumber[this]);
-}
-
 //---------------------------
 
 type MapIntCollege = [int] Ref;
@@ -297,7 +240,7 @@ requires  (packedIsEntryNull[this] == false);
 requires (mapOfColleges[this] == m);
 requires (m[key1] == null);
 
-procedure ConstructMapCollege(m: MapIntCollege, max:int, s:int, this: Ref);
+procedure ConstructMapCollege(m: MapIntCollege, max:int, this: Ref);
 ensures (mapOfColleges[this] == m);
 ensures	(maxSize[this] == max);
 
@@ -506,6 +449,13 @@ requires packedApplicationWebsiteField[this];
 requires fracApplicationWebsiteField[this] > 0.0;
 ensures	(mapOfColleges[this] == m); 
 
+procedure ConstructApplicationWebsite(maxSize1:int, this:Ref)
+ensures (fracApplicationWebsiteField[this] == 1.0);
+
+{
+	call ConstructMapCollege(mapOfColleges[this], maxSize1, this);	
+}
+
 procedure submitApplicationGetCollege(collegeNumber:int, this:Ref) returns (r: Ref)
 modifies mapOfColleges;
 requires packedApplicationWebsiteField[this];
@@ -528,6 +478,7 @@ modifies mapOfColleges;
 	var college, college2 : Ref;
 	var app1, app2 : Ref;
 	var app3, app4 : Ref;
+  var tempbo : bool;
 	assume (college != college2);
 	assume (app1 != app2);
 	assume (app3 != app4);
@@ -554,9 +505,9 @@ modifies mapOfColleges;
 	fracStudentAppFacilitiesFew[app2] := 1.0;
 	fracCollegeFacilitiesFew[college] := fracCollegeFacilitiesFew[college] / 2.0;
 
-	call checkFewFacilities(app1);
+	call tempbo := checkFacilitiesFew(app1);
 	call changeApplicationFew(34, app1);
-	call checkFewFacilities(app2);
+	call tempbo := checkFacilitiesFew(app2);
 
 	// ---- code below this is similar to above
 
@@ -576,7 +527,7 @@ modifies mapOfColleges;
 	fracStudentAppFacilitiesMany[app4] := 1.0;
 	fracCollegeFacilitiesMany[college2] := fracCollegeFacilitiesMany[college2] / 2.0;
 
-	call checkFewFacilities(app3);
+	call tempbo := checkFacilitiesMany(app3);
 	call changeApplicationFew(78, app3);
-	call checkFewFacilities(app4);
+	call tempbo := checkFacilitiesMany(app4);
 }

@@ -132,11 +132,10 @@ modifies n,sum;
   var temp : real;
 n[this]:=n1;
 if (realSum[this]==null) {
-	call sumConstrRealSum(n[this], realSum[this]);
+	call ConstructRealSum(n[this], realSum[this], this);
 }
-
 	call temp := calculateSumRealSum(realSum[this]);
-  	sum[this]:=temp;
+  sum[this]:=temp;
 	r:=sum[this];
 }
 
@@ -201,7 +200,6 @@ requires (instanceof[sumClient[this]] == 1) ==>
 requires (instanceof[sumClient[this]] == 2)==> 
 	((fracSumGreater0RealSum[sumClient[this]] > 0.0) &&
          packedSumGreater0RealSum[sumClient[this]]);
-ensures	
 {
 if (instanceof[sumClient[this]] == 1) {
 call r:=sumIsGreater0ProxySum(sumClient[this]);
