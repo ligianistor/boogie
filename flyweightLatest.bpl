@@ -156,8 +156,6 @@ ensures	(num <= 4 * c);
 
 procedure ConstructCollege(number:int, this:Ref) 
 modifies collegeNumber, endowment;
-ensures packedCollegeFields[this] &&
-	(fracCollegeFields[this] > 0.0);
 // TODO need to put in statements about the parameters.
 // ensures this#k CollegeFields()[number, (number*1000)-5]
 {
@@ -166,6 +164,8 @@ ensures packedCollegeFields[this] &&
 }
 
 procedure getCollegeNumber(this:Ref) returns (r:int)
+requires packedCollegeNumberField[this] &&
+	(fracCollegeNumberField[this] > 0.0);
 ensures packedCollegeNumberField[this] &&
 	(fracCollegeNumberField[this] > 0.0);
 // TODO add statement about value of parameter 
@@ -364,7 +364,7 @@ ensures (mapOfColleges[this] == m);
 ensures (m[key1] == null);
 
 procedure createMapCollege(maxSize1:int, this: Ref)
-modifies maxSize, mapOfColleges;
+modifies maxSize, mapOfColleges, packedIsEntryNull;
 ensures (forall j:int :: (j<=maxSize1) ==> packedIsEntryNull[this, j] && (fracIsEntryNull[this, j]==1.0));
 {
 maxSize[this] := maxSize1;
@@ -372,13 +372,18 @@ call makeMapNull(maxSize1, this);
 }
 
 procedure makeMapNull(i : int, this:Ref)
-modifies mapOfColleges;
-ensures (forall j:int :: ((j<=i) ==> packedIsEntryNull[this, j]));
+modifies mapOfColleges, packedIsEntryNull;
+requires (i>=0);
+ensures (forall j:int :: (((j<=i) && (j>=0) ) ==> packedIsEntryNull[this, j]));
 {
 if (i==0) {
 	mapOfColleges[this][i] := null;	
-} else {
+  packedIsEntryNull[this, i] := true;
+} else if (i>0) {
 	call makeMapNull(i-1, this);
+  assert (forall j:int :: (((j<=i-1) && (j>=0) ) ==> packedIsEntryNull[this, j]));
+  mapOfColleges[this][i] := null;	
+  packedIsEntryNull[this, i] := true;
 }
 }
 
@@ -443,7 +448,7 @@ call r:= get(collegeNumber, this);
 }
 
 procedure ConstructApplicationWebsite(maxSize1:int, this:Ref)
-modifies maxSize, mapOfColleges;
+modifies maxSize, mapOfColleges, packedIsEntryNull;
 ensures (fracApplicationWebsiteField[this] == 1.0);
 {
 	call createMapCollege(maxSize1, this);	
@@ -470,7 +475,7 @@ modifies mapOfColleges, fracCollegeFacilitiesMany, packedApplicationWebsiteField
   packedCollegeFields, fracCollegeFields, collegeNumber, endowment,
   fracApplicationWebsiteField, college, facilities, campusNumber, 
   fracMultipleOf, packedMultipleOf, fracStudentAppFacilitiesFew,
-  fracStudentAppFacilitiesMany, maxSize;
+  fracStudentAppFacilitiesMany, maxSize, packedIsEntryNull;
 {
 	var website : Ref;
 	var college, college2 : Ref;
