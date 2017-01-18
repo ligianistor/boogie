@@ -9,17 +9,6 @@ var fracMultipleOf: [Ref] real;
 var packedBasicIntCell: [Ref] bool;
 var fracBasicIntCell: [Ref] real;
 
-function modulo(x:int, y:int) returns (int);
-axiom (forall x:int, y:int :: {modulo(x,y)} 
-    ((0 <= x) &&(0 < y) ==> (0 <= modulo(x,y) ) && (modulo(x,y) < y) )
-    &&
-    ((0 <= x) &&(y < 0) ==> (0 <= modulo(x,y) ) && (modulo(x,y) < -y) )
-    &&
-    ((x <= 0) &&(0 < y) ==> (-y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
-    &&
-    ((x <= 0) &&(y < 0) ==> (y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
-   ); 
-
 // TODO need to be able to go from BasicIntCell to one of
 // the more complex predicates and back.
 procedure PackBasicIntCell(a: int, v:int, this:Ref);
@@ -37,17 +26,23 @@ procedure PackMultipleOf(a: int, v:int, this:Ref);
 requires (packedMultipleOf[this]==false);
 requires (value[this] == v);
 requires (divider[this] == a);
-requires (modulo(v,a) == 0); 
+requires ( (v - int(v/a)*a )==0);
 
 procedure UnpackMultipleOf(a: int, v:int, this:Ref);
 requires packedMultipleOf[this];
 requires fracMultipleOf[this] > 0.0;
 ensures	(value[this] == v);
 ensures (divider[this] == a);
-ensures	(modulo(v,a) == 0); 
+ensures	 ( (v - int(v/a)*a )==0);
 
-procedure ConstructIntCell(x: int, this: Ref);
-ensures (value[this] == x);
+procedure ConstructIntCell(divider1: int, value1: int, this: Ref)
+modifies divider, value;
+ensures (value[this] == value1);
+ensures (divider[this] == divider1);
+{
+	value[this] := value1;
+	divider[this] := divider1;
+}
 
 procedure setValueMultiple3(x: int, divi:int, this: Ref) 
 modifies value, divider,
@@ -176,7 +171,7 @@ ensures packedCollegeNumberField[this] &&
 
 // the method that calculates the extrinsic state
 procedure getNumberFacilities(campusNumber:int, this:Ref) returns (r:Ref)
-modifies fracMultipleOf, packedMultipleOf;
+modifies fracMultipleOf, packedMultipleOf, divider, value;
 requires packedCollegeNumberField[this];
 requires (fracCollegeNumberField[this] > 0.0);
 //TODO have to say what are the current values of the parameters
@@ -185,7 +180,7 @@ ensures packedMultipleOf[r] &&
 	(fracMultipleOf[r] > 0.0);
 //ensures result#1 MultipleOf(this.collegeNumber)
 {
-	call ConstructIntCell(collegeNumber[this] * campusNumber, r);
+	call ConstructIntCell(collegeNumber[this], collegeNumber[this] * campusNumber, r);
 	packedMultipleOf[r] := false;
 	call PackMultipleOf(collegeNumber[this], collegeNumber[this] * campusNumber, r);
 	packedMultipleOf[r] := true;
@@ -250,7 +245,7 @@ ensures	packedCollegeFacilitiesFew[col];
 ensures	(fracCollegeFacilitiesFew[col] > 0.0);
 
 procedure ConstructStudentApplication(col:Ref, campusNum:int, this:Ref) 
-modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf;
+modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf, divider, value;
 {
     var temp : Ref;
 		college[this] := col;
@@ -260,20 +255,20 @@ modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf;
 }
 	
 procedure changeApplicationFew(newCampusNumber:int, this:Ref)
-modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf;
+modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf, divider, value;
 requires packedStudentAppFacilitiesFew[this];
 requires (fracStudentAppFacilitiesFew[this] > 0.0);
 ensures packedStudentAppFacilitiesFew[this];
 ensures	(fracStudentAppFacilitiesFew[this] > 0.0);
 {
   var temp : Ref;
-	campusNumber[this] := modulo(newCampusNumber, 4);
+	campusNumber[this] := (newCampusNumber - int(newCampusNumber/4)*4 );
 	call temp := getNumberFacilities(campusNumber[this], college[this]);
   facilities[this] := temp;
 }
 
 procedure changeApplicationMany(newCampusNumber:int, this:Ref)
-modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf;
+modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf, divider, value;
 requires packedStudentAppFacilitiesMany[this];
 requires (fracStudentAppFacilitiesMany[this] > 0.0);
 ensures packedStudentAppFacilitiesMany[this];
@@ -475,7 +470,7 @@ modifies mapOfColleges, fracCollegeFacilitiesMany, packedApplicationWebsiteField
   packedCollegeFields, fracCollegeFields, collegeNumber, endowment,
   fracApplicationWebsiteField, college, facilities, campusNumber, 
   fracMultipleOf, packedMultipleOf, fracStudentAppFacilitiesFew,
-  fracStudentAppFacilitiesMany, maxSize, packedIsEntryNull;
+  fracStudentAppFacilitiesMany, maxSize, packedIsEntryNull, divider, value;
 {
 	var website : Ref;
 	var college, college2 : Ref;

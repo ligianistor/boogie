@@ -46,8 +46,14 @@ ensures	(value[this] == v);
 ensures (divider[this] == a);
 ensures	(modulo(v,a) == 0); 
 
-procedure ConstructIntCell(x: int, this: Ref);
-ensures (value[this] == x);
+procedure ConstructIntCell(divider1: int, value1: int, this: Ref)
+modifies divider, value;
+ensures (value[this] == value1);
+ensures (divider[this] == divider1);
+{
+	value[this] := value1;
+	divider[this] := divider1;
+}
 
 procedure setValueMultiple3(x: int, divi:int, this: Ref) 
 modifies value, divider,
