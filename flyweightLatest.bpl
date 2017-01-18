@@ -9,6 +9,12 @@ var fracMultipleOf: [Ref] real;
 var packedBasicIntCell: [Ref] bool;
 var fracBasicIntCell: [Ref] real;
 
+var packedIntCellMany : [Ref] bool;
+var fracIntCellMany : [Ref]real;
+
+var packedIntCellFew : [Ref] bool;
+var fracIntCellFew : [Ref]real;
+
 // TODO need to be able to go from BasicIntCell to one of
 // the more complex predicates and back.
 procedure PackBasicIntCell(a: int, v:int, this:Ref);
@@ -34,6 +40,33 @@ requires fracMultipleOf[this] > 0.0;
 ensures	(value[this] == v);
 ensures (divider[this] == a);
 ensures	 ( (v - int(v/a)*a )==0);
+
+//TODO need to fix the body of this
+procedure PackIntCellMany(a: int, v:int, this:Ref);
+requires (packedIntCellMany[this]==false);
+requires (value[this] == v);
+requires (divider[this] == a);
+requires (v/a >= 10.0);
+
+procedure UnpackIntCellMany(a: int, v:int, this:Ref);
+requires packedIntCellMany[this];
+requires fracIntCellMany[this] > 0.0;
+ensures	(value[this] == v);
+ensures (divider[this] == a);
+ensures (v/a >= 10.0);
+
+procedure PackIntCellFew(a: int, v:int, this:Ref);
+requires (packedIntCellFew[this]==false);
+requires (value[this] == v);
+requires (divider[this] == a);
+requires (v/a <= 4.0);
+
+procedure UnpackIntCellFew(a: int, v:int, this:Ref);
+requires packedIntCellFew[this];
+requires fracIntCellFew[this] > 0.0;
+ensures	(value[this] == v);
+ensures (divider[this] == a);
+ensures (v/a <= 4.0);
 
 procedure ConstructIntCell(divider1: int, value1: int, this: Ref)
 modifies divider, value;
@@ -118,36 +151,33 @@ requires (packedCollegeFields[this]==false);
 requires (collegeNumber[this] == c);
 requires (endowment[this] == c*1000 - 5); 
 
-procedure UnpackCollegeFields(c:int, this:Ref);
+procedure UnpackCollegeFields(colNum:int, this:Ref);
 requires packedCollegeFields[this];
 requires fracCollegeFields[this] > 0.0;
-ensures	(collegeNumber[this] == c);
-ensures (endowment[this] == c*1000 - 5);
+ensures	(collegeNumber[this] == colNum);
+ensures (endowment[this] == colNum*1000 - 5);
 
-procedure PackCollegeFacilitiesMany(num:int, c:int, this:Ref);
+procedure PackCollegeFacilitiesMany(numFacilities:int, colNum:int, this:Ref);
 requires (packedCollegeFacilitiesMany[this] == false);
-//TODO all Pack procedures need to refer to frac also, 
-// not only to packed.
-requires (collegeNumber[this] == c) && (num >= 10 * c);
+requires (collegeNumber[this] == colNum);
+requires (numFacilities >= 10 * colNum);
 
-procedure UnpackCollegeFacilitiesMany(num:int, c:int, this:Ref);
+procedure UnpackCollegeFacilitiesMany(numFacilities:int, colNum:int, this:Ref);
 requires packedCollegeFacilitiesMany[this];
 requires fracCollegeFacilitiesMany[this] > 0.0;
-//TODO all Unpack procedures need to refer to frac also, 
-// not only to packed.
-ensures (collegeNumber[this] == c);
-ensures	(num >= 10 * c);
+ensures (collegeNumber[this] == colNum);
+ensures	(numFacilities >= 10 * colNum);
 
-procedure PackCollegeFacilitiesFew(num:int, c:int, this:Ref);
+procedure PackCollegeFacilitiesFew(numFacilities:int, colNum:int, this:Ref);
 requires (packedCollegeFacilitiesFew[this] == false);
-requires (collegeNumber[this] == c);
-requires (num <= 4 * c);
+requires (collegeNumber[this] == colNum);
+requires (numFacilities <= 4 * colNum);
 
-procedure UnpackCollegeFacilitiesFew(num:int, c:int, this:Ref);
+procedure UnpackCollegeFacilitiesFew(numFacilities:int, colNum:int, this:Ref);
 requires packedCollegeFacilitiesFew[this];
 requires fracCollegeFacilitiesFew[this] > 0.0;
-ensures (collegeNumber[this] == c);
-ensures	(num <= 4 * c);
+ensures (collegeNumber[this] == colNum);
+ensures	(numFacilities <= 4 * colNum);
 
 procedure ConstructCollege(number:int, this:Ref) 
 modifies collegeNumber, endowment;
@@ -159,10 +189,10 @@ modifies collegeNumber, endowment;
 }
 
 procedure getCollegeNumber(this:Ref) returns (r:int)
-requires packedCollegeNumberField[this] &&
-	(fracCollegeNumberField[this] > 0.0);
-ensures packedCollegeNumberField[this] &&
-	(fracCollegeNumberField[this] > 0.0);
+requires packedCollegeNumberField[this];
+requires (fracCollegeNumberField[this] > 0.0);
+ensures packedCollegeNumberField[this];
+ensures	(fracCollegeNumberField[this] > 0.0);
 // TODO add statement about value of parameter 
 // ensures this#k CollegeNumberField()[result]
 {
@@ -170,21 +200,28 @@ ensures packedCollegeNumberField[this] &&
 }
 
 // the method that calculates the extrinsic state
-procedure getNumberFacilities(campusNumber:int, this:Ref) returns (r:Ref)
-modifies fracMultipleOf, packedMultipleOf, divider, value;
+procedure getNumberFacilities(campNum:int, this:Ref) returns (r:Ref)
+modifies divider, value, 
+	packedIntCellMany, packedIntCellFew,
+  fracIntCellMany, fracIntCellFew;
 requires packedCollegeNumberField[this];
 requires (fracCollegeNumberField[this] > 0.0);
-//TODO have to say what are the current values of the parameters
-// requires this#1 CollegeNumberField(this.collegeNumber)
-ensures packedMultipleOf[r] &&
-	(fracMultipleOf[r] > 0.0);
-//ensures result#1 MultipleOf(this.collegeNumber)
+//TODO add ensures about the parameters
+ensures (campNum>=10) ==> (packedIntCellMany[r] && (fracIntCellMany[r]==1.0));
+ensures (campNum<=4) ==>  (packedIntCellFew[r] && (fracIntCellFew[r]==1.0));
 {
-	call ConstructIntCell(collegeNumber[this], collegeNumber[this] * campusNumber, r);
-	packedMultipleOf[r] := false;
-	call PackMultipleOf(collegeNumber[this], collegeNumber[this] * campusNumber, r);
-	packedMultipleOf[r] := true;
-	fracMultipleOf[r] := 1.0;
+	call ConstructIntCell(collegeNumber[this], collegeNumber[this] * campNum, r);
+	if (campNum>=10) {
+		packedIntCellMany[r] := false;
+		call PackIntCellMany(collegeNumber[this] * campNum, collegeNumber[this], r);
+		packedIntCellMany[r] := true;
+		fracIntCellMany[r] := 1.0;
+	} else if (campNum<=4) {
+		packedIntCellFew[r] := false;
+		call PackIntCellFew(collegeNumber[this] * campNum, collegeNumber[this], r);
+		packedIntCellFew[r] := true;
+		fracIntCellFew[r] := 1.0;
+	}	
 }
 
 //---------------------------
@@ -245,7 +282,9 @@ ensures	packedCollegeFacilitiesFew[col];
 ensures	(fracCollegeFacilitiesFew[col] > 0.0);
 
 procedure ConstructStudentApplication(col:Ref, campusNum:int, this:Ref) 
-modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf, divider, value;
+modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf, divider, value
+        , packedIntCellMany, packedIntCellFew,
+        fracIntCellMany, fracIntCellFew;
 {
     var temp : Ref;
 		college[this] := col;
@@ -255,7 +294,9 @@ modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf, di
 }
 	
 procedure changeApplicationFew(newCampusNumber:int, this:Ref)
-modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf, divider, value;
+modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf, divider, value
+  , packedIntCellMany, packedIntCellFew,
+        fracIntCellMany, fracIntCellFew;
 requires packedStudentAppFacilitiesFew[this];
 requires (fracStudentAppFacilitiesFew[this] > 0.0);
 ensures packedStudentAppFacilitiesFew[this];
@@ -268,7 +309,9 @@ ensures	(fracStudentAppFacilitiesFew[this] > 0.0);
 }
 
 procedure changeApplicationMany(newCampusNumber:int, this:Ref)
-modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf, divider, value;
+modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf, divider, value
+      , packedIntCellMany, packedIntCellFew,
+        fracIntCellMany, fracIntCellFew;
 requires packedStudentAppFacilitiesMany[this];
 requires (fracStudentAppFacilitiesMany[this] > 0.0);
 ensures packedStudentAppFacilitiesMany[this];
@@ -465,18 +508,21 @@ ensures ( packedCollegeBuildingsFew[r] &&
 }
 
 procedure main(this:Ref) 
-modifies mapOfColleges, fracCollegeFacilitiesMany, packedApplicationWebsiteField,
-  packedStudentAppFacilitiesFew, packedStudentAppFacilitiesMany, fracCollegeFacilitiesFew,
+modifies mapOfColleges, packedApplicationWebsiteField,
+  packedStudentAppFacilitiesFew, packedStudentAppFacilitiesMany,
   packedCollegeFields, fracCollegeFields, collegeNumber, endowment,
   fracApplicationWebsiteField, college, facilities, campusNumber, 
   fracMultipleOf, packedMultipleOf, fracStudentAppFacilitiesFew,
-  fracStudentAppFacilitiesMany, maxSize, packedIsEntryNull, divider, value;
+  fracStudentAppFacilitiesMany, maxSize, packedIsEntryNull, divider, value,
+  fracCollegeFacilitiesFew, fracCollegeFacilitiesMany
+  , packedIntCellMany, packedIntCellFew,
+        fracIntCellMany, fracIntCellFew;
 {
 	var website : Ref;
 	var college, college2 : Ref;
 	var app1, app2 : Ref;
 	var app3, app4 : Ref;
-  var tempbo : bool;
+  	var tempbo : bool;
 	assume (college != college2);
 	assume (app1 != app2);
 	assume (app3 != app4);
