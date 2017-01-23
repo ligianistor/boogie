@@ -42,31 +42,31 @@ ensures (divider[this] == a);
 ensures	 ( (v - int(v/a)*a )==0);
 
 //TODO need to fix the body of this
-procedure PackIntCellMany(a: int, v:int, this:Ref);
+procedure PackIntCellMany(divi: int, val:int, quot:int, this:Ref);
 requires (packedIntCellMany[this]==false);
-requires (value[this] == v);
-requires (divider[this] == a);
-requires (v/a >= 10.0);
+requires (value[this] == val);
+requires (divider[this] == divi);
+requires (quot >= 10);
 
-procedure UnpackIntCellMany(a: int, v:int, this:Ref);
+procedure UnpackIntCellMany(divi: int, val:int, quot:int, this:Ref);
 requires packedIntCellMany[this];
 requires fracIntCellMany[this] > 0.0;
-ensures	(value[this] == v);
-ensures (divider[this] == a);
-ensures (v/a >= 10.0);
+ensures	(value[this] == val);
+ensures (divider[this] == divi);
+ensures (quot >= 10);
 
-procedure PackIntCellFew(a: int, v:int, this:Ref);
+procedure PackIntCellFew(divi: int, v:int, quot:int, this:Ref);
 requires (packedIntCellFew[this]==false);
 requires (value[this] == v);
-requires (divider[this] == a);
-requires (v/a <= 4.0);
+requires (divider[this] == divi);
+requires (quot <= 4);
 
-procedure UnpackIntCellFew(a: int, v:int, this:Ref);
+procedure UnpackIntCellFew(divi: int, v:int, quot:int, this:Ref);
 requires packedIntCellFew[this];
 requires fracIntCellFew[this] > 0.0;
 ensures	(value[this] == v);
-ensures (divider[this] == a);
-ensures (v/a <= 4.0);
+ensures (divider[this] == divi);
+ensures (quot <= 4);
 
 procedure ConstructIntCell(divider1: int, value1: int, this: Ref)
 modifies divider, value;
@@ -213,12 +213,14 @@ ensures (campNum<=4) ==>  (packedIntCellFew[r] && (fracIntCellFew[r]==1.0));
 	call ConstructIntCell(collegeNumber[this], collegeNumber[this] * campNum, r);
 	if (campNum>=10) {
 		packedIntCellMany[r] := false;
-		call PackIntCellMany(collegeNumber[this] * campNum, collegeNumber[this], r);
+    assert (campNum>=10);
+   //assert ( ( (collegeNumber[this] * campNum)/collegeNumber[this]) >= 10.0);
+		call PackIntCellMany(collegeNumber[this], collegeNumber[this] * campNum,  campNum, r);
 		packedIntCellMany[r] := true;
 		fracIntCellMany[r] := 1.0;
 	} else if (campNum<=4) {
 		packedIntCellFew[r] := false;
-		call PackIntCellFew(collegeNumber[this] * campNum, collegeNumber[this], r);
+		call PackIntCellFew(collegeNumber[this], collegeNumber[this] * campNum,  campNum, r);
 		packedIntCellFew[r] := true;
 		fracIntCellFew[r] := 1.0;
 	}	
