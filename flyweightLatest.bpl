@@ -439,29 +439,30 @@ ensures (mapOfColleges[this] == m);
 ensures (m[key1] == null);
 
 procedure createMapCollege(maxSize1:int, this: Ref)
-modifies maxSize, mapOfColleges, packedIsEntryNull, fracIsEntryNull;
+modifies maxSize, mapOfColleges, packedKeyValuePair, fracKeyValuePair;
 requires (maxSize1>=0);
-ensures (forall j:int :: ((j<=maxSize1) && (j>=0)) ==> (packedIsEntryNull[this, j] && (fracIsEntryNull[this, j]==1.0)) ) ;
+// TODO add something about param being null in the ensures below
+ensures (forall j:int :: ((j<=maxSize1) && (j>=0)) ==> (packedKeyValuePair[this, j] && (fracKeyValuePair[this, j]==1.0)) ) ;
+ensures maxSize[this] == maxSize1;
 {
-maxSize[this] := maxSize1;
 call makeMapNull(maxSize1, this);
+maxSize[this] := maxSize1;
 }
 
 procedure makeMapNull(i : int, this:Ref)
-modifies mapOfColleges, packedIsEntryNull, fracIsEntryNull;
+modifies mapOfColleges, packedKeyValuePair, fracKeyValuePair;
 requires (i>=0);
-ensures (forall j:int :: (((j<=i) && (j>=0) ) ==> (packedIsEntryNull[this, j] && ( fracIsEntryNull[this, j] == 1.0 )))  );
+ensures (forall j:int :: (((j<=i) && (j>=0) ) ==> (packedKeyValuePair[this, j] && ( fracKeyValuePair[this, j] == 1.0 )))  );
 {
 if (i==0) {
 	mapOfColleges[this][i] := null;	
-  packedIsEntryNull[this, i] := true;
-  fracIsEntryNull[this, i] := 1.0;
+  packedKeyValuePair[this, i] := true;
+  fracKeyValuePair[this, i] := 1.0;
 } else if (i>0) {
 	call makeMapNull(i-1, this);
-  assert (forall j:int :: (((j<=i-1) && (j>=0) ) ==> packedIsEntryNull[this, j]));
   mapOfColleges[this][i] := null;	
-  packedIsEntryNull[this, i] := true;
-  fracIsEntryNull[this, i] := 1.0;
+  packedKeyValuePair[this, i] := true;
+  fracKeyValuePair[this, i] := 1.0;
 }
 }
 
@@ -538,11 +539,13 @@ call r:= get(collegeNumber, this);
 }
 
 procedure ConstructApplicationWebsite(maxSize1:int, this:Ref)
-modifies maxSize, mapOfColleges, packedIsEntryNull, fracIsEntryNull;
+modifies maxSize, mapOfColleges, packedKeyValuePair, fracKeyValuePair;
 requires (maxSize1>=0);
+ensures (forall j:int :: ((j<=maxSize1) && (j>=0)) ==> (packedKeyValuePair[this, j] && (fracKeyValuePair[this, j]==1.0)) ) ;
+ensures maxSize[this] == maxSize1;
 {
-	call createMapCollege(maxSize1, this);	
-}
+	call createMapCollege(maxSize1, this);
+ }
 
 procedure submitApplicationGetCollege(collegeNumber:int, this:Ref) returns (r: Ref)
 modifies mapOfColleges, packedCollegeFields, fracCollegeFields, collegeNumber, endowment,
@@ -569,7 +572,7 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
   packedIntCellMany, packedIntCellFew,
   fracIntCellMany, fracIntCellFew,
-  fracIsEntryNull, packedKeyValuePair;
+  fracIsEntryNull, packedKeyValuePair, fracKeyValuePair;
 {
 	var website : Ref;
 	var college, college2 : Ref;
@@ -583,7 +586,9 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   //TODO need to construct mapOfColleges and it needs to ensure that forall
 	
 	call ConstructApplicationWebsite(5, website);
+  assert (forall j:int :: ((j<=5) && (j>=0)) ==> (packedKeyValuePair[website, j] && (fracKeyValuePair[website, j]==1.0)) ) ;
 	packedApplicationWebsiteField[website] := false;
+  assert maxSize[website] == 5;
 	call PackApplicationWebsiteField(mapOfColleges[website], website);
 	packedApplicationWebsiteField[website] := true;
 	fracApplicationWebsiteField[website] := 1.0;
