@@ -390,14 +390,23 @@ var maxSize : [Ref]int;
 var packedApplicationWebsiteField : [Ref]bool;
 var fracApplicationWebsiteField : [Ref]real;
 
+//TODO I might not need both predicate isEntryNull and KeyValuePair since
+// the second one is more general than the first
+
 procedure PackApplicationWebsiteField(m: MapIntCollege, this:Ref);
 requires (packedApplicationWebsiteField[this]==false);
 requires (mapOfColleges[this] == m); 
+// TODO add something about params, the values can be null or not
+requires  (forall j:int :: (  ((j<=maxSize[this]) && (j>=0)) ==> 
+           packedKeyValuePair[this, j] && (fracKeyValuePair[this, j] > 0.0) ) );
 
 procedure UnpackApplicationWebsiteField(m: MapIntCollege, this:Ref);
 requires packedApplicationWebsiteField[this];
 requires fracApplicationWebsiteField[this] > 0.0;
 ensures	(mapOfColleges[this] == m);
+// TODO add something about params, the values can be null or not
+ensures  (forall j:int :: (  ((j<=maxSize[this]) && (j>=0)) ==> 
+           packedKeyValuePair[this, j] && (fracKeyValuePair[this, j] > 0.0) ) );
 
 var packedKeyValuePair : [Ref, int]bool;
 var fracKeyValuePair : [Ref, int]real;
@@ -500,7 +509,8 @@ ensures	(fracKeyValuePair[this, key1] > 0.0);
 	
 procedure lookup(collegeNumber:int, this:Ref) returns (r:Ref)
 modifies mapOfColleges, packedCollegeFields, fracCollegeFields,collegeNumber,
-       endowment, packedKeyValuePair;
+       endowment, packedKeyValuePair, packedApplicationWebsiteField;
+requires (collegeNumber<=maxSize[this]) && (0<=collegeNumber);
 requires packedApplicationWebsiteField[this];
 requires (fracApplicationWebsiteField[this] > 0.0);
 // TODO needs another requires  related to all fractions in mapOfColleges
@@ -512,6 +522,8 @@ ensures	(fracKeyValuePair[this, collegeNumber] > 0.0);
 var temp:bool;
 var c:Ref;
 call temp := containsKey(collegeNumber, this);
+call UnpackApplicationWebsiteField(mapOfColleges[this], this);
+packedApplicationWebsiteField[this]:=false;
 if (temp == false) 
 	{
 		call ConstructCollege(collegeNumber, c);
@@ -527,24 +539,24 @@ call r:= get(collegeNumber, this);
 
 procedure ConstructApplicationWebsite(maxSize1:int, this:Ref)
 modifies maxSize, mapOfColleges, packedIsEntryNull, fracIsEntryNull;
+requires (maxSize1>=0);
 {
 	call createMapCollege(maxSize1, this);	
 }
 
 procedure submitApplicationGetCollege(collegeNumber:int, this:Ref) returns (r: Ref)
 modifies mapOfColleges, packedCollegeFields, fracCollegeFields, collegeNumber, endowment,
-        packedKeyValuePair;
+        packedKeyValuePair, packedApplicationWebsiteField;
 requires packedApplicationWebsiteField[this];
 requires (fracApplicationWebsiteField[this] > 0.0);
+requires (collegeNumber<=maxSize[this]) && (0<=collegeNumber);
 ensures ( packedCollegeBuildingsFew[r] && 
 	(fracCollegeBuildingsFew[r] > 0.0) ) ||
 	( packedCollegeBuildingsMany[r] &&
 	(fracCollegeBuildingsMany[r] > 0.0) );
 {
-	var college : Ref;
-	call college := lookup(collegeNumber, this);
-	// might be able to say var r : Ref from the beginning
-	r := college;
+	call r := lookup(collegeNumber, this);
+  // TODO I might need to add the ensures of this function to the ensures of lookup()	
 }
 
 procedure main(this:Ref) 
@@ -563,10 +575,12 @@ modifies mapOfColleges, packedApplicationWebsiteField,
 	var college, college2 : Ref;
 	var app1, app2 : Ref;
 	var app3, app4 : Ref;
-  	var tempbo : bool;
+  var tempbo : bool;
 	assume (college != college2);
 	assume (app1 != app2);
 	assume (app3 != app4);
+  
+  //TODO need to construct mapOfColleges and it needs to ensure that forall
 	
 	call ConstructApplicationWebsite(5, website);
 	packedApplicationWebsiteField[website] := false;
