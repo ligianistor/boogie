@@ -9,6 +9,12 @@ var fracMultipleOf: [Ref] real;
 var packedBasicIntCell: [Ref] bool;
 var fracBasicIntCell: [Ref] real;
 
+var packedIntCellMany : [Ref] bool;
+var fracIntCellMany : [Ref]real;
+
+var packedIntCellFew : [Ref] bool;
+var fracIntCellFew : [Ref]real;
+
 function modulo(x:int, y:int) returns (int);
 axiom (forall x:int, y:int :: {modulo(x,y)} 
     ((0 <= x) &&(0 < y) ==> (0 <= modulo(x,y) ) && (modulo(x,y) < y) )
@@ -19,6 +25,7 @@ axiom (forall x:int, y:int :: {modulo(x,y)}
     &&
     ((x <= 0) &&(y < 0) ==> (y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
    ); 
+
 
 // TODO need to be able to go from BasicIntCell to one of
 // the more complex predicates and back.
@@ -37,14 +44,41 @@ procedure PackMultipleOf(a: int, v:int, this:Ref);
 requires (packedMultipleOf[this]==false);
 requires (value[this] == v);
 requires (divider[this] == a);
-requires (modulo(v,a) == 0); 
+requires ( (v - int(v/a)*a )==0);
 
 procedure UnpackMultipleOf(a: int, v:int, this:Ref);
 requires packedMultipleOf[this];
 requires fracMultipleOf[this] > 0.0;
 ensures	(value[this] == v);
 ensures (divider[this] == a);
-ensures	(modulo(v,a) == 0); 
+ensures	 ( (v - int(v/a)*a )==0);
+
+//TODO need to fix the body of this
+procedure PackIntCellMany(divi: int, val:int, quot:int, this:Ref);
+requires (packedIntCellMany[this]==false);
+requires (value[this] == val);
+requires (divider[this] == divi);
+requires (quot >= 10);
+
+procedure UnpackIntCellMany(divi: int, val:int, quot:int, this:Ref);
+requires packedIntCellMany[this];
+requires fracIntCellMany[this] > 0.0;
+ensures	(value[this] == val);
+ensures (divider[this] == divi);
+ensures (quot >= 10);
+
+procedure PackIntCellFew(divi: int, v:int, quot:int, this:Ref);
+requires (packedIntCellFew[this]==false);
+requires (value[this] == v);
+requires (divider[this] == divi);
+requires (quot <= 4);
+
+procedure UnpackIntCellFew(divi: int, v:int, quot:int, this:Ref);
+requires packedIntCellFew[this];
+requires fracIntCellFew[this] > 0.0;
+ensures	(value[this] == v);
+ensures (divider[this] == divi);
+ensures (quot <= 4);
 
 procedure ConstructIntCell(divider1: int, value1: int, this: Ref)
 modifies divider, value;
@@ -132,11 +166,11 @@ ensures (fracMultipleOf[c] > 0.0);
 ensures (divider[cell[this]] == 14);
 
 procedure ConstructStateLive(this:Ref)
-modifies cell;
+modifies cell, divider, value;
 //ensures (forall y:Ref :: ( (y!=this) ==> (cell[y] == old(cell[y]) ) ) );
 {	
 	var temp:Ref;
-	call ConstructIntCell(0, temp);
+	call ConstructIntCell(1, 0, temp);
 	call ConstructStateLive2(temp, cell[this]);
 }
 
@@ -258,10 +292,10 @@ ensures (fracMultipleOf[c] > 0.0);
 ensures (divider[cell[this]] == 16);
 
 procedure ConstructStateLimbo(this:Ref)
-modifies cell;
+modifies cell, divider, value;
 {	
 	var temp:Ref;
-	call ConstructIntCell(0, temp);
+	call ConstructIntCell(1, 0, temp);
 	call ConstructStateLimbo2(temp, cell[this]);
 }
 
@@ -385,10 +419,10 @@ ensures (fracMultipleOf[c] > 0.0);
 ensures (divider[cell[this]] == 4);
 
 procedure ConstructStateSleep(this:Ref)
-modifies cell;
+modifies cell, divider, value;
 {	
 	var temp:Ref;
-	call ConstructIntCell(0, temp);
+	call ConstructIntCell(1, 0, temp);
 	call ConstructStateSleep2(temp, cell[this]);
 }
 
@@ -570,7 +604,7 @@ ensures (myState[this] == m);
 ensures instanceof[m]==3;
 	
 procedure ConstructStateContext(this:Ref) 
-modifies cell, myState, instanceof;
+modifies cell, myState, instanceof, divider, value;
 ensures instanceof[myState[this]]== 1;
 { 
 
@@ -858,7 +892,7 @@ assume (sclient1 != sclient2);
 assume (sclient3 != sclient4);
 assume (scontext1 != scontext2);
 
-call ConstructIntCell(15, i1);
+call ConstructIntCell(15, 15, i1);
 packedMultipleOf[i1] := false;
 call PackMultipleOf(15, 15, i1);
 packedMultipleOf[i1] := true;
@@ -898,7 +932,7 @@ call tempBool := stateClientCheckMultiplicity3(sclient2);
 call tempRef := computeResultSC(3, scontext1); 
 call tempBool := stateClientCheckMultiplicity3(sclient1); 
 
-call ConstructIntCell(14, i2);
+call ConstructIntCell(14, 14, i2);
 packedMultipleOf[i2] := false;
 call PackMultipleOf(14, 14, i2);
 packedMultipleOf[i2] := true;
