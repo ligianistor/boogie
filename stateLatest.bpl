@@ -866,7 +866,7 @@ ensures (fracStateClientMultiple2[this] > 0.0);
 call r := stateContextCheckMultiplicity2(scon[this]);
 }
  
-procedure main(this:Ref)
+procedure main1(this:Ref)
 modifies cell, packedMultipleOf, fracMultipleOf, instanceof,
         myState, divider, value, fracStateClientMultiple3,
         packedStateClientMultiple3, packedStateMultipleOf3StateLive,
@@ -930,7 +930,34 @@ call tempBool := stateClientCheckMultiplicity3(sclient1);
 call tempRef := computeResultSC(2, scontext1); 
 call tempBool := stateClientCheckMultiplicity3(sclient2); 
 call tempRef := computeResultSC(3, scontext1); 
-call tempBool := stateClientCheckMultiplicity3(sclient1); 
+call tempBool := stateClientCheckMultiplicity3(sclient1); 		
+}
+
+procedure main2(this:Ref)
+modifies cell, packedMultipleOf, fracMultipleOf, instanceof,
+        myState, divider, value, fracStateClientMultiple3,
+        packedStateClientMultiple3, packedStateMultipleOf3StateLive,
+        fracStateMultipleOf3StateLive, packedStateContextMultiple3,
+        fracStateContextMultiple3, packedStateMultipleOf2StateLive,
+        fracStateMultipleOf2StateLive, packedStateContextMultiple2,
+        fracStateContextMultiple2, packedStateClientMultiple2,
+        fracStateClientMultiple2, packedStateLive, fracStateLive,
+        packedStateLimbo, fracStateLimbo, packedStateSleep, fracStateSleep,
+        packedStateMultipleOf3StateLimbo, packedStateMultipleOf2StateLimbo,
+        packedStateMultipleOf3StateSleep, packedStateMultipleOf2StateSleep;
+{
+var i1, i2 : Ref;
+var st1, st2 : Ref;
+var scontext1, scontext2 : Ref;
+var sclient1, sclient2, sclient3, sclient4 : Ref;
+var tempRef : Ref;
+var tempBool : bool;
+
+assume (i1 != i2);
+assume (st1 != st2);
+assume (sclient1 != sclient2);
+assume (sclient3 != sclient4);
+assume (scontext1 != scontext2);
 
 call ConstructIntCell(14, 14, i2);
 packedMultipleOf[i2] := false;
