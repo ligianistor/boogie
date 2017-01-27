@@ -636,14 +636,16 @@ ensures (forall y:Ref :: (y!=this) ==> (myState[y] == old(myState[y])));
   if (instanceof[newState] == 1 ) {
      packedStateLive[this] := true;
      fracStateLive[this] := 0.001;
-  }
+  } else
   if (instanceof[newState] == 2 ) {
      packedStateLimbo[this] := true;
      fracStateLimbo[this] := 0.001;
-  }
+  } else
   if (instanceof[newState] == 3 ) {
      packedStateSleep[this] := true;
      fracStateSleep[this] := 0.001;
+  } else {
+    assume false;
   }
 } 
 
@@ -720,33 +722,24 @@ requires (instanceof[myState[this]] == 3) ==> (
 requires (forall x:Ref :: ( packedMultipleOf[x]));
 ensures packedStateContextMultiple2[this];
 ensures fracStateContextMultiple2[this] > 0.0;
-ensures (old(instanceof[myState[this]]) == 1) ==> 
-        (packedStateSleep[this] && (fracStateSleep[this] > 0.0));
-ensures (old(instanceof[myState[this]]) == 3) ==> 
-        (packedStateLimbo[this] && (fracStateLimbo[this] > 0.0));
-ensures (old(instanceof[myState[this]]) == 2) ==> 
-        (packedStateLive[this] && (fracStateLive[this] > 0.0));
 {
-var temp : Ref;
 call UnpackStateContextMultiple2(myState[this], this);
 packedStateContextMultiple2[this] := false;
 if (instanceof[myState[this]] == 1) {
   call UnpackStateMultipleOf2StateLive(cell[myState[this]], myState[this]);
   packedStateMultipleOf2StateLive[myState[this]]:=false;
-	call temp := computeResult2StateLive(this, num, myState[this]);
+	call r := computeResult2StateLive(this, num, myState[this]);
 } else if (instanceof[myState[this]] == 2) {
   call UnpackStateMultipleOf2StateLimbo(cell[myState[this]], myState[this]);
   packedStateMultipleOf2StateLimbo[myState[this]]:=false;
-	call temp := computeResult2StateLimbo(this, num, myState[this]);
+	call r := computeResult2StateLimbo(this, num, myState[this]);
 } else if (instanceof[myState[this]] == 3) {
   call UnpackStateMultipleOf2StateSleep(cell[myState[this]], myState[this]);
   packedStateMultipleOf2StateSleep[myState[this]]:=false;
-	call temp := computeResult2StateSleep(this, num, myState[this]);
+	call r := computeResult2StateSleep(this, num, myState[this]);
+} else {
+  assume false;
 }
-call PackStateContextMultiple2(myState[this], this);
-packedStateContextMultiple2[this] := true;
-r:=temp;
-
 }
 
 procedure stateContextCheckMultiplicity3(this:Ref) returns (b:bool) 
@@ -759,21 +752,21 @@ requires (forall  x:Ref :: ( packedStateMultipleOf3StateSleep[x]));
 ensures packedStateContextMultiple3[this];
 ensures fracStateContextMultiple3[this] > 0.0;
 { 
-var temp : bool;
 if (instanceof[myState[this]] == 1) {
   call UnpackStateContextMultiple3(myState[this], this);
   packedStateContextMultiple3[this] := false;
-	call temp := checkMod3StateLive(myState[this]);
+	call b := checkMod3StateLive(myState[this]);
 } else if (instanceof[myState[this]] == 2) {
   call UnpackStateContextMultiple3(myState[this], this);
   packedStateContextMultiple3[this] := false;
-	call temp := checkMod3StateLimbo(myState[this]);
+	call b := checkMod3StateLimbo(myState[this]);
 } else if (instanceof[myState[this]] == 3){
   call UnpackStateContextMultiple3(myState[this], this);
   packedStateContextMultiple3[this] := false;
-	call temp := checkMod3StateSleep(myState[this]);
+	call b := checkMod3StateSleep(myState[this]);
+} else {
+  assume false;
 }
-b := temp;
 } 
 
 procedure stateContextCheckMultiplicity2(this:Ref) returns (b:bool) 
@@ -786,21 +779,19 @@ requires (forall  x:Ref :: ( packedStateMultipleOf2StateSleep[x]));
 ensures packedStateContextMultiple2[this];
 ensures fracStateContextMultiple2[this] > 0.0;
 { 
-var temp : bool;
 if (instanceof[myState[this]] == 1) {
   call UnpackStateContextMultiple2(myState[this], this);
   packedStateContextMultiple2[this] := false;
-	call temp := checkMod2StateLive(myState[this]);
+	call b := checkMod2StateLive(myState[this]);
 } else if (instanceof[myState[this]] == 2) {
   call UnpackStateContextMultiple2(myState[this], this);
   packedStateContextMultiple2[this] := false;
-	call temp := checkMod2StateLimbo(myState[this]);
+	call b := checkMod2StateLimbo(myState[this]);
 } else if (instanceof[myState[this]] == 3) {
   call UnpackStateContextMultiple2(myState[this], this);
   packedStateContextMultiple2[this] := false;
-	call temp := checkMod2StateSleep(myState[this]);
+	call b := checkMod2StateSleep(myState[this]);
 }
-b := temp;
 } 
 
 //--------------------------------
