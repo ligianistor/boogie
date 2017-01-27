@@ -192,21 +192,27 @@ requires packedMultipleOf[cell[this]];
 requires (fracStateMultipleOf3StateLive[this] > 0.0);
 requires (packedStateContextMultiple3[context]==false);
 requires (fracStateContextMultiple3[context] > 0.0);
-ensures packedStateMultipleOf3StateLive[this];
-ensures	(fracStateMultipleOf3StateLive[this] > 0.0);
+ensures (packedStateContextMultiple3[context]==true);
+ensures (fracStateContextMultiple3[context] > 0.0);
 ensures packedStateLimbo[context];
 ensures	(fracStateLimbo[context] > 0.0);
 {
-var s : Ref;
-call setValueMultiple3(num*15, 15, cell[this]);
-call PackStateMultipleOf3StateLive(cell[this], this);
-packedStateMultipleOf3StateLive[this] := true;
-call ConstructStateLimbo(s);
-instanceof[s]:=2;
+assume (r!=this);
+
+call ConstructStateLimbo(r);
+// TODO r should be a mutiple of 3
+instanceof[r]:=2;
+// TODO need to unpack a predicate related to multiple of 3 of r so that we get to cell[r]
+fracMultipleOf[cell[r]] := 1.0;
+packedMultipleOf[cell[r]] := true;
+
+call setValueMultiple3(num*15, 15, cell[r]);
+call PackStateMultipleOf3StateLive(cell[r], r);
+packedStateMultipleOf3StateLive[r] := true;
 // StateLike s = new StateLimbo()[];
-call setState(s, context);
-r := cell[this];
+call setState(r, context);
 }
+
 
 procedure computeResult2StateLive(context:Ref, num:int, this:Ref) returns (r:Ref)
 modifies cell, value, myState, instanceof, packedStateLive, fracStateLive
@@ -622,6 +628,8 @@ ensures instanceof[myState[this]] == instanceof[newState];
 ensures ((old(instanceof[newState]) == 1) ==> ( packedStateLive[this] && (fracStateLive[this] > 0.0)));
 ensures	((old(instanceof[newState] == 2)) ==> ( packedStateLimbo[this] && (fracStateLimbo[this] > 0.0)));
 ensures	((old(instanceof[newState] == 3)) ==> ( packedStateSleep[this] && (fracStateSleep[this] > 0.0)));
+ensures (forall y:Ref :: (y!=myState[this]) ==> (instanceof[y] == old(instanceof[y]))); 
+ensures (forall y:Ref :: (y!=this) ==> (myState[y] == old(myState[y]))); 
 { 
 	myState[this] := newState; 
 	instanceof[myState[this]] := instanceof[newState];
@@ -669,23 +677,25 @@ ensures (old(instanceof[myState[this]]) == 2) ==>
 ensures (old(instanceof[myState[this]]) == 3) ==> 
         (packedStateLive[this] && (fracStateLive[this] > 0.0));
 {
-var temp : Ref;
+
 call UnpackStateContextMultiple3(myState[this], this);
 packedStateContextMultiple3[this] := false;
 if (instanceof[myState[this]] == 1) {
   call UnpackStateMultipleOf3StateLive(cell[myState[this]], myState[this]);
   packedStateMultipleOf3StateLive[myState[this]]:=false;
-	call temp := computeResultStateLive(this, num, myState[this]);
+	call r := computeResultStateLive(this, num, myState[this]);
+  assert (packedStateContextMultiple3[this] == true);
 } else if (instanceof[myState[this]] == 2) {
   call UnpackStateMultipleOf3StateLimbo(cell[myState[this]], myState[this]);
   packedStateMultipleOf3StateLimbo[myState[this]]:=false;
-	call temp := computeResultStateLimbo(this, num, myState[this]);
+	call r := computeResultStateLimbo(this, num, myState[this]);
 } else if (instanceof[myState[this]] == 3)  {
   call UnpackStateMultipleOf3StateSleep(cell[myState[this]], myState[this]);
   packedStateMultipleOf3StateSleep[myState[this]]:=false;
-	call temp := computeResultStateSleep(this, num, myState[this]);
+	call r := computeResultStateSleep(this, num, myState[this]);
 }
-r := temp;
+ // call PackStateContextMultiple3(myState[this], this);
+  //packedStateContextMultiple3[this] := true;
 }
 
 procedure computeResult2SC(num: int, this:Ref) returns (r:Ref)
