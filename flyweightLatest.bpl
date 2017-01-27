@@ -284,12 +284,10 @@ ensures	packedCollegeFacilitiesFew[col];
 ensures	(fracCollegeFacilitiesFew[col] > 0.0);
 
 procedure ConstructStudentApplication(col:Ref, campusNum:int, this:Ref) 
-modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf, divider, value
-        ,  //TODO do I need to have these in the modifies?
+modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf, divider, value,
         packedCollegeFacilitiesFew, packedCollegeFacilitiesMany
         , fracCollegeFacilitiesFew, fracCollegeFacilitiesMany;
   requires campusNum > 0;
-
   ensures (college[this] == col);
   ensures (campusNumber[this] == campusNum);
   ensures ( (campusNum <= 4) && (campusNum > 0)  )==> ( packedCollegeFacilitiesFew[col] && 
@@ -301,12 +299,14 @@ modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf, di
     assume (forall y:Ref :: (collegeNumber[y] > 0) );
 		college[this] := col;
 		call temp := getNumberFacilities(campusNum, collegeNumber[college[this]], college[this]);
-    facilities[this] := temp;
+    facilities[this] := temp;// !!!Here I need to add in the Java program what is the
+    // new predicate that has to hold about col, because only now I have all the information
+    // to know which predicate holds.
+    // I have a fraction to col since it is given as input.
 		campusNumber[this] := campusNum;	
-    if (0 <campusNum  && campusNum<= 4) {
-      //TODO here I need to think about the assignments below
+    if (0 < campusNum  && campusNum <= 4) {
       packedCollegeFacilitiesFew[college[this]] := false;
-      call PackCollegeFacilitiesFew(facilities[this] ,collegeNumber[college[this]], college[this]);
+      call PackCollegeFacilitiesFew(facilities[this], collegeNumber[college[this]], college[this]);
       packedCollegeFacilitiesFew[college[this]] := true;
       fracCollegeFacilitiesFew[college[this]] := 0.001;
       
