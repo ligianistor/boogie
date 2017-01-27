@@ -26,9 +26,6 @@ axiom (forall x:int, y:int :: {modulo(x,y)}
     ((x <= 0) &&(y < 0) ==> (y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
    ); 
 
-
-// TODO need to be able to go from BasicIntCell to one of
-// the more complex predicates and back.
 procedure PackBasicIntCell(a: int, v:int, this:Ref);
 requires (packedBasicIntCell[this]==false);
 requires (value[this] == v);
@@ -53,7 +50,6 @@ ensures	(value[this] == v);
 ensures (divider[this] == a);
 ensures	 ( (v - int(v/a)*a )==0);
 
-//TODO need to fix the body of this
 procedure PackIntCellMany(divi: int, val:int, quot:int, this:Ref);
 requires (packedIntCellMany[this]==false);
 requires (value[this] == val);
@@ -213,25 +209,27 @@ ensures	(fracCollegeNumberField[this] > 0.0);
 
 // the method that calculates the extrinsic state
 procedure getNumberFacilities(campNum:int, colNum:int, this:Ref) returns (r:int)
-modifies divider, value, 
-	packedIntCellMany, packedIntCellFew,
-  fracIntCellMany, fracIntCellFew;
+modifies divider, value;
   requires (collegeNumber[this] == colNum);
+  requires campNum > 0;
+  requires colNum > 0;
   //TODO add an or of packed[] == false
 //requires packedCollegeNumberField[this]==false; 
 // I should add || packedCollegeFacilitiesMany == false 
 // || packedCollegeFacilitiesFew ==false
 //requires (fracCollegeNumberField[this] > 0.0);
 //TODO add ensures about the parameters
-ensures  r== collegeNumber[this] * campNum;
+ensures  r == colNum * campNum;
+ensures r> 0;
 {
-	r:=collegeNumber[this] * campNum;
+	r := colNum * campNum;
 }
 
 //---------------------------
 
 var college : [Ref]Ref;
 var campusNumber : [Ref]int;
+// facilities is a field of StudentApplication
 var facilities : [Ref]int;
 
 var packedStudentApplicationFields : [Ref]bool;
@@ -287,32 +285,43 @@ ensures	(fracCollegeFacilitiesFew[col] > 0.0);
 
 procedure ConstructStudentApplication(col:Ref, campusNum:int, this:Ref) 
 modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf, divider, value
-        , packedIntCellMany, packedIntCellFew,
-        fracIntCellMany, fracIntCellFew;
+        ,  //TODO do I need to have these in the modifies?
+        packedCollegeFacilitiesFew, packedCollegeFacilitiesMany
+        , fracCollegeFacilitiesFew, fracCollegeFacilitiesMany;
+  requires campusNum > 0;
+
   ensures (college[this] == col);
   ensures (campusNumber[this] == campusNum);
- ensures (campusNum <= 4) ==> ( packedCollegeFacilitiesFew[col] && 
+  ensures ( (campusNum <= 4) && (campusNum > 0)  )==> ( packedCollegeFacilitiesFew[col] && 
 	(fracCollegeFacilitiesFew[col] > 0.0) );
-ensures (campusNum >= 10) ==> 	( packedCollegeFacilitiesMany[col] &&
+  ensures (campusNum >= 10) ==> ( packedCollegeFacilitiesMany[col] &&
 	(fracCollegeFacilitiesMany[col] > 0.0) );
 {
     var temp : int;
+    assume (forall y:Ref :: (collegeNumber[y] > 0) );
 		college[this] := col;
 		call temp := getNumberFacilities(campusNum, collegeNumber[college[this]], college[this]);
     facilities[this] := temp;
 		campusNumber[this] := campusNum;	
-    if (campusNum <= 4) {
-      call PackCollegeFacilitiesFew(facilities[college[this]],collegeNumber[college[this]], college[this]);
+    if (0 <campusNum  && campusNum<= 4) {
+      //TODO here I need to think about the assignments below
+      packedCollegeFacilitiesFew[college[this]] := false;
+      call PackCollegeFacilitiesFew(facilities[this] ,collegeNumber[college[this]], college[this]);
+      packedCollegeFacilitiesFew[college[this]] := true;
+      fracCollegeFacilitiesFew[college[this]] := 0.001;
+      
     } else if (campusNum >= 10) {
-      call PackCollegeFacilitiesMany(facilities[college[this]],collegeNumber[college[this]], college[this]);
+      packedCollegeFacilitiesMany[college[this]] := false;
+      call PackCollegeFacilitiesMany(facilities[this] ,collegeNumber[college[this]], college[this]);
+      packedCollegeFacilitiesMany[college[this]] := true;
+      fracCollegeFacilitiesMany[college[this]] := 0.001;
     }
 }
-	
+
 procedure changeApplicationFew(newCampusNumber:int, this:Ref)
-modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf, divider, value
-  , packedIntCellMany, packedIntCellFew,
-        fracIntCellMany, fracIntCellFew,
+modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf, divider, value,
         packedStudentAppFacilitiesFew, packedStudentAppFacilitiesMany;
+requires newCampusNumber > 0;
 requires packedStudentAppFacilitiesFew[this];
 requires (fracStudentAppFacilitiesFew[this] > 0.0);
 ensures packedStudentAppFacilitiesFew[this];
@@ -320,7 +329,10 @@ ensures	(fracStudentAppFacilitiesFew[this] > 0.0);
 ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesFew[y] == old(packedStudentAppFacilitiesFew[y]) ) ) );
 {
   var temp : int;
-	campusNumber[this] := modulo(newCampusNumber, 4);
+  // TODO this can also be added in an axiom
+  // but it can also be done like here
+  assume (forall y:Ref :: (collegeNumber[y] > 0) );
+	campusNumber[this] := modulo(newCampusNumber, 4) + 1;
   call UnpackStudentAppFacilitiesFew(college[this], campusNumber[this], this);
   packedStudentAppFacilitiesFew[this] := false;
 	call temp := getNumberFacilities(campusNumber[this], collegeNumber[college[this]], college[this]);
@@ -330,15 +342,17 @@ ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesFew[y] == ol
 }
 
 procedure changeApplicationMany(newCampusNumber:int, this:Ref)
-modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf, divider, value
-      , packedIntCellMany, packedIntCellFew,
-        fracIntCellMany, fracIntCellFew;
+modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf, divider, value;
+requires newCampusNumber > 0;
 requires packedStudentAppFacilitiesMany[this];
 requires (fracStudentAppFacilitiesMany[this] > 0.0);
 ensures packedStudentAppFacilitiesMany[this];
 ensures	(fracStudentAppFacilitiesMany[this] > 0.0);
 {
-  	var temp:int;
+  	var temp:int; 
+    assume (forall y:Ref :: (collegeNumber[y] > 0) );
+    //TODO might need to add this second one to other procedures
+    assume (forall y:Ref :: (campusNumber[y] > 0) );
 	  campusNumber[this] := newCampusNumber * 10 + 1;
 	  call temp := getNumberFacilities(campusNumber[this],collegeNumber[college[this]], college[this]);
   	facilities[this] := temp;
@@ -539,9 +553,8 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   fracMultipleOf, packedMultipleOf, fracStudentAppFacilitiesFew,
   fracStudentAppFacilitiesMany, maxSize, divider, value,
   fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
-  packedIntCellMany, packedIntCellFew,
-  fracIntCellMany, fracIntCellFew,
-  packedKeyValuePair, fracKeyValuePair;
+  packedKeyValuePair, fracKeyValuePair,
+        packedCollegeFacilitiesFew, packedCollegeFacilitiesMany;
 {
 	var website : Ref;
 	var college : Ref;
@@ -588,17 +601,16 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   fracMultipleOf, packedMultipleOf, fracStudentAppFacilitiesFew,
   fracStudentAppFacilitiesMany, maxSize, divider, value,
   fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
-  packedIntCellMany, packedIntCellFew,
-  fracIntCellMany, fracIntCellFew,
-  packedKeyValuePair, fracKeyValuePair;
+  packedKeyValuePair, fracKeyValuePair,
+        packedCollegeFacilitiesFew, packedCollegeFacilitiesMany;
 {
 	var website : Ref;
 	var college2 : Ref;
 	var app3, app4 : Ref;
-  var tempbo : bool;
+  	var tempbo : bool;
 	assume (app3 != app4);
   
-  call ConstructApplicationWebsite(100, website);
+  	call ConstructApplicationWebsite(100, website);
 	packedApplicationWebsiteField[website] := false;
 	call PackApplicationWebsiteField(mapOfColleges[website], website);
 	packedApplicationWebsiteField[website] := true;
@@ -624,4 +636,3 @@ modifies mapOfColleges, packedApplicationWebsiteField,
 	call changeApplicationMany(78, app3);
 	call tempbo := checkFacilitiesMany(app4);
 }
-//TODO maybe I can put both main1 and main2 back into main
