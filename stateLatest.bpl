@@ -752,8 +752,6 @@ ensures (forall  x:Ref :: ( packedStateMultipleOf3StateSleep[x]));
 ensures (forall  x:Ref :: ( packedStateContextMultiple3[x])); 
 ensures (forall x:Ref :: ( packedMultipleOf[x]));
 {
-call UnpackStateContextMultiple3(myState[this], this);
-packedStateContextMultiple3[this] := false;
 if (instanceof[myState[this]] == 1) {
   call UnpackStateMultipleOf3StateLive(cell[myState[this]], myState[this]);
   packedStateMultipleOf3StateLive[myState[this]]:=false;
@@ -799,9 +797,15 @@ requires (instanceof[myState[this]] == 3) ==> (
 requires (forall x:Ref :: ( packedMultipleOf[x]));
 ensures packedStateContextMultiple2[this];
 ensures fracStateContextMultiple2[this] > 0.0;
+ensures (forall  x:Ref :: ( packedStateMultipleOf2StateLive[x])); 
+//ensures (forall  y:Ref :: (fracStateMultipleOf2StateLive[y] == old(fracStateMultipleOf2StateLive[y]) ) );
+ensures (forall  x:Ref :: ( packedStateMultipleOf2StateLimbo[x])); 
+//ensures (forall  y:Ref :: (fracStateMultipleOf2StateLimbo[y] == old(fracStateMultipleOf2StateLimbo[y]) ) );
+ensures (forall  x:Ref :: ( packedStateMultipleOf2StateSleep[x])); 
+//ensures (forall  y:Ref :: (fracStateMultipleOf2StateSleep[y] == old(fracStateMultipleOf2StateSleep[y]) ) );
+ensures (forall  x:Ref :: ( packedStateContextMultiple2[x])); 
+ensures (forall x:Ref :: ( packedMultipleOf[x]));
 {
-call UnpackStateContextMultiple2(myState[this], this);
-packedStateContextMultiple2[this] := false;
 if (instanceof[myState[this]] == 1) {
   call UnpackStateMultipleOf2StateLive(cell[myState[this]], myState[this]);
   packedStateMultipleOf2StateLive[myState[this]]:=false;
@@ -823,6 +827,7 @@ procedure stateContextCheckMultiplicity3(this:Ref) returns (b:bool)
 modifies packedStateContextMultiple3;
 requires packedStateContextMultiple3[this];
 requires fracStateContextMultiple3[this] > 0.0;
+// TODO maybe add for the forall below that (instanceof(x) == 1 ==>)
 requires (forall  x:Ref :: ( packedStateMultipleOf3StateLive[x])); 
 requires (forall  x:Ref :: ( packedStateMultipleOf3StateLimbo[x])); 
 requires (forall  x:Ref :: ( packedStateMultipleOf3StateSleep[x])); 
@@ -940,6 +945,7 @@ ensures (forall  x:Ref :: ( packedStateMultipleOf3StateLive[x]));
 ensures (forall  x:Ref :: ( packedStateMultipleOf3StateLimbo[x])); 
 ensures (forall  x:Ref :: ( packedStateMultipleOf3StateSleep[x])); 
 ensures (forall  x:Ref :: ( packedStateContextMultiple3[x])); 
+ensures (forall  x:Ref :: ( packedStateClientMultiple3[x])); 
 {
   call UnpackStateClientMultiple3(scon[this], this);
   packedStateClientMultiple3[this] := false;
@@ -958,6 +964,8 @@ requires (forall  x:Ref :: ( packedStateMultipleOf2StateSleep[x]));
 requires (forall  x:Ref :: ( packedStateContextMultiple2[x])); 
 ensures packedStateClientMultiple2[this];
 ensures (fracStateClientMultiple2[this] > 0.0);
+ensures (forall  x:Ref :: ( packedStateContextMultiple2[x])); 
+ensures (forall  x:Ref :: ( packedStateClientMultiple2[x]));
 {
   call UnpackStateClientMultiple2(scon[this], this);
   packedStateClientMultiple2[this] := false;
@@ -1029,12 +1037,21 @@ call PackStateClientMultiple3(scontext1, sclient2);
 packedStateClientMultiple3[sclient2] := true;
 fracStateClientMultiple3[sclient2] := 1.0;
 
-call tempRef := computeResultSC(1, scontext1);
-call tempBool := stateClientCheckMultiplicity3(sclient1); 
 call UnpackStateContextMultiple3(myState[scontext1], scontext1);
 packedStateContextMultiple3[scontext1] := false;
+assert (packedStateClientMultiple3[sclient2]==true);
+call tempRef := computeResultSC(1, scontext1);
+assert (packedStateClientMultiple3[sclient2]==true);
+call tempBool := stateClientCheckMultiplicity3(sclient1); 
+assert (packedStateClientMultiple3[sclient2]==true);
+call UnpackStateContextMultiple3(myState[scontext1], scontext1);
+packedStateContextMultiple3[scontext1] := false;
+assert (packedStateClientMultiple3[sclient2]==true);
 call tempRef := computeResultSC(2, scontext1); 
+assert (packedStateClientMultiple3[sclient2]==true);
 call tempBool := stateClientCheckMultiplicity3(sclient2); 
+
+assert (packedStateClientMultiple3[sclient2]==true);
 call UnpackStateContextMultiple3(myState[scontext1], scontext1);
 packedStateContextMultiple3[scontext1] := false;
 call tempRef := computeResultSC(3, scontext1); 
