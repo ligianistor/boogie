@@ -191,16 +191,14 @@ requires (fracStateContextMultiple3[context] > 0.0);
 requires (forall  x:Ref :: ((instanceof[x]==1)==> packedStateMultipleOf3StateLive[x])); 
 requires (forall  x:Ref :: ((instanceof[x]==2)==>  packedStateMultipleOf3StateLimbo[x])); 
 requires (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf3StateSleep[x])); 
-requires (forall  x:Ref :: ( packedStateContextMultiple3[x])); 
 ensures (packedStateContextMultiple3[context]==true);
 ensures (fracStateContextMultiple3[context] > 0.0);
 ensures packedStateLimbo[context];
 ensures	(fracStateLimbo[context] > 0.0);
-//ensures (forall  x:Ref :: ((instanceof[x]==2)==>  packedStateMultipleOf3StateLimbo[x]));
 ensures (forall  x:Ref :: ((instanceof[x]==1)==> packedStateMultipleOf3StateLive[x])); 
 ensures (forall  x:Ref :: ((instanceof[x]==2)==>  packedStateMultipleOf3StateLimbo[x])); 
 ensures (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf3StateSleep[x])); 
-ensures (forall  x:Ref :: ( packedStateContextMultiple3[x])); 
+ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple3[x] == old(packedStateContextMultiple3[x]))) ); 
 {
 var i1:Ref;
 assume (r!=this);
@@ -714,6 +712,9 @@ requires (packedStateContextMultiple3[this] == false);
 requires (instanceof[newState] == 1) ==> (fracStateMultipleOf3StateLive[newState] > 0.0);
 requires (instanceof[newState] == 2) ==> (fracStateMultipleOf3StateLimbo[newState] > 0.0);
 requires (instanceof[newState] == 3) ==> (fracStateMultipleOf3StateSleep[newState] > 0.0);
+requires (forall  x:Ref :: ((instanceof[x]==1)==> packedStateMultipleOf3StateLive[x])); 
+requires (forall  x:Ref :: ((instanceof[x]==2)==>  packedStateMultipleOf3StateLimbo[x])); 
+requires (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf3StateSleep[x])); 
 //TODO these need to be in predicates
 ensures myState[this] == newState;
 ensures instanceof[myState[this]] == instanceof[newState];
@@ -724,6 +725,10 @@ ensures	((old(instanceof[newState]) == 3) ==> ( packedStateSleep[this] && (fracS
 ensures packedStateContextMultiple3[this];
 ensures (forall y:Ref :: (y!=myState[this]) ==> (instanceof[y] == old(instanceof[y]))); 
 ensures (forall y:Ref :: (y!=this) ==> (myState[y] == old(myState[y]))); 
+ensures (forall  x:Ref :: ((instanceof[x]==1)==> packedStateMultipleOf3StateLive[x])); 
+ensures (forall  x:Ref :: ((instanceof[x]==2)==>  packedStateMultipleOf3StateLimbo[x])); 
+ensures (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf3StateSleep[x])); 
+ensures (forall  x:Ref :: ((x!=this) ==> (packedStateContextMultiple3[x] == old(packedStateContextMultiple3[x]))) ); 
 { 
 	myState[this] := newState; 
 	instanceof[myState[this]] := instanceof[newState];
