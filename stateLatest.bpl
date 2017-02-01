@@ -783,8 +783,6 @@ modifies cell, value, myState, instanceof, packedStateLive, fracStateLive
           packedStateMultipleOf2StateLive, fracStateMultipleOf2StateLive;
 requires packedStateContextMultiple2[this]==false;
 requires fracStateContextMultiple2[this] > 0.0;
-//TODO should not access myState like this, but through the right predicate
-// maybe StateLive(old[this])
 // TODO need to add something about fractions related to the below
 requires (instanceof[myState[this]] == 1) ==> (
       packedStateMultipleOf2StateLive[myState[this]] &&
