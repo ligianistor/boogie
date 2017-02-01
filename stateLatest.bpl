@@ -188,6 +188,10 @@ modifies cell, value, myState, instanceof, packedStateLive, fracStateLive,
          packedStateContextMultiple3;
 requires (packedStateContextMultiple3[context]==false);
 requires (fracStateContextMultiple3[context] > 0.0);
+requires (forall  x:Ref :: ((instanceof[x]==1)==> packedStateMultipleOf3StateLive[x])); 
+requires (forall  x:Ref :: ((instanceof[x]==2)==>  packedStateMultipleOf3StateLimbo[x])); 
+requires (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf3StateSleep[x])); 
+requires (forall  x:Ref :: ( packedStateContextMultiple3[x])); 
 ensures (packedStateContextMultiple3[context]==true);
 ensures (fracStateContextMultiple3[context] > 0.0);
 ensures packedStateLimbo[context];
