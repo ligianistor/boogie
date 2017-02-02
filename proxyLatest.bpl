@@ -9,16 +9,16 @@ var fracSumGreater0RealSum: [Ref] real;
 const null: Ref;
 
 var n: [Ref]int;
+// sum can be considerent a dependent field on n
 var sum: [Ref]real;
 
-procedure PackBasicFieldsRealSum(s1:real, n1:int, this:Ref);
+procedure PackBasicFieldsRealSum(n1:int, this:Ref);
 requires (packedBasicFieldsRealSum[this] == false);
-requires (sum[this] == s1) && (n[this]==n1);
+requires (n[this]==n1);
 
-procedure UnpackBasicFieldsRealSum(s1:real, n1:int, this:Ref);
+procedure UnpackBasicFieldsRealSum(n1:int, this:Ref);
 requires packedBasicFieldsRealSum[this];
 requires fracBasicFieldsRealSum[this] > 0.0;
-ensures (sum[this] == s1);
 ensures	(n[this]==n1);
 
 procedure PackSumOKRealSum(n1:int, this:Ref);
@@ -47,7 +47,7 @@ modifies n, sum;
 ensures n[this] == n1;
 ensures sum[this] == (n1*(n1+1)/2);
 {
-  var temp:real;
+  	var temp:real;
 	n[this] := n1;
 	call temp := calculateRealSum(n1, this);
 }
@@ -116,14 +116,13 @@ var fracBasicFieldsProxySum: [Ref] real;
 
 var realSum: [Ref]Ref;
 
-procedure PackBasicFieldsProxySum(s1:real, n1:int, this:Ref);
+procedure PackBasicFieldsProxySum(n1:int, this:Ref);
 requires (packedBasicFieldsProxySum[this] == false);
-requires (sum[this] == s1) && (n[this] == n1);
+requires (n[this] == n1);
 
-procedure UnpackBasicFieldsProxySum(s1:real, n1:int, this:Ref);
+procedure UnpackBasicFieldsProxySum(n1:int, this:Ref);
 requires packedBasicFieldsProxySum[this];
 requires fracBasicFieldsProxySum[this] > 0.0;
-ensures (sum[this] == s1);
 ensures	(n[this] == n1);
 
 procedure PackSumOKProxySum(n1:int, this:Ref);
