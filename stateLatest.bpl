@@ -881,16 +881,10 @@ ensures (forall  x:Ref :: ( packedStateContextMultiple2[x]));
 //ensures (forall x:Ref :: ( packedMultipleOf[x]));
 {
 if (instanceof[myState[this]] == 1) {
-  call UnpackStateMultipleOf2StateLive(cell[myState[this]], myState[this]);
-  packedStateMultipleOf2StateLive[myState[this]]:=false;
 	call r := computeResult2StateLive(this, num, myState[this]);
 } else if (instanceof[myState[this]] == 2) {
-  call UnpackStateMultipleOf2StateLimbo(cell[myState[this]], myState[this]);
-  packedStateMultipleOf2StateLimbo[myState[this]]:=false;
 	call r := computeResult2StateLimbo(this, num, myState[this]);
 } else if (instanceof[myState[this]] == 3) {
-  call UnpackStateMultipleOf2StateSleep(cell[myState[this]], myState[this]);
-  packedStateMultipleOf2StateSleep[myState[this]]:=false;
 	call r := computeResult2StateSleep(this, num, myState[this]);
 } else {
   assume false;
