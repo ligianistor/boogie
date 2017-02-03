@@ -12,19 +12,21 @@ var n: [Ref]int;
 // sum can be considerent a dependent field on n
 var sum: [Ref]real;
 
-procedure PackBasicFieldsRealSum(n1:int, this:Ref);
+procedure PackBasicFieldsRealSum(su:real, n1:int, this:Ref);
 requires (packedBasicFieldsRealSum[this] == false);
 requires (n[this]==n1);
+requires (sum[this] == su);
 
-procedure UnpackBasicFieldsRealSum(n1:int, this:Ref);
+procedure UnpackBasicFieldsRealSum(su:real, n1:int, this:Ref);
 requires packedBasicFieldsRealSum[this];
 requires fracBasicFieldsRealSum[this] > 0.0;
 ensures	(n[this]==n1);
+ensures (sum[this] == su);
 
 procedure PackSumOKRealSum(n1:int, this:Ref);
 requires (packedSumOKRealSum[this] == false);
-requires (n[this]==n1) &&
-	( sum[this] == (n1 * (n1+1) / 2) );
+requires (n[this]==n1);
+requires ( sum[this] == (n1 * (n1+1) / 2) );
 
 procedure UnpackSumOKRealSum(n1:int, this:Ref);
 requires packedSumOKRealSum[this];
@@ -34,7 +36,8 @@ ensures	(sum[this] == (n1 * (n1+1) / 2) );
 
 procedure PackSumGreater0RealSum(s1:real, this:Ref);
 requires (packedSumGreater0RealSum[this] == false);
-requires (sum[this] == s1) && (s1 > 0.0);
+requires (sum[this] == s1);
+requires (s1 > 0.0);
 
 procedure UnpackSumGreater0RealSum(s1:real, this:Ref);
 requires packedSumGreater0RealSum[this];
@@ -43,17 +46,26 @@ ensures (sum[this] == s1);
 ensures	(s1 > 0.0);
 
 procedure ConstructRealSum(n1:int, this:Ref)
-modifies n, sum;
+modifies n, sum, packedBasicFieldsRealSum, fracBasicFieldsRealSum, packedSumOKRealSum,
+        fracSumOKRealSum;
+requires n1 > 0;
 ensures n[this] == n1;
 ensures sum[this] == (n1*(n1+1)/2);
 {
   	var temp:real;
 	n[this] := n1;
-	call temp := calculateRealSum(n1, this);
+  sum[this] := 0.0;
+  packedBasicFieldsRealSum[this] := false;
+  call PackBasicFieldsRealSum(0.0, n1, this);
+  packedBasicFieldsRealSum[this] := true;
+  fracBasicFieldsRealSum[this] := 1.0;
+	call temp := calculateRealSum(this);
 }
 
 procedure addOneToSumRealSum(n1: int, this:Ref)
-modifies n, sum;
+modifies n, sum, packedSumGreater0RealSum, packedSumOKRealSum,
+        fracSumOKRealSum;
+requires n1 > 0;
 requires packedBasicFieldsRealSum[this];
 requires (fracBasicFieldsRealSum[this] == 1.0);
 ensures packedSumGreater0RealSum[this];
@@ -61,8 +73,13 @@ ensures (fracSumGreater0RealSum[this] == 1.0);
 {
 	var temp:real;
 	n[this] := n1;
-	call temp := calculateRealSum(n[this], this);
+	call temp := calculateRealSum(this);
+  call UnpackSumOKRealSum(n[this], this);
+  packedSumOKRealSum[this] := false;
 	sum[this] := temp+1.0;
+  packedSumGreater0RealSum[this] := packedSumOKRealSum[this];
+  call PackSumGreater0RealSum(sum[this], this);
+  packedSumGreater0RealSum[this]:=true;
 }
 
 procedure calculateSumRealSum(this:Ref)  returns (r:real)
@@ -75,15 +92,22 @@ ensures	(fracSumOKRealSum[this] > 0.0);
 	r := sum[this];
 }
 
-procedure calculateRealSum(n1:int, this:Ref) returns (r:real)
-modifies sum;
+procedure calculateRealSum(this:Ref) returns (r:real)
+modifies sum, packedSumOKRealSum, fracSumOKRealSum;
 requires packedBasicFieldsRealSum[this];
 requires (fracBasicFieldsRealSum[this] > 0.0);
+requires n[this] > 0;
 ensures packedSumOKRealSum[this];
 ensures	(fracSumOKRealSum[this] > 0.0);
+ensures sum[this] == (n[this]*(n[this]+1)/2);
+ensures r > 0.0;
 {
-	sum[this] := n1 * (n1 + 1) / 2;
+	sum[this] := n[this] * (n[this] + 1) / 2;
 	r := sum[this];
+  call PackSumOKRealSum(n[this], this);
+  packedSumOKRealSum[this] := true;
+  // I transfer the fraction from one predicate to the other
+  fracSumOKRealSum[this] := fracBasicFieldsRealSum[this];
 }
 
 
@@ -116,14 +140,16 @@ var fracBasicFieldsProxySum: [Ref] real;
 
 var realSum: [Ref]Ref;
 
-procedure PackBasicFieldsProxySum(n1:int, this:Ref);
+procedure PackBasicFieldsProxySum(su:real, n1:int, this:Ref);
 requires (packedBasicFieldsProxySum[this] == false);
 requires (n[this] == n1);
+requires (sum[this] == su);
 
-procedure UnpackBasicFieldsProxySum(n1:int, this:Ref);
+procedure UnpackBasicFieldsProxySum(su:real, n1:int, this:Ref);
 requires packedBasicFieldsProxySum[this];
 requires fracBasicFieldsProxySum[this] > 0.0;
 ensures	(n[this] == n1);
+ensures (sum[this] == su);
 
 procedure PackSumOKProxySum(n1:int, this:Ref);
 requires (packedSumOKProxySum[this] == false);
@@ -156,7 +182,8 @@ ensures sum[this] == (n1*(n1+1)/2);
 }
 
 procedure calculateSumProxySum(this:Ref)  returns (r:real)
-modifies n, sum, packedSumOKRealSum, fracSumOKRealSum;
+modifies n, sum, packedSumOKRealSum, fracSumOKRealSum
+      , packedBasicFieldsRealSum, fracBasicFieldsRealSum;
 requires packedBasicFieldsProxySum[this];
 requires (fracBasicFieldsProxySum[this] > 0.0);
 ensures packedSumOKProxySum[this];
@@ -172,11 +199,13 @@ ensures	(fracSumOKProxySum[this] > 0.0);
 	}
 	call temp := calculateSumRealSum(this);
   	sum[this]:=temp;
-	r:=sum[this];
+	  r:=sum[this];
 }
 
 procedure addOneToSumProxySum(n1:int, this:Ref)
-modifies n, sum, packedSumOKRealSum, fracSumOKRealSum;
+modifies n, sum, packedSumOKRealSum, fracSumOKRealSum
+        , packedBasicFieldsRealSum, fracBasicFieldsRealSum,
+        packedSumGreater0RealSum;
 requires packedBasicFieldsProxySum[this];
 requires (fracBasicFieldsProxySum[this] == 1.0);
 ensures packedSumGreater0ProxySum[this];
@@ -292,7 +321,8 @@ modifies packedSumOKProxySum, fracSumOKProxySum,
     packedClientSumOK, fracClientSumOK, sum,
      packedSumGreater0ProxySum, fracSumGreater0ProxySum,
      packedClientSumGreater0, fracClientSumGreater0, n,
-     realSum, sumClient, packedSumOKRealSum, fracSumOKRealSum;
+     realSum, sumClient, packedSumOKRealSum, fracSumOKRealSum
+     , packedBasicFieldsRealSum, fracBasicFieldsRealSum;
 {
 var s:Ref;
 var client1, client2:Ref;
@@ -347,7 +377,8 @@ modifies packedSumOKProxySum, fracSumOKProxySum,
     packedClientSumOK, fracClientSumOK, sum,
      packedSumGreater0ProxySum, fracSumGreater0ProxySum,
      packedClientSumGreater0, fracClientSumGreater0, n,
-     realSum, sumClient, packedSumOKRealSum, fracSumOKRealSum;
+     realSum, sumClient, packedSumOKRealSum, fracSumOKRealSum
+     , packedBasicFieldsRealSum, fracBasicFieldsRealSum;
 {
 var s2:Ref;
 var client3, client4:Ref;
