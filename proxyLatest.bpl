@@ -174,7 +174,7 @@ ensures	(s1 > 0.0);
 procedure ConstructProxySum(n1:int, this:Ref)
 modifies n, sum, realSum;
 ensures n[this] == n1;
-ensures sum[this] == (n1*(n1+1)/2);
+ensures sum[this] == 0.0;
 {
 	n[this] := n1;
 	sum[this] := 0.0;
