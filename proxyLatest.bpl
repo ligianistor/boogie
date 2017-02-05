@@ -16,22 +16,26 @@ procedure PackBasicFieldsRealSum(su:real, n1:int, this:Ref);
 requires (packedBasicFieldsRealSum[this] == false);
 requires (n[this]==n1);
 requires (sum[this] == su);
+requires n1 > 0;
 
 procedure UnpackBasicFieldsRealSum(su:real, n1:int, this:Ref);
 requires packedBasicFieldsRealSum[this];
 requires fracBasicFieldsRealSum[this] > 0.0;
 ensures	(n[this]==n1);
 ensures (sum[this] == su);
+ensures n1 > 0;
 
 procedure PackSumOKRealSum(n1:int, this:Ref);
 requires (packedSumOKRealSum[this] == false);
 requires (n[this]==n1);
+requires n1 > 0;
 requires ( sum[this] == (n1 * (n1+1) / 2) );
 
 procedure UnpackSumOKRealSum(n1:int, this:Ref);
 requires packedSumOKRealSum[this];
 requires fracSumOKRealSum[this] > 0.0;
 ensures	(n[this]==n1);
+ensures n1 > 0;
 ensures	(sum[this] == (n1 * (n1+1) / 2) );
 
 procedure PackSumGreater0RealSum(s1:real, this:Ref);
@@ -50,7 +54,7 @@ modifies n, sum, packedBasicFieldsRealSum, fracBasicFieldsRealSum, packedSumOKRe
         fracSumOKRealSum;
 requires n1 > 0;
 ensures n[this] == n1;
-ensures sum[this] == (n1*(n1+1)/2);
+//ensures sum[this] == (n1*(n1+1)/2);
 {
   	var temp:real;
 	n[this] := n1;
@@ -64,28 +68,29 @@ ensures sum[this] == (n1*(n1+1)/2);
 
 procedure addOneToSumRealSum(n1: int, this:Ref)
 modifies n, sum, packedSumGreater0RealSum, packedSumOKRealSum,
-        fracSumOKRealSum;
+        fracSumOKRealSum, fracSumGreater0RealSum, packedBasicFieldsRealSum;
 requires n1 > 0;
 requires packedBasicFieldsRealSum[this];
 requires (fracBasicFieldsRealSum[this] == 1.0);
 ensures packedSumGreater0RealSum[this];
 ensures (fracSumGreater0RealSum[this] == 1.0);
 {
-	var temp:real;
+	var temp : real;
 	n[this] := n1;
 	call temp := calculateRealSum(this);
   call UnpackSumOKRealSum(n[this], this);
   packedSumOKRealSum[this] := false;
-	sum[this] := temp+1.0;
+	sum[this] := temp + 1.0;
   packedSumGreater0RealSum[this] := packedSumOKRealSum[this];
+  fracSumGreater0RealSum[this] := fracSumOKRealSum[this];
   call PackSumGreater0RealSum(sum[this], this);
-  packedSumGreater0RealSum[this]:=true;
+  packedSumGreater0RealSum[this] := true;
 }
 
 procedure calculateSumRealSum(this:Ref)  returns (r:real)
 modifies sum;
-requires packedBasicFieldsRealSum[this];
-requires (fracBasicFieldsRealSum[this] > 0.0);
+requires packedSumOKRealSum[this];
+requires (fracSumOKRealSum[this] > 0.0);
 ensures packedSumOKRealSum[this];
 ensures	(fracSumOKRealSum[this] > 0.0);
 { 
@@ -93,17 +98,27 @@ ensures	(fracSumOKRealSum[this] > 0.0);
 }
 
 procedure calculateRealSum(this:Ref) returns (r:real)
-modifies sum, packedSumOKRealSum, fracSumOKRealSum;
+modifies sum, packedSumOKRealSum, fracSumOKRealSum, packedBasicFieldsRealSum;
 requires packedBasicFieldsRealSum[this];
 requires (fracBasicFieldsRealSum[this] > 0.0);
-requires n[this] > 0;
 ensures packedSumOKRealSum[this];
-ensures	(fracSumOKRealSum[this] > 0.0);
-ensures sum[this] == (n[this]*(n[this]+1)/2);
+ensures	(fracSumOKRealSum[this] == old(fracBasicFieldsRealSum[this]));
 ensures r > 0.0;
+//ensures (forall y:Ref :: ( (y!=this) ==> (fracSumOKRealSum[y] == old(fracSumOKRealSum[y]) ) ) );
 {
+  call UnpackBasicFieldsRealSum(sum[this], n[this], this);
+  packedBasicFieldsRealSum[this] := false;
 	sum[this] := n[this] * (n[this] + 1) / 2;
 	r := sum[this];
+  
+  packedSumOKRealSum[this] := packedBasicFieldsRealSum[this];
+  fracSumOKRealSum[this] := fracBasicFieldsRealSum[this];
+  
+//requires (packedSumOKRealSum[this] == false);
+//requires (n[this]==n1);
+//requires n1 > 0;
+//requires ( sum[this] == (n1 * (n1+1) / 2) );
+
   call PackSumOKRealSum(n[this], this);
   packedSumOKRealSum[this] := true;
   // I transfer the fraction from one predicate to the other
@@ -205,7 +220,7 @@ ensures	(fracSumOKProxySum[this] > 0.0);
 procedure addOneToSumProxySum(n1:int, this:Ref)
 modifies n, sum, packedSumOKRealSum, fracSumOKRealSum
         , packedBasicFieldsRealSum, fracBasicFieldsRealSum,
-        packedSumGreater0RealSum;
+        packedSumGreater0RealSum, fracSumGreater0RealSum;
 requires packedBasicFieldsProxySum[this];
 requires (fracBasicFieldsProxySum[this] == 1.0);
 ensures packedSumGreater0ProxySum[this];
