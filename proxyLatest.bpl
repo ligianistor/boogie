@@ -324,10 +324,14 @@ ensures (instanceof[suCli] == 1) ==> (fracSumGreater0ProxySum[suCli] > 0.0) ;
 ensures (instanceof[suCli] == 2) ==> (fracSumGreater0RealSum[suCli] > 0.0) ;
 
 procedure ConstructClientSum(sum1:Ref, this:Ref)
-modifies sumClient;
+modifies sumClient, instanceof;
 ensures sumClient[this] == sum1;
+ensures (instanceof[sum1] == old(instanceof[sum1]));
+ensures (forall y:Ref :: ( (y!=sumClient[this]) ==> (instanceof[y] == old(instanceof[y]) ) ) );
+ensures (forall y:Ref :: ( (y!=this) ==> (sumClient[y] == old(sumClient[y]) ) ) );
 {
 	sumClient[this] := sum1;
+  instanceof[sumClient[this]] := instanceof[sum1];
 }
 
 procedure checkSumIsOK(this:Ref) returns (r:bool)
@@ -407,7 +411,6 @@ instanceof[s] := 1;
 // could keep the if like below
 // but I instead simplified it
 call temp := calculateSumProxySum(s);
-
 call ConstructClientSum(s, client1);
 packedClientSumOK[client1] := false;
 call PackClientSumOK(s, client1);
@@ -415,6 +418,7 @@ packedClientSumOK[client1] := true;
 fracClientSumOK[client1] := 1.0;
 
 call ConstructClientSum(s, client2);
+
 packedClientSumOK[client2] := false;
 call PackClientSumOK(s, client2);
 packedClientSumOK[client2] := true;
@@ -422,13 +426,10 @@ fracClientSumOK[client2] := 1.0;
 
 call temp2 := checkSumIsOK(client1);
 
-if (instanceof[s] == 1) {
-	call temp := calculateSumProxySum(s);
-} else if (instanceof[s] == 2) {
-	call temp := calculateSumRealSum(s);
-} else {
-  assume false;
-}
+//transfer from one object proposition to another
+packedBasicFieldsProxySum[s] := packedSumOKProxySum[s];
+
+call temp := calculateSumProxySum(s);
 
 call temp2 := checkSumIsOK(client2);
 }
@@ -477,13 +478,11 @@ fracClientSumGreater0[client4] := 1.0;
 
 call temp2 := checkSumGreater0(client3);
 
-if (instanceof[s2] == 1) {
-	call temp1 := addOneToSumProxySum(s2);
-} else if (instanceof[s2] == 2) {
-	call temp1 := addOneToSumRealSum(s2);
-} else {
-  assume false;
-}
+//transfer from one object proposition to another
+packedBasicFieldsProxySum[s2] := packedSumGreater0ProxySum[s2];
+
+call temp1 := addOneToSumProxySum(s2);
+
 
 call temp2 := checkSumGreater0(client4);
 }
