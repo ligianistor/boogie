@@ -165,7 +165,6 @@ ensures (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf3StateSle
 ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple3[x] == old(packedStateContextMultiple3[x]))) ); 
 {
 var i1:Ref;
-assume (r!=this);
 
 call ConstructIntCell(21, num*21, i1);
 packedMultipleOf[i1] := false;
@@ -205,7 +204,6 @@ ensures (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf2StateSle
 ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple2[x] == old(packedStateContextMultiple2[x]))) ); 
 {
 var i1:Ref;
-assume (r!=this);
 
 call ConstructIntCell(4, num*4, i1);
 packedMultipleOf[i1] := false;
@@ -319,7 +317,6 @@ ensures (forall  x:Ref :: ((instanceof[x]==3)==> packedStateMultipleOf3StateSlee
 ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple3[x] == old(packedStateContextMultiple3[x]))) ); 
 {
 var i1:Ref;
-assume (r!=this);
 
 call ConstructIntCell(33, num*33, i1);
 packedMultipleOf[i1] := false;
@@ -362,7 +359,6 @@ ensures (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf2StateSle
 ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple2[x] == old(packedStateContextMultiple2[x]))) ); 
 {
 var i1:Ref;
-assume (r!=this);
 
 call ConstructIntCell(14, num*14, i1);
 packedMultipleOf[i1] := false;
@@ -514,7 +510,6 @@ ensures (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf2StateSle
 ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple2[x] == old(packedStateContextMultiple2[x]))) ); 
 {
 var i1:Ref;
-assume (r!=this);
 
 call ConstructIntCell(16, num*16, i1);
 packedMultipleOf[i1] := false;

@@ -105,7 +105,6 @@ ensures (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf2StateSle
 ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple2[x] == old(packedStateContextMultiple2[x]))) ); 
 {
 var i1:Ref;
-assume (r!=this);
 
 call ConstructIntCell(16, num*16, i1);
 packedMultipleOf[i1] := false;
