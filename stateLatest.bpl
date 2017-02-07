@@ -1,3 +1,4 @@
+//intcell.bpl
 type Ref;
 const null: Ref;
 
@@ -26,9 +27,6 @@ axiom (forall x:int, y:int :: {modulo(x,y)}
     ((x <= 0) &&(y < 0) ==> (y <= modulo(x,y) ) && (modulo(x,y) <= 0) )
    ); 
 
-
-// TODO need to be able to go from BasicIntCell to one of
-// the more complex predicates and back.
 procedure PackBasicIntCell(a: int, v:int, this:Ref);
 requires (packedBasicIntCell[this]==false);
 requires (value[this] == v);
@@ -53,7 +51,6 @@ ensures	(value[this] == v);
 ensures (divider[this] == a);
 ensures	 ( (v - int(v/a)*a )==0);
 
-//TODO need to fix the body of this
 procedure PackIntCellMany(divi: int, val:int, quot:int, this:Ref);
 requires (packedIntCellMany[this]==false);
 requires (value[this] == val);
@@ -89,46 +86,13 @@ ensures (divider[this] == divider1);
 	divider[this] := divider1;
 }
 
-procedure setValueMultiple3(x: int, divi:int, this: Ref) 
-modifies value, divider,
-      packedMultipleOf, fracMultipleOf;
-//requires (fracBasicIntCell[this] == 1.0); 
-requires (fracMultipleOf[this] > 0.0);
-requires packedMultipleOf[this];
-//requires (divider[this] == 21) || 
-//	(divider[this] == 15) ||
-//	(divider[this] == 33) ;
-ensures (divider[this] == divi);
-ensures (fracMultipleOf[this] > 0.0);
-ensures packedMultipleOf[this];
-{
-	value[this] := x;
-  divider[this] := divi;
-}
-
-procedure setValueMultiple2(x: int, divi:int, this: Ref) 
-modifies value, divider,
-      packedMultipleOf, fracMultipleOf;
-//requires (fracBasicIntCell[this] == 1.0); 
-requires (fracMultipleOf[this] > 0.0);
-requires packedMultipleOf[this];
-//requires  (divider[this] == 16) ||
-//	 (divider[this] == 14) ||
-//	 (divider[this] == 4);
-ensures (divider[this] == divi);
-ensures (fracMultipleOf[this] > 0.0);
-ensures packedMultipleOf[this];
-{
-	value[this] := x;
-  divider[this] := divi;
-}
-
 procedure getValueInt(this: Ref) returns (r:int)
 {
-	r:=value[this];
+	r := value[this];
 }
 
 //----------------------
+//statelive.bpl
 
 var cell : [Ref]Ref;
 var instanceof : [Ref]int;
@@ -285,6 +249,7 @@ b:= (modulo(temp, 2) == 0);
 }
 
 //--------------------------------------------
+//statelimbo.bpl
 
 var packedStateMultipleOf3StateLimbo: [Ref]bool;
 var fracStateMultipleOf3StateLimbo: [Ref]real;
@@ -328,7 +293,6 @@ modifies cell, divider, value;
 
 procedure ConstructStateLimbo2(c:Ref, this:Ref)
 modifies cell;
-//TODO this should be a predicate
 ensures cell[this] == c;
 {	
 	cell[this] := c;
@@ -442,6 +406,7 @@ b := (modulo(temp, 2) == 0);
 }
 
 //-----------------------------------------
+//statesleep.bpl
 
 var packedStateMultipleOf3StateSleep: [Ref]bool;
 var fracStateMultipleOf3StateSleep: [Ref]real;
@@ -510,8 +475,6 @@ ensures (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf3StateSle
 ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple3[x] == old(packedStateContextMultiple3[x]))) ); 
 {
 var i1:Ref;
-  // TODO maybe we don't need this assume
-assume (r!=this);
 
 call ConstructIntCell(15, num*15, i1);
 packedMultipleOf[i1] := false;
@@ -595,6 +558,7 @@ b := (modulo(temp, 2) == 0);
 }
 
 //-------------------------------
+//statecontext.bpl
 
 var myState: [Ref]Ref;
 
@@ -691,8 +655,6 @@ ensures instanceof[m]==3;
 procedure ConstructStateContext(mysta:Ref, this:Ref) 
 modifies myState;
 ensures myState[this] == mysta;
-//ensures instanceof[myState[this]] == instanceof[mysta];
-//ensures (instanceof[mysta] == old(instanceof[mysta]));
 { 
   myState[this] := mysta;
  // instanceof[myState[this]] := instanceof[mysta];
@@ -711,7 +673,6 @@ requires (forall  x:Ref :: ((instanceof[x]==1)==> packedStateMultipleOf2StateLiv
 requires (forall  x:Ref :: ((instanceof[x]==2)==>  packedStateMultipleOf2StateLimbo[x])); 
 requires (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf2StateSleep[x])); 
 
-//TODO these need to be in predicates
 ensures myState[this] == newState;
 ensures instanceof[myState[this]] == instanceof[newState];
 
@@ -759,7 +720,6 @@ requires (instanceof[newState] == 3) ==> (fracStateMultipleOf3StateSleep[newStat
 requires (forall  x:Ref :: ((instanceof[x]==1)==> packedStateMultipleOf3StateLive[x])); 
 requires (forall  x:Ref :: ((instanceof[x]==2)==>  packedStateMultipleOf3StateLimbo[x])); 
 requires (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf3StateSleep[x])); 
-//TODO these need to be in predicates
 ensures myState[this] == newState;
 ensures instanceof[myState[this]] == instanceof[newState];
 
@@ -852,7 +812,6 @@ modifies cell, value, myState, instanceof, packedStateLive, fracStateLive
           packedStateMultipleOf2StateLive, fracStateMultipleOf2StateLive;
 requires packedStateContextMultiple2[this]==false;
 requires fracStateContextMultiple2[this] > 0.0;
-// TODO need to add something about fractions related to the below
 requires (instanceof[myState[this]] == 1) ==> (
       packedStateMultipleOf2StateLive[myState[this]] &&
       (fracStateMultipleOf2StateLive[myState[this]] > 0.0)
@@ -866,7 +825,6 @@ requires (instanceof[myState[this]] == 3) ==> (
       (fracStateMultipleOf2StateSleep[myState[this]] > 0.0)
 );
 //requires (forall x:Ref :: ( packedMultipleOf[x]));
-
 requires (forall  x:Ref :: ((instanceof[x]==1)==> packedStateMultipleOf2StateLive[x])); 
 requires (forall  x:Ref :: ((instanceof[x]==2)==>  packedStateMultipleOf2StateLimbo[x])); 
 requires (forall  x:Ref :: ((instanceof[x]==3)==>  packedStateMultipleOf2StateSleep[x])); 
@@ -960,6 +918,7 @@ if (instanceof[myState[this]] == 1) {
 } 
 
 //--------------------------------
+//stateclient.bpl
 
 var scon: [Ref]Ref;
 

@@ -1,3 +1,4 @@
+//realsum.bpl
 type Ref;
 var packedBasicFieldsRealSum: [Ref] bool;
 var fracBasicFieldsRealSum: [Ref] real;
@@ -137,6 +138,7 @@ ensures (fracSumGreater0RealSum[this] > 0.0);
 }
 
 //---------------------
+//proxysum.bpl
 
 var packedSumOKProxySum: [Ref] bool;
 var fracSumOKProxySum: [Ref] real;
@@ -282,6 +284,7 @@ ensures (fracSumGreater0ProxySum[this] > 0.0);
 }
 
 //------------------------------------
+//clientsum.bpl
 
 var sumClient : [Ref]Ref;
 var instanceof: [Ref]int; // maybe this should be declared in the interface Sum
@@ -486,6 +489,4 @@ call temp1 := addOneToSumProxySum(s2);
 
 call temp2 := checkSumGreater0(client4);
 }
-
-
 

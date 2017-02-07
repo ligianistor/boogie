@@ -1,3 +1,4 @@
+//intcell.bpl
 type Ref;
 const null: Ref;
 
@@ -85,45 +86,13 @@ ensures (divider[this] == divider1);
 	divider[this] := divider1;
 }
 
-procedure setValueMultiple3(x: int, divi:int, this: Ref) 
-modifies value, divider,
-      packedMultipleOf, fracMultipleOf;
-//requires (fracBasicIntCell[this] == 1.0); 
-requires (fracMultipleOf[this] > 0.0);
-requires packedMultipleOf[this];
-//requires (divider[this] == 21) || 
-//	(divider[this] == 15) ||
-//	(divider[this] == 33) ;
-ensures (divider[this] == divi);
-ensures (fracMultipleOf[this] > 0.0);
-ensures packedMultipleOf[this];
-{
-	value[this] := x;
-  divider[this] := divi;
-}
-
-procedure setValueMultiple2(x: int, divi:int, this: Ref) 
-modifies value, divider,
-      packedMultipleOf, fracMultipleOf;
-//requires (fracBasicIntCell[this] == 1.0); 
-requires (fracMultipleOf[this] > 0.0);
-requires packedMultipleOf[this];
-//requires  (divider[this] == 16) ||
-//	 (divider[this] == 14) ||
-//	 (divider[this] == 4);
-ensures (divider[this] == divi);
-ensures (fracMultipleOf[this] > 0.0);
-ensures packedMultipleOf[this];
-{
-	value[this] := x;
-  divider[this] := divi;
-}
-
 procedure getValueInt(this: Ref) returns (r:int)
 {
-	r:=value[this];
+	r := value[this];
 }
+
 //-------------------
+//college.bpl
 
 var collegeNumber :[Ref]int;
 var endowment : [Ref]int;
@@ -226,6 +195,7 @@ ensures r> 0;
 }
 
 //---------------------------
+//studentapplication.bpl
 
 var college : [Ref]Ref;
 var campusNumber : [Ref]int;
@@ -329,8 +299,6 @@ ensures	(fracStudentAppFacilitiesFew[this] > 0.0);
 ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesFew[y] == old(packedStudentAppFacilitiesFew[y]) ) ) );
 {
   var temp : int;
-  // TODO this can also be added in an axiom
-  // but it can also be done like here
   assume (forall y:Ref :: (collegeNumber[y] > 0) );
 	campusNumber[this] := modulo(newCampusNumber, 4) + 1;
   call UnpackStudentAppFacilitiesFew(college[this], campusNumber[this], this);
@@ -351,8 +319,6 @@ ensures	(fracStudentAppFacilitiesMany[this] > 0.0);
 {
   	var temp:int; 
     assume (forall y:Ref :: (collegeNumber[y] > 0) );
-    //TODO might need to add this second one to other procedures
-    assume (forall y:Ref :: (campusNumber[y] > 0) );
 	  campusNumber[this] := newCampusNumber * 10 + 1;
 	  call temp := getNumberFacilities(campusNumber[this],collegeNumber[college[this]], college[this]);
   	facilities[this] := temp;
@@ -379,6 +345,7 @@ ensures	(fracStudentAppFacilitiesMany[this] > 0.0);
 
 
 //-------------------------
+//applicationwebsite.bpl
 
 type MapIntCollege = [int] Ref;
 
@@ -443,13 +410,13 @@ ensures (forall j:int :: (((j<=i) && (j>=0) ) ==> (packedKeyValuePair[this, j] &
 {
 if (i==0) {
 	mapOfColleges[this][i] := null;	
-  packedKeyValuePair[this, i] := true;
-  fracKeyValuePair[this, i] := 1.0;
+  	packedKeyValuePair[this, i] := true;
+  	fracKeyValuePair[this, i] := 1.0;
 } else if (i>0) {
 	call makeMapNull(i-1, this);
-  mapOfColleges[this][i] := null;	
-  packedKeyValuePair[this, i] := true;
-  fracKeyValuePair[this, i] := 1.0;
+  	mapOfColleges[this][i] := null;	
+  	packedKeyValuePair[this, i] := true;
+  	fracKeyValuePair[this, i] := 1.0;
 }
 }
 
@@ -468,8 +435,8 @@ requires (fracApplicationWebsiteField[this] > 0.0);
 	
 procedure put(key1 : int, college1: Ref, this:Ref) 
 modifies mapOfColleges, packedKeyValuePair;
-//requires packedApplicationWebsiteField[this];
-//requires (fracApplicationWebsiteField[this] > 0.0);
+requires packedApplicationWebsiteField[this]==false;
+requires (fracApplicationWebsiteField[this] > 0.0);
 // This put procedure will be called with null for the value in packedKeyValuePair.
 requires packedKeyValuePair[this, key1];
 requires (fracKeyValuePair[this, key1] > 0.0);
@@ -488,7 +455,6 @@ requires packedKeyValuePair[this, key1];
 requires	(fracKeyValuePair[this, key1] > 0.0);
 ensures packedKeyValuePair[this, key1];
 ensures	(fracKeyValuePair[this, key1] > 0.0);
-// TODO make sure fraction values are right
 //requires this#k MapOfCollegesField()
 //ensures this#k KeyValuePair(key1, result)
 {
@@ -501,8 +467,6 @@ modifies mapOfColleges, packedCollegeFields, fracCollegeFields,collegeNumber,
 requires (collegeNumber<=maxSize[this]) && (0<=collegeNumber);
 requires packedApplicationWebsiteField[this];
 requires (fracApplicationWebsiteField[this] > 0.0);
-// TODO needs another requires  related to all fractions in mapOfColleges
-// maybe needs to be added in PackApplicationWebsiteField predicate
 ensures packedKeyValuePair[this, collegeNumber];
 ensures	(fracKeyValuePair[this, collegeNumber] > 0.0);
 //ensures this#k KeyValuePair(collegeNumber, result)
@@ -542,7 +506,6 @@ requires (fracApplicationWebsiteField[this] > 0.0);
 requires (collegeNumber<=maxSize[this]) && (0<=collegeNumber);
 {
 	call r := lookup(collegeNumber, this);
-  // TODO I might need to add the ensures of this function to the ensures of lookup()	
 }
 
 procedure main1(this:Ref) 
@@ -559,10 +522,8 @@ modifies mapOfColleges, packedApplicationWebsiteField,
 	var website : Ref;
 	var college : Ref;
 	var app1, app2: Ref;
-  var tempbo : bool;
+  	var tempbo : bool;
 	assume (app1 != app2);
-  
-  //TODO need to construct mapOfColleges and it needs to ensure that forall
 	
 	call ConstructApplicationWebsite(100, website);
 	packedApplicationWebsiteField[website] := false;
