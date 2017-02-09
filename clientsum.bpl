@@ -39,7 +39,7 @@ ensures (instanceof[suCli] == 1) ==> (fracSumGreater0ProxySum[suCli] > 0.0) ;
 ensures (instanceof[suCli] == 2) ==> (fracSumGreater0RealSum[suCli] > 0.0) ;
 
 procedure ConstructClientSum(sum1:Ref, this:Ref)
-modifies sumClient, instanceof;
+modifies sumClient, instanceof, packedSumOKRealSum;
 ensures sumClient[this] == sum1;
 ensures (instanceof[sum1] == old(instanceof[sum1]));
 ensures (forall y:Ref :: ( (y!=sumClient[this]) ==> (instanceof[y] == old(instanceof[y]) ) ) );
@@ -50,6 +50,7 @@ ensures (forall y:Ref :: ( (y!=this) ==> (sumClient[y] == old(sumClient[y]) ) ) 
 }
 
 procedure checkSumIsOK(this:Ref) returns (r:bool)
+modifies packedSumOKRealSum, packedSumOKProxySum;
 requires (instanceof[sumClient[this]] == 1) ==> 
 	((fracSumOKProxySum[sumClient[this]] > 0.0) &&
          packedSumOKProxySum[sumClient[this]] );
@@ -75,6 +76,7 @@ call r := sumIsOKRealSum(sumClient[this]);
 }
 
 procedure checkSumGreater0(this:Ref) returns (r:bool)
+modifies packedSumGreater0RealSum, packedSumGreater0ProxySum;
 requires (instanceof[sumClient[this]] == 1) ==> 
 	((fracSumGreater0ProxySum[sumClient[this]] > 0.0) &&
          packedSumGreater0ProxySum[sumClient[this]] );
@@ -119,13 +121,13 @@ assume (forall y:Ref :: (fracSumGreater0RealSum[y] >= 0.0) );
 
 call ConstructProxySum(5,s);
 packedBasicFieldsProxySum[s] := false;
-call PackBasicFieldsProxySum(sum[s], n[s], s);
+call PackBasicFieldsProxySum(realSum[s], sum[s], n[s], s);
 packedBasicFieldsProxySum[s] := true;
 fracBasicFieldsProxySum[s] := 1.0;
 instanceof[s] := 1;
 // could keep the if like below
 // but I instead simplified it
-call UnpackBasicFieldsProxySum(sum[s], n[s], s);
+call UnpackBasicFieldsProxySum(realSum[s], sum[s], n[s], s);
 packedBasicFieldsProxySum[s] := false;
 call temp := calculateSumProxySum(s);
 call ConstructClientSum(s, client1);
@@ -145,7 +147,7 @@ call temp2 := checkSumIsOK(client1);
 
 //transfer from one object proposition to another
 packedBasicFieldsProxySum[s] := packedSumOKProxySum[s];
-call UnpackBasicFieldsProxySum(sum[s], n[s], s);
+call UnpackBasicFieldsProxySum(realSum[s], sum[s], n[s], s);
 packedBasicFieldsProxySum[s] := false;
 call temp := calculateSumProxySum(s);
 
@@ -176,10 +178,12 @@ assume (forall y:Ref :: (fracSumGreater0RealSum[y] >= 0.0) );
 
 call ConstructProxySum(7,s2);
 packedBasicFieldsProxySum[s2] := false;
-call PackBasicFieldsProxySum(sum[s2], n[s2], s2);
+call PackBasicFieldsProxySum(realSum[s2], sum[s2], n[s2], s2);
 packedBasicFieldsProxySum[s2] := true;
 fracBasicFieldsProxySum[s2] := 1.0;
 instanceof[s2] := 1;
+call UnpackBasicFieldsProxySum(realSum[s2], sum[s2], n[s2], s2);
+packedBasicFieldsProxySum[s2] := false;
 call temp1 := addOneToSumProxySum(s2);
 
 call ConstructClientSum(s2, client3);
@@ -199,8 +203,9 @@ call temp2 := checkSumGreater0(client3);
 //transfer from one object proposition to another
 packedBasicFieldsProxySum[s2] := packedSumGreater0ProxySum[s2];
 
+call UnpackBasicFieldsProxySum(realSum[s2], sum[s2], n[s2], s2);
+packedBasicFieldsProxySum[s2] := false;
 call temp1 := addOneToSumProxySum(s2);
-
 
 call temp2 := checkSumGreater0(client4);
 }

@@ -1,4 +1,3 @@
-
 var packedSumOKProxySum: [Ref] bool;
 var fracSumOKProxySum: [Ref] real;
 var packedSumGreater0ProxySum: [Ref] bool;
@@ -8,28 +7,32 @@ var fracBasicFieldsProxySum: [Ref] real;
 
 var realSum: [Ref]Ref;
 
-procedure PackBasicFieldsProxySum(su:real, n1:int, this:Ref);
+procedure PackBasicFieldsProxySum(rs:Ref, su:real, n1:int, this:Ref);
 requires (packedBasicFieldsProxySum[this] == false);
-requires (n[this] == n1);
+requires (realSum[this] == rs);
 requires (sum[this] == su);
+requires (n[this] == n1);
 requires (n1 > 0);
 
-procedure UnpackBasicFieldsProxySum(su:real, n1:int, this:Ref);
+procedure UnpackBasicFieldsProxySum(rs:Ref, su:real, n1:int, this:Ref);
 requires packedBasicFieldsProxySum[this];
 requires fracBasicFieldsProxySum[this] > 0.0;
-ensures	(n[this] == n1);
+ensures (realSum[this] == rs);
 ensures (sum[this] == su);
+ensures	(n[this] == n1);
 ensures (n1 > 0);
 
 procedure PackSumOKProxySum(n1:int, this:Ref);
 requires (packedSumOKProxySum[this] == false);
 requires (n[this] == n1);
+requires n1 > 0;
 requires ( sum[this] == n1 * (n1+1) / 2 );
 
 procedure UnpackSumOKProxySum(n1:int, this:Ref);
 requires packedSumOKProxySum[this];
 requires fracSumOKProxySum[this] > 0.0;
 ensures	(n[this] == n1);
+ensures n1 > 0;
 ensures (sum[this] == (n1 * (n1+1) / 2));
 
 procedure PackSumGreater0ProxySum(s1:real, this:Ref);
@@ -58,7 +61,6 @@ procedure calculateSumProxySum(this:Ref)  returns (r:real)
 modifies n, sum, packedSumOKRealSum, fracSumOKRealSum
       , packedBasicFieldsRealSum, fracBasicFieldsRealSum, packedBasicFieldsProxySum,
       packedSumOKProxySum, fracSumOKProxySum;
-// TODO this should be == false!!!
 requires packedBasicFieldsProxySum[this] == false;
 requires (fracBasicFieldsProxySum[this] > 0.0);
 requires n[this] > 0;
@@ -92,16 +94,17 @@ modifies n, sum, packedSumOKRealSum, fracSumOKRealSum
         packedSumGreater0RealSum, fracSumGreater0RealSum,
         packedSumGreater0ProxySum, packedBasicFieldsProxySum,
         fracSumGreater0ProxySum;
-requires packedBasicFieldsProxySum[this];
-//TODO should this be 1.0 or 0.0 , in all the requires here
-requires (fracBasicFieldsProxySum[this] == 1.0);
+requires packedBasicFieldsProxySum[this]==false;
+//Should this be 1.0 or 0.0 , in all the requires here?
+//I think it should be > 0 because it is like calculateSum, where sumOK() is the invariant.
+//Only here sumGreater0() is the invariant.
+requires (fracBasicFieldsProxySum[this] > 0.0);
+requires n[this] > 0;
 requires (realSum[this]!=null) ==> ( packedBasicFieldsRealSum[realSum[this]] && (fracBasicFieldsRealSum[realSum[this]] > 0.0));
 ensures packedSumGreater0ProxySum[this];
-ensures (fracSumGreater0ProxySum[this] == 1.0);
+ensures (fracSumGreater0ProxySum[this] > 0.0);
 {
   var temp : real;
-	call UnpackBasicFieldsProxySum(sum[this], n[this], this);
-  packedBasicFieldsProxySum[this] := false;
 	if (realSum[this] == null) {
 		call ConstructRealSum(n[this], realSum[this]);
 		packedSumOKRealSum[realSum[this]] := false;
@@ -114,7 +117,7 @@ ensures (fracSumGreater0ProxySum[this] == 1.0);
     fracBasicFieldsRealSum[realSum[this]] := fracSumOKRealSum[realSum[this]];
 	} 
 
-	call temp := addOneToSumRealSum(realSum[this]);
+  call temp := addOneToSumRealSum(realSum[this]);
   sum[this] := temp;
   n[this] := n[realSum[this]];
   // transfer from one object proposition to another
@@ -126,19 +129,30 @@ ensures (fracSumGreater0ProxySum[this] == 1.0);
 }
 
 procedure sumIsOKProxySum(this:Ref) returns (r:bool)
+modifies packedSumOKProxySum;
 requires packedSumOKProxySum[this];
 requires (fracSumOKProxySum[this] > 0.0);
 ensures packedSumOKProxySum[this];
-ensures (fracSumOKProxySum[this] > 0.0); {
+ensures (fracSumOKProxySum[this] > 0.0); 
+{
+	call UnpackSumOKProxySum(n[this], this);
+	packedSumOKProxySum[this] := false;
 	r := (sum[this] == (n[this] * (n[this]+1) / 2.0));
+	call PackSumOKProxySum(n[this], this);
+	packedSumOKProxySum[this] := true;
 }
 
 procedure sumIsGreater0ProxySum(this:Ref)  returns (r:bool)
+modifies packedSumGreater0ProxySum;
 requires packedSumGreater0ProxySum[this];
 requires (fracSumGreater0ProxySum[this] > 0.0);
 ensures packedSumGreater0ProxySum[this];
 ensures (fracSumGreater0ProxySum[this] > 0.0);
 {
+	call UnpackSumGreater0ProxySum(sum[this], this);
+	packedSumGreater0ProxySum[this] := false;
 	r:= (sum[this] > 0.0);
+	call PackSumGreater0ProxySum(sum[this], this);
+	packedSumGreater0ProxySum[this] := true;
 }
 
