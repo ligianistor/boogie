@@ -55,6 +55,7 @@ modifies n, sum, packedBasicFieldsRealSum, fracBasicFieldsRealSum, packedSumOKRe
 requires n1 > 0;
 ensures n[this] == n1;
 ensures sum[this] == (n1*(n1+1)/2);
+// TODO do I need this?
 ensures (forall y:Ref :: ( (y!=this) ==> (n[y] == old(n[y]) ) ) );
 {
   	var temp:real;

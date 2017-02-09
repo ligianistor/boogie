@@ -1,3 +1,4 @@
+
 var packedSumOKProxySum: [Ref] bool;
 var fracSumOKProxySum: [Ref] real;
 var packedSumGreater0ProxySum: [Ref] bool;
@@ -57,15 +58,15 @@ procedure calculateSumProxySum(this:Ref)  returns (r:real)
 modifies n, sum, packedSumOKRealSum, fracSumOKRealSum
       , packedBasicFieldsRealSum, fracBasicFieldsRealSum, packedBasicFieldsProxySum,
       packedSumOKProxySum, fracSumOKProxySum;
-requires packedBasicFieldsProxySum[this];
+// TODO this should be == false!!!
+requires packedBasicFieldsProxySum[this] == false;
 requires (fracBasicFieldsProxySum[this] > 0.0);
+requires n[this] > 0;
 requires (realSum[this]!=null) ==> ( packedSumOKRealSum[realSum[this]] && (fracSumOKRealSum[realSum[this]] > 0.0));
 ensures packedSumOKProxySum[this];
 ensures	(fracSumOKProxySum[this] > 0.0);
 { 
 	var temp : real;
-  call UnpackBasicFieldsProxySum(sum[this], n[this], this);
-  packedBasicFieldsProxySum[this] := false;
 	if (realSum[this]==null) {
 		call ConstructRealSum(n[this], realSum[this]);
 		packedSumOKRealSum[realSum[this]] := false;
