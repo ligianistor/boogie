@@ -1,4 +1,3 @@
-
 var packedStateMultipleOf3StateLimbo: [Ref]bool;
 var fracStateMultipleOf3StateLimbo: [Ref]real;
 
@@ -9,27 +8,27 @@ procedure PackStateMultipleOf3StateLimbo(c:Ref, this:Ref);
 requires (packedStateMultipleOf3StateLimbo[this] ==false);
 requires (cell[this] == c);
 requires (fracMultipleOf[c] > 0.0);
-requires (divider[cell[this]] == 21);
+requires (divider[cell[this]] == 33);
 
 procedure UnpackStateMultipleOf3StateLimbo(c:Ref, this:Ref);
 requires packedStateMultipleOf3StateLimbo[this];
 requires fracStateMultipleOf3StateLimbo[this] > 0.0;
 ensures (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
-ensures (divider[cell[this]] == 21);
+ensures (divider[cell[this]] == 33);
 
 procedure PackStateMultipleOf2StateLimbo(c:Ref, this:Ref);
 requires (packedStateMultipleOf2StateLimbo[this] ==false);
 requires (cell[this] == c);
 requires (fracMultipleOf[c] > 0.0);
-requires (divider[cell[this]] == 16);
+requires (divider[cell[this]] == 14);
 
 procedure UnpackStateMultipleOf2StateLimbo(c:Ref, this:Ref);
 requires packedStateMultipleOf2StateLimbo[this];
 requires fracStateMultipleOf2StateLimbo[this] > 0.0;
 ensures (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
-ensures (divider[cell[this]] == 16);
+ensures (divider[cell[this]] == 14);
 
 procedure ConstructStateLimbo(this:Ref)
 modifies cell, divider, value;

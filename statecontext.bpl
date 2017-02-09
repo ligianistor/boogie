@@ -1,8 +1,4 @@
-
 var myState: [Ref]Ref;
-
-var packedBasicFieldsContext : [Ref]bool;
-var fracBasicFieldsContext : [Ref]real;
 
 var packedStateLive :[Ref]bool;
 var fracStateLive :[Ref]real;
@@ -48,15 +44,6 @@ ensures (myState[this] == m);
 ensures (instanceof[m] == 1) ==> (fracStateMultipleOf3StateLive[m] > 0.0);
 ensures (instanceof[m] == 2) ==> (fracStateMultipleOf3StateLimbo[m] > 0.0);
 ensures (instanceof[m] == 3) ==> (fracStateMultipleOf3StateSleep[m] > 0.0);
-
-procedure PackBasicFieldsContext(m:Ref, this:Ref);
-requires packedBasicFieldsContext[this] == false;
-requires (myState[this] == m);
-
-procedure UnpackBasicFieldsContext(m:Ref, this:Ref);
-requires packedBasicFieldsContext[this];
-requires fracBasicFieldsContext[this] > 0.0;
-ensures (myState[this] == m);
 
 procedure PackStateLive(m:Ref, this:Ref);
 requires packedStateLive[this] == false;
@@ -104,6 +91,7 @@ modifies myState, instanceof, packedStateLive, fracStateLive
        , packedStateLimbo, fracStateLimbo, packedStateSleep, fracStateSleep, 
        packedStateContextMultiple2;
 requires (packedStateContextMultiple2[this] == false);
+requires fracStateContextMultiple2[this] > 0.0;
 requires (instanceof[newState] == 1) ==> (fracStateMultipleOf2StateLive[newState] > 0.0);
 requires (instanceof[newState] == 2) ==> (fracStateMultipleOf2StateLimbo[newState] > 0.0);
 requires (instanceof[newState] == 3) ==> (fracStateMultipleOf2StateSleep[newState] > 0.0);
@@ -153,6 +141,7 @@ modifies myState, instanceof, packedStateLive, fracStateLive
        , packedStateLimbo, fracStateLimbo, packedStateSleep, fracStateSleep, 
        packedStateContextMultiple3;
 requires (packedStateContextMultiple3[this] == false);
+requires fracStateContextMultiple3[this] > 0.0;
 requires (instanceof[newState] == 1) ==> (fracStateMultipleOf3StateLive[newState] > 0.0);
 requires (instanceof[newState] == 2) ==> (fracStateMultipleOf3StateLimbo[newState] > 0.0);
 requires (instanceof[newState] == 3) ==> (fracStateMultipleOf3StateSleep[newState] > 0.0);

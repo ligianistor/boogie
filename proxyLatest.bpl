@@ -56,6 +56,7 @@ modifies n, sum, packedBasicFieldsRealSum, fracBasicFieldsRealSum, packedSumOKRe
 requires n1 > 0;
 ensures n[this] == n1;
 ensures sum[this] == (n1*(n1+1)/2);
+// TODO do I need this?
 ensures (forall y:Ref :: ( (y!=this) ==> (n[y] == old(n[y]) ) ) );
 {
   	var temp:real;
@@ -199,6 +200,7 @@ procedure calculateSumProxySum(this:Ref)  returns (r:real)
 modifies n, sum, packedSumOKRealSum, fracSumOKRealSum
       , packedBasicFieldsRealSum, fracBasicFieldsRealSum, packedBasicFieldsProxySum,
       packedSumOKProxySum, fracSumOKProxySum;
+// TODO this should be == false!!!
 requires packedBasicFieldsProxySum[this];
 requires (fracBasicFieldsProxySum[this] > 0.0);
 requires (realSum[this]!=null) ==> ( packedSumOKRealSum[realSum[this]] && (fracSumOKRealSum[realSum[this]] > 0.0));

@@ -1,4 +1,3 @@
-
 var scon: [Ref]Ref;
 
 var packedStateClientMultiple2:[Ref]bool;
@@ -103,18 +102,14 @@ requires (forall  x:Ref :: ( packedStateMultipleOf3StateSleep[x]));
 requires (forall  x:Ref :: ( packedStateContextMultiple3[x])); 
 requires (forall  x:Ref :: ( packedStateClientMultiple3[x]));
 {
-var i1, i2 : Ref;
-var st1, st2 : Ref;
-var scontext1, scontext2 : Ref;
-var sclient1, sclient2, sclient3, sclient4 : Ref;
+var i1 : Ref;
+var st1 : Ref;
+var scontext1: Ref;
+var sclient1, sclient2: Ref;
 var tempRef : Ref;
 var tempBool : bool;
 
-assume (i1 != i2);
-assume (st1 != st2);
 assume (sclient1 != sclient2);
-assume (sclient3 != sclient4);
-assume (scontext1 != scontext2);
 
 call ConstructIntCell(15, 15, i1);
 packedMultipleOf[i1] := false;
@@ -182,18 +177,14 @@ requires (forall  x:Ref :: ( packedStateMultipleOf2StateSleep[x]));
 requires (forall  x:Ref :: ( packedStateContextMultiple2[x])); 
 requires (forall  x:Ref :: ( packedStateClientMultiple2[x]));
 {
-var i1, i2 : Ref;
-var st1, st2 : Ref;
-var scontext1, scontext2 : Ref;
-var sclient1, sclient2, sclient3, sclient4 : Ref;
+var i2 : Ref;
+var st2 : Ref;
+var scontext2 : Ref;
+var sclient3, sclient4 : Ref;
 var tempRef : Ref;
 var tempBool : bool;
 
-assume (i1 != i2);
-assume (st1 != st2);
-assume (sclient1 != sclient2);
 assume (sclient3 != sclient4);
-assume (scontext1 != scontext2);
 
 call ConstructIntCell(14, 14, i2);
 packedMultipleOf[i2] := false;

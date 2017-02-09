@@ -1,4 +1,3 @@
-
 var packedStateMultipleOf3StateSleep: [Ref]bool;
 var fracStateMultipleOf3StateSleep: [Ref]real;
 
@@ -9,27 +8,27 @@ procedure PackStateMultipleOf3StateSleep(c:Ref, this:Ref);
 requires (packedStateMultipleOf3StateSleep[this] == false);
 requires (cell[this] == c);
 requires (fracMultipleOf[c] > 0.0);
-requires (divider[cell[this]] == 33);
+requires (divider[cell[this]] == 15);
 
 procedure UnpackStateMultipleOf3StateSleep(c:Ref, this:Ref);
 requires packedStateMultipleOf3StateSleep[this];
 requires fracStateMultipleOf3StateSleep[this] > 0.0;
 ensures (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
-ensures (divider[cell[this]] == 33);
+ensures (divider[cell[this]] == 15);
 
 procedure PackStateMultipleOf2StateSleep(c:Ref, this:Ref);
 requires (packedStateMultipleOf2StateSleep[this] == false);
 requires (cell[this] == c);
 requires (fracMultipleOf[c] > 0.0);
-requires (divider[cell[this]] == 4);
+requires (divider[cell[this]] == 16);
 
 procedure UnpackStateMultipleOf2StateSleep(c:Ref, this:Ref);
 requires packedStateMultipleOf2StateSleep[this];
 requires fracStateMultipleOf2StateSleep[this] > 0.0;
 ensures (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
-ensures (divider[cell[this]] == 4);
+ensures (divider[cell[this]] == 16);
 
 procedure ConstructStateSleep(this:Ref)
 modifies cell, divider, value;

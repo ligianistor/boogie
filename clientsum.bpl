@@ -1,4 +1,3 @@
-
 var sumClient : [Ref]Ref;
 var instanceof: [Ref]int; // maybe this should be declared in the interface Sum
 // actually it's ok to be declared in the first class that implements the interface because

@@ -1,4 +1,3 @@
-
 var packedSumOKProxySum: [Ref] bool;
 var fracSumOKProxySum: [Ref] real;
 var packedSumGreater0ProxySum: [Ref] bool;

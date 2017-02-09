@@ -1,4 +1,3 @@
-
 var cell : [Ref]Ref;
 var instanceof : [Ref]int;
 
@@ -12,27 +11,27 @@ procedure PackStateMultipleOf3StateLive(c:Ref, this:Ref);
 requires (packedStateMultipleOf3StateLive[this] == false);
 requires (cell[this] == c);
 requires (fracMultipleOf[c] > 0.0);
-requires (divider[cell[this]] == 15);
+requires (divider[cell[this]] == 21);
 
 procedure UnpackStateMultipleOf3StateLive(c:Ref, this:Ref);
 requires packedStateMultipleOf3StateLive[this];
 requires fracStateMultipleOf3StateLive[this] > 0.0;
 ensures (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
-ensures (divider[cell[this]] == 15);
+ensures (divider[cell[this]] == 21);
 
 procedure PackStateMultipleOf2StateLive(c:Ref, this:Ref);
 requires (packedStateMultipleOf2StateLive[this] ==false);
 requires (cell[this] == c);
 requires (fracMultipleOf[c] > 0.0);
-requires (divider[cell[this]] == 14);
+requires (divider[cell[this]] == 4);
 
 procedure UnpackStateMultipleOf2StateLive(c:Ref, this:Ref);
 requires packedStateMultipleOf2StateLive[this];
 requires fracStateMultipleOf2StateLive[this] > 0.0;
 ensures (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
-ensures (divider[cell[this]] == 14);
+ensures (divider[cell[this]] == 4);
 
 procedure ConstructStateLive(this:Ref)
 modifies cell, divider, value;
