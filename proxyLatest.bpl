@@ -233,7 +233,7 @@ modifies n, sum, packedSumOKRealSum, fracSumOKRealSum
 requires packedBasicFieldsProxySum[this] == false;
 requires (fracBasicFieldsProxySum[this] > 0.0);
 requires n[this] > 0;
-requires (realSum[this]!=null) ==> ( packedSumOKRealSum[realSum[this]] && (fracSumOKRealSum[realSum[this]] > 0.0));
+requires (realSum[this]!=null) ==> ( packedSumOKRealSum[realSum[this]] && (fracSumOKRealSum[realSum[this]] > 0.0) && (n[realSum[this]] == n[this]) );
 ensures packedSumOKProxySum[this];
 ensures	(fracSumOKProxySum[this] > 0.0);
 { 
@@ -247,7 +247,6 @@ ensures	(fracSumOKProxySum[this] > 0.0);
 	}
 	  call temp := calculateSumRealSum(realSum[this]);
   	sum[this] := temp;
-    n[this] := n[realSum[this] ];
     
     // transfer from one object proposition to another
     packedSumOKProxySum[this] := packedBasicFieldsProxySum[this];
@@ -269,7 +268,7 @@ requires packedBasicFieldsProxySum[this]==false;
 //Only here sumGreater0() is the invariant.
 requires (fracBasicFieldsProxySum[this] > 0.0);
 requires n[this] > 0;
-requires (realSum[this]!=null) ==> ( packedBasicFieldsRealSum[realSum[this]] && (fracBasicFieldsRealSum[realSum[this]] > 0.0));
+requires (realSum[this]!=null) ==> ( packedBasicFieldsRealSum[realSum[this]] && (fracBasicFieldsRealSum[realSum[this]] > 0.0) && (n[realSum[this]] == n[this]));
 ensures packedSumGreater0ProxySum[this];
 ensures (fracSumGreater0ProxySum[this] > 0.0);
 {
@@ -288,7 +287,6 @@ ensures (fracSumGreater0ProxySum[this] > 0.0);
 
   call temp := addOneToSumRealSum(realSum[this]);
   sum[this] := temp;
-  n[this] := n[realSum[this]];
   // transfer from one object proposition to another
   packedSumGreater0ProxySum[this] := packedBasicFieldsProxySum[this];
   fracSumGreater0ProxySum[this] := fracBasicFieldsProxySum[this];
