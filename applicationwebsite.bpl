@@ -1,4 +1,3 @@
-
 type MapIntCollege = [int] Ref;
 
 // Each ApplicationWebsite will have its own map of college.
