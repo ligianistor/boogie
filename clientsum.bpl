@@ -132,9 +132,12 @@ fracBasicFieldsProxySum[s] := 1.0;
 instanceof[s] := 1;
 // could keep the if like below
 // but I instead simplified it
+
 call UnpackBasicFieldsProxySum(realSum[s], sum[s], n[s], s);
 packedBasicFieldsProxySum[s] := false;
+
 call temp := calculateSumProxySum(s);
+
 call ConstructClientSum(s, client1);
 packedClientSumOK[client1] := false;
 call PackClientSumOK(s, client1);
@@ -142,7 +145,6 @@ packedClientSumOK[client1] := true;
 fracClientSumOK[client1] := 1.0;
 
 call ConstructClientSum(s, client2);
-
 packedClientSumOK[client2] := false;
 call PackClientSumOK(s, client2);
 packedClientSumOK[client2] := true;
@@ -194,6 +196,7 @@ call PackBasicFieldsProxySum(realSum[s2], sum[s2], n[s2], s2);
 packedBasicFieldsProxySum[s2] := true;
 fracBasicFieldsProxySum[s2] := 1.0;
 instanceof[s2] := 1;
+
 call UnpackBasicFieldsProxySum(realSum[s2], sum[s2], n[s2], s2);
 packedBasicFieldsProxySum[s2] := false;
 call temp1 := addOneToSumProxySum(s2);
@@ -228,5 +231,3 @@ packedClientSumGreater0[client4] := false;
 
 call temp2 := checkSumGreater0(client4);
 }
-
-
