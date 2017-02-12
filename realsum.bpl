@@ -107,6 +107,7 @@ requires (fracSumOKRealSum[this] > 0.0);
 ensures r == (n[this]*(n[this]+1)/2);
 ensures packedSumOKRealSum[this] == false;
 ensures (fracSumOKRealSum[this] > 0.0);
+ensures (n[this] > 0);
 { 
   call UnpackSumOKRealSum(n[this], this);
   packedSumOKRealSum[this] := false;
