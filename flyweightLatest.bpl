@@ -489,6 +489,8 @@ requires packedKeyValuePair[this, key1];
 requires	(fracKeyValuePair[this, key1] > 0.0);
 ensures packedKeyValuePair[this, key1];
 ensures	(fracKeyValuePair[this, key1] > 0.0);
+ensures packedCollegeFields[c];
+ensures fracCollegeFields[c] > 0.0;
 //requires this#k MapOfCollegesField()
 //ensures this#k KeyValuePair(key1, result)
 {
@@ -503,6 +505,9 @@ requires packedApplicationWebsiteField[this];
 requires (fracApplicationWebsiteField[this] > 0.0);
 ensures packedKeyValuePair[this, collegeNumber];
 ensures	(fracKeyValuePair[this, collegeNumber] > 0.0);
+ensures packedCollegeFields[r];
+ensures fracCollegeFields[r] > 0.0;
+
 //ensures this#k KeyValuePair(collegeNumber, result)
 {
 var temp:bool;
@@ -538,6 +543,8 @@ modifies mapOfColleges, packedCollegeFields, fracCollegeFields, collegeNumber, e
 requires packedApplicationWebsiteField[this];
 requires (fracApplicationWebsiteField[this] > 0.0);
 requires (collegeNumber<=maxSize[this]) && (0<=collegeNumber);
+  ensures packedCollegeNumberField[r];
+  ensures fracCollegeNumberField[r] > 0.0;
 {
 	call r := lookup(collegeNumber, this);
 }
