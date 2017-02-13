@@ -1,4 +1,3 @@
-
 var collegeNumber :[Ref]int;
 var endowment : [Ref]int;
 
@@ -71,6 +70,7 @@ ensures (endowment[this] == (number *1000) - 5);
 }
 
 procedure getCollegeNumber(this:Ref) returns (r:int)
+modifies packedCollegeNumberField;
 requires packedCollegeNumberField[this];
 requires (fracCollegeNumberField[this] > 0.0);
 ensures packedCollegeNumberField[this];
@@ -78,7 +78,11 @@ ensures	(fracCollegeNumberField[this] > 0.0);
 // TODO add statement about value of parameter 
 // ensures this#k CollegeNumberField()[result]
 {
+	call UnpackCollegeNumberField(collegeNumber[this], this);
+	packedCollegeNumberField[this] := false;
 	r := collegeNumber[this];
+	call PackCollegeNumberField(collegeNumber[this], this);
+	packedCollegeNumberField[this] := true;
 }
 
 // the method that calculates the extrinsic state
