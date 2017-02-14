@@ -1,4 +1,3 @@
-
 var college : [Ref]Ref;
 var campusNumber : [Ref]int;
 // facilities is a field of StudentApplication
@@ -58,8 +57,11 @@ ensures	(fracCollegeFacilitiesFew[col] > 0.0);
 procedure ConstructStudentApplication(col:Ref, campusNum:int, this:Ref) 
 modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf, divider, value,
         packedCollegeFacilitiesFew, packedCollegeFacilitiesMany
-        , fracCollegeFacilitiesFew, fracCollegeFacilitiesMany;
+        , fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
+        packedCollegeNumberField;
   requires campusNum > 0;
+  requires packedCollegeNumberField[col];
+  requires fracCollegeNumberField[col] > 0.0;
   ensures (college[this] == col);
   ensures (campusNumber[this] == campusNum);
   ensures ( (campusNum <= 4) && (campusNum > 0)  )==> ( packedCollegeFacilitiesFew[col] && 
@@ -70,6 +72,8 @@ modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf, di
     var temp : int;
     assume (forall y:Ref :: (collegeNumber[y] > 0) );
 		college[this] := col;
+    call UnpackCollegeNumberField(collegeNumber[college[this]], college[this]);
+    packedCollegeNumberField[college[this]] := false;
 		call temp := getNumberFacilities(campusNum, collegeNumber[college[this]], college[this]);
     facilities[this] := temp;// !!!Here I need to add in the Java program what is the
     // new predicate that has to hold about col, because only now I have all the information
@@ -87,12 +91,16 @@ modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf, di
       call PackCollegeFacilitiesMany(facilities[this] ,collegeNumber[college[this]], college[this]);
       packedCollegeFacilitiesMany[college[this]] := true;
       fracCollegeFacilitiesMany[college[this]] := 0.001;
+    } else {
+      // we cannot end up here
+      assume false;
     }
 }
 
 procedure changeApplicationFew(newCampusNumber:int, this:Ref)
 modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf, divider, value,
-        packedStudentAppFacilitiesFew, packedStudentAppFacilitiesMany;
+        packedStudentAppFacilitiesFew, packedStudentAppFacilitiesMany, packedCollegeNumberField,
+        fracCollegeNumberField;
 requires newCampusNumber > 0;
 requires packedStudentAppFacilitiesFew[this];
 requires (fracStudentAppFacilitiesFew[this] > 0.0);
@@ -102,9 +110,16 @@ ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesFew[y] == ol
 {
   var temp : int;
   assume (forall y:Ref :: (collegeNumber[y] > 0) );
-	campusNumber[this] := modulo(newCampusNumber, 4) + 1;
-  call UnpackStudentAppFacilitiesFew(college[this], campusNumber[this], this);
+    call UnpackStudentAppFacilitiesFew(college[this], campusNumber[this], this);
   packedStudentAppFacilitiesFew[this] := false;
+	campusNumber[this] := modulo(newCampusNumber, 4) + 1;
+    
+    //transfer
+    packedCollegeNumberField[college[this]] := packedCollegeFacilitiesFew[college[this]];
+    fracCollegeNumberField[college[this]] := fracCollegeFacilitiesFew[college[this]];
+
+    call UnpackCollegeNumberField(collegeNumber[college[this]], college[this]);
+    packedCollegeNumberField[college[this]] := false;
 	call temp := getNumberFacilities(campusNumber[this], collegeNumber[college[this]], college[this]);
   facilities[this] := temp;
   call PackStudentAppFacilitiesFew(college[this], campusNumber[this], this);
@@ -112,20 +127,32 @@ ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesFew[y] == ol
 }
 
 procedure changeApplicationMany(newCampusNumber:int, this:Ref)
-modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf, divider, value;
+modifies campusNumber, facilities, fracMultipleOf, packedMultipleOf, divider, value,
+      packedCollegeNumberField, packedStudentAppFacilitiesMany, fracCollegeNumberField;
 requires newCampusNumber > 0;
 requires packedStudentAppFacilitiesMany[this];
 requires (fracStudentAppFacilitiesMany[this] > 0.0);
 ensures packedStudentAppFacilitiesMany[this];
 ensures	(fracStudentAppFacilitiesMany[this] > 0.0);
+ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesMany[y] == old(packedStudentAppFacilitiesMany[y]) ) ) );
 {
   	var temp:int; 
     assume (forall y:Ref :: (collegeNumber[y] > 0) );
+    call UnpackStudentAppFacilitiesMany(college[this], campusNumber[this], this);
+    packedStudentAppFacilitiesMany[this] := false;
 	  campusNumber[this] := newCampusNumber * 10 + 1;
+    
+    //transfer
+    packedCollegeNumberField[college[this]] := packedCollegeFacilitiesMany[college[this]];
+    fracCollegeNumberField[college[this]] := fracCollegeFacilitiesMany[college[this]];
+
+    call UnpackCollegeNumberField(collegeNumber[college[this]], college[this]);
+    packedCollegeNumberField[college[this]] := false;
 	  call temp := getNumberFacilities(campusNumber[this],collegeNumber[college[this]], college[this]);
   	facilities[this] := temp;
+    call PackStudentAppFacilitiesMany(college[this], campusNumber[this], this);
+    packedStudentAppFacilitiesMany[this] := true;
 }
-
 
 procedure checkFacilitiesFew(this:Ref) returns (b:bool)
 requires packedStudentAppFacilitiesFew[this];
@@ -144,5 +171,4 @@ ensures	(fracStudentAppFacilitiesMany[this] > 0.0);
 {       
 	b := (facilities[this] >= 10 * campusNumber[this]);
 }
-
 
