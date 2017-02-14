@@ -75,15 +75,9 @@ procedure getNumberFacilities(campNum:int, colNum:int, this:Ref) returns (r:int)
 modifies divider, value;
 requires packedCollegeNumberField[this] == false;
 requires fracCollegeNumberField[this] > 0.0;
-  requires (collegeNumber[this] == colNum);
-  requires campNum > 0;
-  requires colNum > 0;
-  //TODO add an or of packed[] == false
-//requires packedCollegeNumberField[this]==false; 
-// I should add || packedCollegeFacilitiesMany == false 
-// || packedCollegeFacilitiesFew ==false
-//requires (fracCollegeNumberField[this] > 0.0);
-//TODO add ensures about the parameters
+requires (collegeNumber[this] == colNum);
+requires campNum > 0;
+requires colNum > 0;
 ensures  r == colNum * campNum;
 ensures r> 0;
 {

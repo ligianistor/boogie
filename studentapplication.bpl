@@ -28,7 +28,6 @@ requires (college[this] == col);
 requires (campusNumber[this] == c);
 requires packedCollegeFacilitiesMany[col];
 requires (fracCollegeFacilitiesMany[col] > 0.0);
-//TODO add ensures about params in this object proposition
 
 procedure UnpackStudentAppFacilitiesMany(col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesMany[this];
@@ -44,7 +43,7 @@ requires (college[this] == col);
 requires (campusNumber[this] == c);
 requires packedCollegeFacilitiesFew[col];
 requires (fracCollegeFacilitiesFew[col] > 0.0);
-//TODO add ensures about params in this object proposition
+
 
 procedure UnpackStudentAppFacilitiesFew(col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesFew[this];

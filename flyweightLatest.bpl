@@ -96,6 +96,7 @@ procedure getValueInt(this: Ref) returns (r:int)
 
 var collegeNumber :[Ref]int;
 var endowment : [Ref]int;
+var facilitiesCol : [Ref]int;
 
 var packedCollegeNumberField : [Ref]bool;
 var fracCollegeNumberField : [Ref]real;
@@ -118,23 +119,27 @@ ensures	(collegeNumber[this] == c);
 procedure PackCollegeFacilitiesMany(numFacilities:int, colNum:int, this:Ref);
 requires (packedCollegeFacilitiesMany[this] == false);
 requires (collegeNumber[this] == colNum);
+requires (facilitiesCol[this] == numFacilities);
 requires (numFacilities >= 10 * colNum);
 
 procedure UnpackCollegeFacilitiesMany(numFacilities:int, colNum:int, this:Ref);
 requires packedCollegeFacilitiesMany[this];
 requires fracCollegeFacilitiesMany[this] > 0.0;
 ensures (collegeNumber[this] == colNum);
+ensures (facilitiesCol[this] == numFacilities);
 ensures	(numFacilities >= 10 * colNum);
 
 procedure PackCollegeFacilitiesFew(numFacilities:int, colNum:int, this:Ref);
 requires (packedCollegeFacilitiesFew[this] == false);
 requires (collegeNumber[this] == colNum);
+requires (facilitiesCol[this] == numFacilities);
 requires (numFacilities <= 4 * colNum);
 
 procedure UnpackCollegeFacilitiesFew(numFacilities:int, colNum:int, this:Ref);
 requires packedCollegeFacilitiesFew[this];
 requires fracCollegeFacilitiesFew[this] > 0.0;
 ensures (collegeNumber[this] == colNum);
+ensures (facilitiesCol[this] == numFacilities);
 ensures	(numFacilities <= 4 * colNum);
 
 procedure ConstructCollege(number:int, this:Ref) 
@@ -213,15 +218,14 @@ requires packedStudentApplicationFields[this];
 ensures (college[this] == c);
 ensures	(campusNumber[this] == camp);
 
-procedure PackStudentAppFacilitiesMany(col:Ref, c:int, this:Ref);
+procedure PackStudentAppFacilitiesMany(fa:int, col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesMany[this] == false;
 requires (college[this] == col);
 requires (campusNumber[this] == c);
 requires packedCollegeFacilitiesMany[col];
 requires (fracCollegeFacilitiesMany[col] > 0.0);
-//TODO add ensures about params in this object proposition
 
-procedure UnpackStudentAppFacilitiesMany(col:Ref, c:int, this:Ref);
+procedure UnpackStudentAppFacilitiesMany(fa:int, col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesMany[this];
 requires fracStudentAppFacilitiesMany[this] > 0.0;
 ensures (college[this] == col);
@@ -229,15 +233,14 @@ ensures	(campusNumber[this] == c);
 ensures	packedCollegeFacilitiesMany[col];
 ensures	(fracCollegeFacilitiesMany[col] > 0.0);
 
-procedure PackStudentAppFacilitiesFew(col:Ref, c:int, this:Ref);
+procedure PackStudentAppFacilitiesFew(fa:int, col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesFew[this] == false;
 requires (college[this] == col);
 requires (campusNumber[this] == c);
 requires packedCollegeFacilitiesFew[col];
 requires (fracCollegeFacilitiesFew[col] > 0.0);
-//TODO add ensures about params in this object proposition
 
-procedure UnpackStudentAppFacilitiesFew(col:Ref, c:int, this:Ref);
+procedure UnpackStudentAppFacilitiesFew(fa:int, col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesFew[this];
 requires fracStudentAppFacilitiesFew[this] > 0.0;
 ensures (college[this] == col);
@@ -301,7 +304,7 @@ ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesFew[y] == ol
 {
   var temp : int;
   assume (forall y:Ref :: (collegeNumber[y] > 0) );
-    call UnpackStudentAppFacilitiesFew(college[this], campusNumber[this], this);
+  call UnpackStudentAppFacilitiesFew(college[this], campusNumber[this], this);
   packedStudentAppFacilitiesFew[this] := false;
 	campusNumber[this] := modulo(newCampusNumber, 4) + 1;
     
