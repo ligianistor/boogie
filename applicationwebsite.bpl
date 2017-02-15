@@ -76,7 +76,7 @@ requires packedApplicationWebsiteField[this];
 requires (fracApplicationWebsiteField[this] > 0.0);
 //requires this#k MapOfCollegesField()
 ensures (b == true) ==> packedKeyValuePair[this, key1] && (fracKeyValuePair[this, key1] > 0.0);
-ensures (b == false) ==> packedKeyValuePair[this, key1] && (fracKeyValuePair[this, key1] > 0.0) &&(mapOfColleges[this][key1]== null);
+ensures (b == false) ==> packedKeyValuePair[this, key1] && (fracKeyValuePair[this, key1] > 0.0) &&(mapOfColleges[this][key1] == null);
 //{
 //	b := true;
 //	if (mapOfColleges[this][key1] == null) {
@@ -103,7 +103,7 @@ ensures	(fracKeyValuePair[this, key1] > 0.0);
 	
 procedure get(key1:int, this:Ref) returns (c:Ref);
 requires packedKeyValuePair[this, key1];
-requires	(fracKeyValuePair[this, key1] > 0.0);
+requires (fracKeyValuePair[this, key1] > 0.0);
 ensures packedKeyValuePair[this, key1];
 ensures	(fracKeyValuePair[this, key1] > 0.0);
 ensures packedCollegeNumberField[c];
@@ -132,16 +132,15 @@ var c:Ref;
 call temp := containsKey(colNum, this);
 call UnpackApplicationWebsiteField(mapOfColleges[this], this);
 packedApplicationWebsiteField[this]:=false;
-if (temp == false) 
-	{
-		call ConstructCollege(colNum, c);
-		packedCollegeNumberField[c] := false;
-		call PackCollegeNumberField(colNum, c);
-		packedCollegeNumberField[c] := true;
-		fracCollegeNumberField[c] := 1.0;
+if (temp == false) {
+	call ConstructCollege(colNum, c);
+	packedCollegeNumberField[c] := false;
+	call PackCollegeNumberField(colNum, c);
+	packedCollegeNumberField[c] := true;
+	fracCollegeNumberField[c] := 1.0;
     
-		call put(colNum, c, this);
-	}
+	call put(colNum, c, this);
+}
 call r:= get(colNum, this);
 }
 
@@ -176,15 +175,17 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   fracStudentAppFacilitiesMany, maxSize, divider, value,
   fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
   packedKeyValuePair, fracKeyValuePair,
-        packedCollegeFacilitiesFew, packedCollegeFacilitiesMany, packedCollegeNumberField,
-        fracCollegeNumberField;
+  packedCollegeFacilitiesFew, packedCollegeFacilitiesMany, packedCollegeNumberField,
+  fracCollegeNumberField;
+  requires (forall  x:Ref :: ( packedCollegeFacilitiesFew[x]));
+  requires (forall y:Ref :: ( packedStudentAppFacilitiesFew[y]));
 {
 	var website : Ref;
 	var college : Ref;
 	var app1, app2: Ref;
   	var tempbo : bool;
 	assume (app1 != app2);
-	
+
 	call ConstructApplicationWebsite(100, website);
 	packedApplicationWebsiteField[website] := false;
 	call PackApplicationWebsiteField(mapOfColleges[website], website);
@@ -192,28 +193,29 @@ modifies mapOfColleges, packedApplicationWebsiteField,
 	fracApplicationWebsiteField[website] := 1.0;
 
 	call college := submitApplicationGetCollege(2, website);
-    call UnpackCollegeNumberField(collegeNumber[college], college);
-    packedCollegeNumberField[college] := false;
+
+ 	call UnpackCollegeNumberField(collegeNumber[college], college);
+ 	packedCollegeNumberField[college] := false;
 	call ConstructStudentApplication(college, 3, app1);
+
 	packedStudentAppFacilitiesFew[app1] := false;
 	call PackStudentAppFacilitiesFew(facilities[app1], college, 3, app1);
 	packedStudentAppFacilitiesFew[app1] := true;
 	fracStudentAppFacilitiesFew[app1] := 1.0;
 	fracCollegeFacilitiesFew[college] := fracCollegeFacilitiesFew[college] / 2.0;
 
- //transfer
-  packedCollegeNumberField[college] := packedCollegeFacilitiesFew[college];
-  fracCollegeNumberField[college] := fracCollegeFacilitiesFew[college];
+ 	//transfer
+  	packedCollegeNumberField[college] := packedCollegeFacilitiesFew[college];
+  	fracCollegeNumberField[college] := fracCollegeFacilitiesFew[college];
   
-   call UnpackCollegeNumberField(collegeNumber[college], college);
-    packedCollegeNumberField[college] := false;
+   	call UnpackCollegeNumberField(collegeNumber[college], college);
+    	packedCollegeNumberField[college] := false;
 	call ConstructStudentApplication(college, 2, app2);
 	packedStudentAppFacilitiesFew[app2] := false;
 	call PackStudentAppFacilitiesFew(facilities[app2], college, 2, app2);
 	packedStudentAppFacilitiesFew[app2] := true;
 	fracStudentAppFacilitiesFew[app2] := 1.0;
 	fracCollegeFacilitiesFew[college] := fracCollegeFacilitiesFew[college] / 2.0;
-
 	call tempbo := checkFacilitiesFew(app1);
 	call changeApplicationFew(34, app1);
 	call tempbo := checkFacilitiesFew(app2);
@@ -230,8 +232,10 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   fracStudentAppFacilitiesMany, maxSize, divider, value,
   fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
   packedKeyValuePair, fracKeyValuePair,
-        packedCollegeFacilitiesFew, packedCollegeFacilitiesMany,
-        packedCollegeNumberField, fracCollegeNumberField;
+  packedCollegeFacilitiesFew, packedCollegeFacilitiesMany,
+  packedCollegeNumberField, fracCollegeNumberField;
+   requires (forall  x:Ref :: ( packedCollegeFacilitiesMany[x]));
+   requires (forall y:Ref :: ( packedStudentAppFacilitiesMany[y]));
 {
 	var website : Ref;
 	var college2 : Ref;
@@ -247,8 +251,8 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   
 	call college2 := submitApplicationGetCollege(56, website);
 
-   call UnpackCollegeNumberField(collegeNumber[college2], college2);
-    packedCollegeNumberField[college2] := false;
+   	call UnpackCollegeNumberField(collegeNumber[college2], college2);
+    	packedCollegeNumberField[college2] := false;
 	call ConstructStudentApplication(college2, 45, app3);
 
 	packedStudentAppFacilitiesMany[app3] := false;
@@ -258,11 +262,11 @@ modifies mapOfColleges, packedApplicationWebsiteField,
 	fracStudentAppFacilitiesMany[app3] := 1.0;
 	fracCollegeFacilitiesMany[college2] := fracCollegeFacilitiesMany[college2] / 2.0;
   
-   //transfer
-  packedCollegeNumberField[college2] := packedCollegeFacilitiesMany[college2];
-  fracCollegeNumberField[college2] := fracCollegeFacilitiesMany[college2];
-   call UnpackCollegeNumberField(collegeNumber[college2], college2);
-    packedCollegeNumberField[college2] := false;
+   	//transfer
+  	packedCollegeNumberField[college2] := packedCollegeFacilitiesMany[college2];
+  	fracCollegeNumberField[college2] := fracCollegeFacilitiesMany[college2];
+   	call UnpackCollegeNumberField(collegeNumber[college2], college2);
+    	packedCollegeNumberField[college2] := false;
 	call ConstructStudentApplication(college2, 97, app4);
 	packedStudentAppFacilitiesMany[app4] := false;
 	call PackStudentAppFacilitiesMany(facilities[app4], college2, 97, app4);
