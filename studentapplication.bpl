@@ -54,11 +54,11 @@ ensures fa <= 4 * collegeNumber[col];
 
 procedure ConstructStudentApplication(col:Ref, campusNum:int, this:Ref) 
 modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf, divider, value,
-        packedCollegeFacilitiesFew, packedCollegeFacilitiesMany
-        , fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
+        packedCollegeFacilitiesFew, packedCollegeFacilitiesMany,
+        fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
         packedCollegeNumberField;
 requires campusNum > 0;
-requires packedCollegeNumberField[col]==false;
+requires (packedCollegeNumberField[col] == false);
 requires fracCollegeNumberField[col] > 0.0;
 requires collegeNumber[col] > 0;
 ensures (college[this] == col);
@@ -67,7 +67,12 @@ ensures ( (campusNum <= 4) && (campusNum > 0)  )==> ( packedCollegeFacilitiesFew
 	(fracCollegeFacilitiesFew[col] > 0.0)  && (facilities[this] == collegeNumber[col] * campusNum) );
 ensures (campusNum >= 10) ==> ( packedCollegeFacilitiesMany[col] &&
 	(fracCollegeFacilitiesMany[col] > 0.0)  && (facilities[this] == collegeNumber[col] * campusNum) );
-ensures  (forall  x:Ref :: ( old(packedCollegeFacilitiesFew[x]) ==true ==> packedCollegeFacilitiesFew[x]));
+// The ensures here are because the variables of type College can satisfy either packedCollegeFacilitiesFew or packedCollegeFacilitiesMany.
+// This is an artifact of Boogie, if we could specify more granular "modifies" clauses then we wouldn't need all these ensures forall or 
+// requires forall.
+// The alternative would be to have a constructor ConstructStudentApplication that constructs a College with many facilities and
+// another constructor for a College with few facilities.
+ensures  (forall  x:Ref :: ( old(packedCollegeFacilitiesFew[x]) == true ==> packedCollegeFacilitiesFew[x]));
 ensures  (forall  x:Ref :: ( old(packedCollegeFacilitiesMany[x]) == true ==>  packedCollegeFacilitiesMany[x]));
 {
     var temp : int;
@@ -107,7 +112,6 @@ ensures	(fracStudentAppFacilitiesFew[this] > 0.0);
 ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesFew[y] == old(packedStudentAppFacilitiesFew[y]) ) ) );
 {
 	var temp : int;
-	assume (forall y:Ref :: (collegeNumber[y] > 0) );
 	call UnpackStudentAppFacilitiesFew(facilities[this], college[this], campusNumber[this], this);
 	packedStudentAppFacilitiesFew[this] := false;
 	campusNumber[this] := modulo(newCampusNumber, 4) + 1;
@@ -136,7 +140,6 @@ ensures	(fracStudentAppFacilitiesMany[this] > 0.0);
 ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesMany[y] == old(packedStudentAppFacilitiesMany[y]) ) ) );
 {
 	var temp:int; 
-	assume (forall y:Ref :: (collegeNumber[y] > 0) );
     	call UnpackStudentAppFacilitiesMany(facilities[this], college[this], campusNumber[this], this);
     	packedStudentAppFacilitiesMany[this] := false;
 	campusNumber[this] := newCampusNumber * 10 + 1;

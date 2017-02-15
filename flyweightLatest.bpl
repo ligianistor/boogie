@@ -145,8 +145,6 @@ modifies collegeNumber, endowment;
 // For the other procedures we do need to say about packed.
 //ensures packedCollegeNumberField[this];
 ensures (collegeNumber[this] == number);
-// TODO need to put in statements about the parameters.
-// ensures this#k CollegeNumberField()[number]
 {
 	collegeNumber[this] := number;
 	endowment[this] := (number *1000) - 5;
@@ -158,8 +156,6 @@ requires packedCollegeNumberField[this];
 requires (fracCollegeNumberField[this] > 0.0);
 ensures packedCollegeNumberField[this];
 ensures	(fracCollegeNumberField[this] > 0.0);
-// TODO add statement about value of parameter 
-// ensures this#k CollegeNumberField()[result]
 {
 	call UnpackCollegeNumberField(collegeNumber[this], this);
 	packedCollegeNumberField[this] := false;
@@ -176,12 +172,6 @@ requires fracCollegeNumberField[this] > 0.0;
   requires (collegeNumber[this] == colNum);
   requires campNum > 0;
   requires colNum > 0;
-  //TODO add an or of packed[] == false
-//requires packedCollegeNumberField[this]==false; 
-// I should add || packedCollegeFacilitiesMany == false 
-// || packedCollegeFacilitiesFew ==false
-//requires (fracCollegeNumberField[this] > 0.0);
-//TODO add ensures about the parameters
 ensures  r == colNum * campNum;
 {
 	r := colNum * campNum;
@@ -246,11 +236,11 @@ ensures fa <= 4 * collegeNumber[col];
 
 procedure ConstructStudentApplication(col:Ref, campusNum:int, this:Ref) 
 modifies college, facilities, campusNumber, fracMultipleOf, packedMultipleOf, divider, value,
-        packedCollegeFacilitiesFew, packedCollegeFacilitiesMany
-        , fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
+        packedCollegeFacilitiesFew, packedCollegeFacilitiesMany,
+        fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
         packedCollegeNumberField;
 requires campusNum > 0;
-requires packedCollegeNumberField[col]==false;
+requires (packedCollegeNumberField[col] == false);
 requires fracCollegeNumberField[col] > 0.0;
 requires collegeNumber[col] > 0;
 ensures (college[this] == col);
@@ -259,7 +249,12 @@ ensures ( (campusNum <= 4) && (campusNum > 0)  )==> ( packedCollegeFacilitiesFew
 	(fracCollegeFacilitiesFew[col] > 0.0)  && (facilities[this] == collegeNumber[col] * campusNum) );
 ensures (campusNum >= 10) ==> ( packedCollegeFacilitiesMany[col] &&
 	(fracCollegeFacilitiesMany[col] > 0.0)  && (facilities[this] == collegeNumber[col] * campusNum) );
-ensures  (forall  x:Ref :: ( old(packedCollegeFacilitiesFew[x]) ==true ==> packedCollegeFacilitiesFew[x]));
+// The ensures here are because the variables of type College can satisfy either packedCollegeFacilitiesFew or packedCollegeFacilitiesMany.
+// This is an artifact of Boogie, if we could specify more granular "modifies" clauses then we wouldn't need all these ensures forall or 
+// requires forall.
+// The alternative would be to have a constructor ConstructStudentApplication that constructs a College with many facilities and
+// another constructor for a College with few facilities.
+ensures  (forall  x:Ref :: ( old(packedCollegeFacilitiesFew[x]) == true ==> packedCollegeFacilitiesFew[x]));
 ensures  (forall  x:Ref :: ( old(packedCollegeFacilitiesMany[x]) == true ==>  packedCollegeFacilitiesMany[x]));
 {
     var temp : int;
@@ -299,7 +294,6 @@ ensures	(fracStudentAppFacilitiesFew[this] > 0.0);
 ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesFew[y] == old(packedStudentAppFacilitiesFew[y]) ) ) );
 {
 	var temp : int;
-	assume (forall y:Ref :: (collegeNumber[y] > 0) );
 	call UnpackStudentAppFacilitiesFew(facilities[this], college[this], campusNumber[this], this);
 	packedStudentAppFacilitiesFew[this] := false;
 	campusNumber[this] := modulo(newCampusNumber, 4) + 1;
@@ -328,7 +322,6 @@ ensures	(fracStudentAppFacilitiesMany[this] > 0.0);
 ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesMany[y] == old(packedStudentAppFacilitiesMany[y]) ) ) );
 {
 	var temp:int; 
-	assume (forall y:Ref :: (collegeNumber[y] > 0) );
     	call UnpackStudentAppFacilitiesMany(facilities[this], college[this], campusNumber[this], this);
     	packedStudentAppFacilitiesMany[this] := false;
 	campusNumber[this] := newCampusNumber * 10 + 1;
@@ -432,8 +425,8 @@ requires (maxSize1>=0);
 ensures (forall j:int :: ((j<=maxSize1) && (j>=0)) ==> (packedKeyValuePair[this, j] && (fracKeyValuePair[this, j]==1.0)) ) ;
 ensures maxSize[this] == maxSize1;
 {
-call makeMapNull(maxSize1, this);
-maxSize[this] := maxSize1;
+	call makeMapNull(maxSize1, this);
+	maxSize[this] := maxSize1;
 }
 
 procedure makeMapNull(i : int, this:Ref)
@@ -559,8 +552,8 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   packedKeyValuePair, fracKeyValuePair,
   packedCollegeFacilitiesFew, packedCollegeFacilitiesMany, packedCollegeNumberField,
   fracCollegeNumberField;
-  requires (forall  x:Ref :: ( packedCollegeFacilitiesFew[x]));
-  requires (forall y:Ref :: ( packedStudentAppFacilitiesFew[y]));
+requires (forall  x:Ref :: ( packedCollegeFacilitiesFew[x]));
+requires (forall y:Ref :: ( packedStudentAppFacilitiesFew[y]));
 {
 	var website : Ref;
 	var college : Ref;
@@ -616,8 +609,8 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   packedKeyValuePair, fracKeyValuePair,
   packedCollegeFacilitiesFew, packedCollegeFacilitiesMany,
   packedCollegeNumberField, fracCollegeNumberField;
-   requires (forall  x:Ref :: ( packedCollegeFacilitiesMany[x]));
-   requires (forall y:Ref :: ( packedStudentAppFacilitiesMany[y]));
+requires (forall  x:Ref :: ( packedCollegeFacilitiesMany[x]));
+requires (forall y:Ref :: ( packedStudentAppFacilitiesMany[y]));
 {
 	var website : Ref;
 	var college2 : Ref;

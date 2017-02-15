@@ -49,8 +49,6 @@ modifies collegeNumber, endowment;
 // For the other procedures we do need to say about packed.
 //ensures packedCollegeNumberField[this];
 ensures (collegeNumber[this] == number);
-// TODO need to put in statements about the parameters.
-// ensures this#k CollegeNumberField()[number]
 {
 	collegeNumber[this] := number;
 	endowment[this] := (number *1000) - 5;
@@ -62,8 +60,6 @@ requires packedCollegeNumberField[this];
 requires (fracCollegeNumberField[this] > 0.0);
 ensures packedCollegeNumberField[this];
 ensures	(fracCollegeNumberField[this] > 0.0);
-// TODO add statement about value of parameter 
-// ensures this#k CollegeNumberField()[result]
 {
 	call UnpackCollegeNumberField(collegeNumber[this], this);
 	packedCollegeNumberField[this] := false;
@@ -80,12 +76,6 @@ requires fracCollegeNumberField[this] > 0.0;
   requires (collegeNumber[this] == colNum);
   requires campNum > 0;
   requires colNum > 0;
-  //TODO add an or of packed[] == false
-//requires packedCollegeNumberField[this]==false; 
-// I should add || packedCollegeFacilitiesMany == false 
-// || packedCollegeFacilitiesFew ==false
-//requires (fracCollegeNumberField[this] > 0.0);
-//TODO add ensures about the parameters
 ensures  r == colNum * campNum;
 {
 	r := colNum * campNum;

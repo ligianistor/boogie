@@ -50,8 +50,8 @@ requires (maxSize1>=0);
 ensures (forall j:int :: ((j<=maxSize1) && (j>=0)) ==> (packedKeyValuePair[this, j] && (fracKeyValuePair[this, j]==1.0)) ) ;
 ensures maxSize[this] == maxSize1;
 {
-call makeMapNull(maxSize1, this);
-maxSize[this] := maxSize1;
+	call makeMapNull(maxSize1, this);
+	maxSize[this] := maxSize1;
 }
 
 procedure makeMapNull(i : int, this:Ref)
@@ -177,8 +177,8 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   packedKeyValuePair, fracKeyValuePair,
   packedCollegeFacilitiesFew, packedCollegeFacilitiesMany, packedCollegeNumberField,
   fracCollegeNumberField;
-  requires (forall  x:Ref :: ( packedCollegeFacilitiesFew[x]));
-  requires (forall y:Ref :: ( packedStudentAppFacilitiesFew[y]));
+requires (forall  x:Ref :: ( packedCollegeFacilitiesFew[x]));
+requires (forall y:Ref :: ( packedStudentAppFacilitiesFew[y]));
 {
 	var website : Ref;
 	var college : Ref;
@@ -234,8 +234,8 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   packedKeyValuePair, fracKeyValuePair,
   packedCollegeFacilitiesFew, packedCollegeFacilitiesMany,
   packedCollegeNumberField, fracCollegeNumberField;
-   requires (forall  x:Ref :: ( packedCollegeFacilitiesMany[x]));
-   requires (forall y:Ref :: ( packedStudentAppFacilitiesMany[y]));
+requires (forall  x:Ref :: ( packedCollegeFacilitiesMany[x]));
+requires (forall y:Ref :: ( packedStudentAppFacilitiesMany[y]));
 {
 	var website : Ref;
 	var college2 : Ref;
