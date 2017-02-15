@@ -13,11 +13,13 @@ var fracCollegeFacilitiesFew : [Ref]real;
 procedure PackCollegeNumberField(c: int, this:Ref);
 requires (packedCollegeNumberField[this]==false);
 requires (collegeNumber[this] == c); 
+requires c>0;
 
 procedure UnpackCollegeNumberField(c: int, this:Ref);
 requires packedCollegeNumberField[this];
 requires fracCollegeNumberField[this] > 0.0;
 ensures	(collegeNumber[this] == c);
+ensures c>0;
 
 procedure PackCollegeFacilitiesMany(numFacilities:int, colNum:int, this:Ref);
 requires (packedCollegeFacilitiesMany[this] == false);
@@ -75,11 +77,17 @@ procedure getNumberFacilities(campNum:int, colNum:int, this:Ref) returns (r:int)
 modifies divider, value;
 requires packedCollegeNumberField[this] == false;
 requires fracCollegeNumberField[this] > 0.0;
-requires (collegeNumber[this] == colNum);
-requires campNum > 0;
-requires colNum > 0;
+  requires (collegeNumber[this] == colNum);
+  requires campNum > 0;
+  requires colNum > 0;
+  //TODO add an or of packed[] == false
+//requires packedCollegeNumberField[this]==false; 
+// I should add || packedCollegeFacilitiesMany == false 
+// || packedCollegeFacilitiesFew ==false
+//requires (fracCollegeNumberField[this] > 0.0);
+//TODO add ensures about the parameters
 ensures  r == colNum * campNum;
-ensures r> 0;
 {
 	r := colNum * campNum;
 }
+
