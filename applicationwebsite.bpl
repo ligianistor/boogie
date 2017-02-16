@@ -108,10 +108,12 @@ ensures packedKeyValuePair[this, key1];
 ensures	(fracKeyValuePair[this, key1] > 0.0);
 ensures packedCollegeNumberField[c];
 ensures fracCollegeNumberField[c] > 0.0;
-//requires this#k MapOfCollegesField()
-//ensures this#k KeyValuePair(key1, result)
 //{
+//  call UnpackKeyValuePair(mapOfColleges[this], key1, null, this);
+//  packedKeyValuePair[this, key1] := false;
 //	c := mapOfColleges[this][key1];
+//  call PackKeyValuePair(mapOfColleges[this], key1, college1, this);
+//  packedKeyValuePair[this, key1] := true;
 //}
 	
 procedure lookup(colNum:int, this:Ref) returns (r:Ref)
@@ -151,7 +153,7 @@ ensures (forall j:int :: ((j<=maxSize1) && (j>=0)) ==> (packedKeyValuePair[this,
 ensures maxSize[this] == maxSize1;
 {
 	call createMapCollege(maxSize1, this);
- }
+}
 
 procedure submitApplicationGetCollege(colNum:int, this:Ref) returns (r: Ref)
 modifies mapOfColleges, packedCollegeNumberField, fracCollegeNumberField, collegeNumber, endowment,
