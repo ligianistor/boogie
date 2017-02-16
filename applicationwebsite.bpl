@@ -43,17 +43,6 @@ requires fracKeyValuePair[this, key] > 0.0;
 ensures (mapOfColleges[this] == m);
 ensures (m[key] == value);
 
-procedure createMapCollege(maxSize1:int, this: Ref)
-modifies maxSize, mapOfColleges, packedKeyValuePair, fracKeyValuePair;
-requires (maxSize1>=0);
-// TODO add something about param being null in the ensures below
-ensures (forall j:int :: ((j<=maxSize1) && (j>=0)) ==> (packedKeyValuePair[this, j] && (fracKeyValuePair[this, j]==1.0)) ) ;
-ensures maxSize[this] == maxSize1;
-{
-	call makeMapNull(maxSize1, this);
-	maxSize[this] := maxSize1;
-}
-
 procedure makeMapNull(i : int, this:Ref)
 modifies mapOfColleges, packedKeyValuePair, fracKeyValuePair;
 requires (i>=0);
@@ -108,18 +97,16 @@ ensures packedKeyValuePair[this, key1];
 ensures	(fracKeyValuePair[this, key1] > 0.0);
 ensures packedCollegeNumberField[c];
 ensures fracCollegeNumberField[c] > 0.0;
+//requires this#k MapOfCollegesField()
+//ensures this#k KeyValuePair(key1, result)
 //{
-//  call UnpackKeyValuePair(mapOfColleges[this], key1, null, this);
-//  packedKeyValuePair[this, key1] := false;
 //	c := mapOfColleges[this][key1];
-//  call PackKeyValuePair(mapOfColleges[this], key1, college1, this);
-//  packedKeyValuePair[this, key1] := true;
 //}
 	
 procedure lookup(colNum:int, this:Ref) returns (r:Ref)
 modifies mapOfColleges, packedCollegeNumberField, fracCollegeNumberField,collegeNumber,
        endowment, packedKeyValuePair, packedApplicationWebsiteField;
-requires (colNum<=maxSize[this]) && (0<colNum);
+requires (0<colNum);
 requires packedApplicationWebsiteField[this];
 requires (fracApplicationWebsiteField[this] > 0.0);
 ensures packedKeyValuePair[this, colNum];
@@ -152,7 +139,8 @@ requires (maxSize1>=0);
 ensures (forall j:int :: ((j<=maxSize1) && (j>=0)) ==> (packedKeyValuePair[this, j] && (fracKeyValuePair[this, j]==1.0)) ) ;
 ensures maxSize[this] == maxSize1;
 {
-	call createMapCollege(maxSize1, this);
+	call makeMapNull(maxSize1, this);
+	maxSize[this] := maxSize1;
 }
 
 procedure submitApplicationGetCollege(colNum:int, this:Ref) returns (r: Ref)
@@ -160,7 +148,7 @@ modifies mapOfColleges, packedCollegeNumberField, fracCollegeNumberField, colleg
         packedKeyValuePair, packedApplicationWebsiteField;
 requires packedApplicationWebsiteField[this];
 requires (fracApplicationWebsiteField[this] > 0.0);
-requires (colNum<=maxSize[this]) && (0<colNum);
+requires (0<colNum);
 ensures packedCollegeNumberField[r];
 ensures fracCollegeNumberField[r] > 0.0;
 {
