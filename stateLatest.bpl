@@ -35,8 +35,8 @@ requires (divider[this] == a);
 procedure UnpackBasicIntCell(a: int, v:int, this:Ref);
 requires packedBasicIntCell[this];
 requires fracBasicIntCell[this] > 0.0;
-ensures	(value[this] == v);
-ensures (divider[this] == a);
+requires (value[this] == v);
+requires (divider[this] == a);
 
 procedure PackMultipleOf(a: int, v:int, this:Ref);
 requires (packedMultipleOf[this]==false);
@@ -47,7 +47,7 @@ requires ( (v - int(v/a)*a )==0);
 procedure UnpackMultipleOf(a: int, v:int, this:Ref);
 requires packedMultipleOf[this];
 requires fracMultipleOf[this] > 0.0;
-ensures	(value[this] == v);
+requires (value[this] == v);
 ensures (divider[this] == a);
 ensures	 ( (v - int(v/a)*a )==0);
 
@@ -60,8 +60,8 @@ requires (quot >= 10);
 procedure UnpackIntCellMany(divi: int, val:int, quot:int, this:Ref);
 requires packedIntCellMany[this];
 requires fracIntCellMany[this] > 0.0;
-ensures	(value[this] == val);
-ensures (divider[this] == divi);
+requires (value[this] == val);
+requires (divider[this] == divi);
 ensures (quot >= 10);
 
 procedure PackIntCellFew(divi: int, v:int, quot:int, this:Ref);
@@ -73,8 +73,8 @@ requires (quot <= 4);
 procedure UnpackIntCellFew(divi: int, v:int, quot:int, this:Ref);
 requires packedIntCellFew[this];
 requires fracIntCellFew[this] > 0.0;
-ensures	(value[this] == v);
-ensures (divider[this] == divi);
+requires (value[this] == v);
+requires (divider[this] == divi);
 ensures (quot <= 4);
 
 procedure ConstructIntCell(divider1: int, value1: int, this: Ref)
@@ -112,7 +112,7 @@ requires (divider[cell[this]] == 21);
 procedure UnpackStateMultipleOf3StateLive(c:Ref, this:Ref);
 requires packedStateMultipleOf3StateLive[this];
 requires fracStateMultipleOf3StateLive[this] > 0.0;
-ensures (cell[this] == c);
+requires (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
 ensures (divider[cell[this]] == 21);
 
@@ -125,7 +125,7 @@ requires (divider[cell[this]] == 4);
 procedure UnpackStateMultipleOf2StateLive(c:Ref, this:Ref);
 requires packedStateMultipleOf2StateLive[this];
 requires fracStateMultipleOf2StateLive[this] > 0.0;
-ensures (cell[this] == c);
+requires (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
 ensures (divider[cell[this]] == 4);
 
@@ -264,7 +264,7 @@ requires (divider[cell[this]] == 33);
 procedure UnpackStateMultipleOf3StateLimbo(c:Ref, this:Ref);
 requires packedStateMultipleOf3StateLimbo[this];
 requires fracStateMultipleOf3StateLimbo[this] > 0.0;
-ensures (cell[this] == c);
+requires (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
 ensures (divider[cell[this]] == 33);
 
@@ -277,7 +277,7 @@ requires (divider[cell[this]] == 14);
 procedure UnpackStateMultipleOf2StateLimbo(c:Ref, this:Ref);
 requires packedStateMultipleOf2StateLimbo[this];
 requires fracStateMultipleOf2StateLimbo[this] > 0.0;
-ensures (cell[this] == c);
+requires (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
 ensures (divider[cell[this]] == 14);
 
@@ -419,7 +419,7 @@ requires (divider[cell[this]] == 15);
 procedure UnpackStateMultipleOf3StateSleep(c:Ref, this:Ref);
 requires packedStateMultipleOf3StateSleep[this];
 requires fracStateMultipleOf3StateSleep[this] > 0.0;
-ensures (cell[this] == c);
+requires (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
 ensures (divider[cell[this]] == 15);
 
@@ -432,7 +432,7 @@ requires (divider[cell[this]] == 16);
 procedure UnpackStateMultipleOf2StateSleep(c:Ref, this:Ref);
 requires packedStateMultipleOf2StateSleep[this];
 requires fracStateMultipleOf2StateSleep[this] > 0.0;
-ensures (cell[this] == c);
+requires (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
 ensures (divider[cell[this]] == 16);
 
@@ -582,7 +582,7 @@ requires (instanceof[m] == 3) ==> (fracStateMultipleOf2StateSleep[m] > 0.0);
 procedure UnpackStateContextMultiple2(m:Ref, this:Ref);
 requires packedStateContextMultiple2[this];
 requires fracStateContextMultiple2[this] > 0.0;
-ensures (myState[this] == m);
+requires (myState[this] == m);
 ensures (instanceof[m] == 1) ==> (fracStateMultipleOf2StateLive[m] > 0.0);
 ensures (instanceof[m] == 2) ==> (fracStateMultipleOf2StateLimbo[m] > 0.0);
 ensures (instanceof[m] == 3) ==> (fracStateMultipleOf2StateSleep[m] > 0.0);
@@ -597,7 +597,7 @@ requires (instanceof[m] == 3) ==> (fracStateMultipleOf3StateSleep[m] > 0.0);
 procedure UnpackStateContextMultiple3(m:Ref, this:Ref);
 requires packedStateContextMultiple3[this];
 requires fracStateContextMultiple3[this] > 0.0;
-ensures (myState[this] == m);
+requires (myState[this] == m);
 ensures (instanceof[m] == 1) ==> (fracStateMultipleOf3StateLive[m] > 0.0);
 ensures (instanceof[m] == 2) ==> (fracStateMultipleOf3StateLimbo[m] > 0.0);
 ensures (instanceof[m] == 3) ==> (fracStateMultipleOf3StateSleep[m] > 0.0);
@@ -610,7 +610,7 @@ requires instanceof[m]==1;
 
 procedure UnpackStateLive(m:Ref, this:Ref);
 requires packedStateLive[this];
-ensures (myState[this] == m);
+requires (myState[this] == m);
 ensures instanceof[m]==1;
 
 procedure PackStateLimbo(m:Ref, this:Ref);
@@ -621,7 +621,7 @@ requires instanceof[m]==2;
 
 procedure UnpackStateLimbo(m:Ref, this:Ref);
 requires  packedStateLimbo[this];
-ensures (myState[this] == m);
+requires (myState[this] == m);
 ensures instanceof[m]==2;
 
 procedure PackStateSleep(m:Ref, this:Ref);
@@ -632,7 +632,7 @@ requires instanceof[m]==3;
 
 procedure UnpackStateSleep(m:Ref, this:Ref);
 requires packedStateSleep[this];
-ensures (myState[this] == m);
+requires (myState[this] == m);
 ensures instanceof[m]==3;
 	
 procedure ConstructStateContext(mysta:Ref, this:Ref) 
@@ -921,7 +921,7 @@ requires (fracStateContextMultiple2[s] > 0.0);
 procedure UnpackStateClientMultiple2(s:Ref, this:Ref);
 requires packedStateClientMultiple2[this];
 requires fracStateClientMultiple2[this] > 0.0;
-ensures (scon[this] == s);
+requires (scon[this] == s);
 ensures (fracStateContextMultiple2[s] > 0.0);
 
 procedure PackStateClientMultiple3(s:Ref, this:Ref);
@@ -932,7 +932,7 @@ requires (fracStateContextMultiple3[s] > 0.0);
 procedure UnpackStateClientMultiple3(s:Ref, this:Ref);
 requires packedStateClientMultiple3[this];
 requires fracStateClientMultiple3[this] > 0.0;
-ensures (scon[this] == s);
+requires (scon[this] == s);
 ensures (fracStateContextMultiple3[s] > 0.0);
 
 procedure ConstructStateClient(sco:Ref, this:Ref)
