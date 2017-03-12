@@ -46,8 +46,7 @@ procedure changeVal(this: Ref, r: int)
 		(fracPredVal[this] >= 1.0) &&
 		(r < 15);
 	requires (forall x:Ref :: packedPredVal[x]);
-	ensures packedPredVal[this] &&
-		(fracPredVal[this] >= 1.0);
+	ensures packedPredVal[this] && (fracPredVal[this] >= 1.0);
 	ensures (forall x:Ref :: (packedPredVal[x] == old(packedPredVal[x])));
 {
 	call UnpackPredVal(val[this], this);
@@ -68,9 +67,7 @@ procedure main()
   	assume (a!=b) && (b!=c) && (c!=a);
   
 	call ConstructSimpleCell(2, null, c);
-	packedPredVal[c] := false; // I only add this assignment 
-	// when it's after a call to the constructor and
-	// I know the predicate that it's going to pack to.
+	packedPredVal[c] := false; 
 	call PackPredVal(2, c);
 	packedPredVal[c] := true;
 	fracPredVal[c] := 1.0;

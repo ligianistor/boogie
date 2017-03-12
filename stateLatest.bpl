@@ -166,12 +166,12 @@ ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple3[x] == o
 {
 var i1:Ref;
 
-call ConstructIntCell(21, num*21, i1);
+call ConstructIntCell(33, num*33, i1);
 packedMultipleOf[i1] := false;
-call PackMultipleOf(21, num*21, i1);
+call PackMultipleOf(33, num*33, i1);
 packedMultipleOf[i1] := true;
 fracMultipleOf[i1] := 1.0;
-divider[i1]:=21;
+divider[i1]:=33;
 
 call ConstructStateLimbo2(i1, r);
 packedStateMultipleOf3StateLimbo[r] := false;
@@ -205,12 +205,12 @@ ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple2[x] == o
 {
 var i1:Ref;
 
-call ConstructIntCell(4, num*4, i1);
+call ConstructIntCell(16, num*16, i1);
 packedMultipleOf[i1] := false;
-call PackMultipleOf(4, num*4, i1);
+call PackMultipleOf(16, num*16, i1);
 packedMultipleOf[i1] := true;
 fracMultipleOf[i1] := 1.0;
-divider[i1]:=4;
+divider[i1]:=16;
 
 call ConstructStateSleep2(i1, r);
 packedStateMultipleOf2StateSleep[r] := false;
@@ -318,12 +318,12 @@ ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple3[x] == o
 {
 var i1:Ref;
 
-call ConstructIntCell(33, num*33, i1);
+call ConstructIntCell(15, num*15, i1);
 packedMultipleOf[i1] := false;
-call PackMultipleOf(33, num*33, i1);
+call PackMultipleOf(15, num*15, i1);
 packedMultipleOf[i1] := true;
 fracMultipleOf[i1] := 1.0;
-divider[i1]:=33;
+divider[i1]:=15;
 
 call ConstructStateSleep2(i1, r);
 packedStateMultipleOf3StateSleep[r] := false;
@@ -360,12 +360,12 @@ ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple2[x] == o
 {
 var i1:Ref;
 
-call ConstructIntCell(14, num*14, i1);
+call ConstructIntCell(4, num*4, i1);
 packedMultipleOf[i1] := false;
-call PackMultipleOf(14, num*14, i1);
+call PackMultipleOf(4, num*4, i1);
 packedMultipleOf[i1] := true;
 fracMultipleOf[i1] := 1.0;
-divider[i1]:=14;
+divider[i1]:=4;
 
 call ConstructStateLive2(i1, r);
 packedStateMultipleOf2StateLive[r] := false;
@@ -472,12 +472,12 @@ ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple3[x] == o
 {
 var i1:Ref;
 
-call ConstructIntCell(15, num*15, i1);
+call ConstructIntCell(21, num*21, i1);
 packedMultipleOf[i1] := false;
-call PackMultipleOf(15, num*15, i1);
+call PackMultipleOf(21, num*21, i1);
 packedMultipleOf[i1] := true;
 fracMultipleOf[i1] := 1.0;
-divider[i1]:=15;
+divider[i1]:=21;
 
 call ConstructStateLive2(i1, r);
 packedStateMultipleOf3StateLive[r] := false;
@@ -511,12 +511,12 @@ ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple2[x] == o
 {
 var i1:Ref;
 
-call ConstructIntCell(16, num*16, i1);
+call ConstructIntCell(14, num*14, i1);
 packedMultipleOf[i1] := false;
-call PackMultipleOf(16, num*16, i1);
+call PackMultipleOf(14, num*14, i1);
 packedMultipleOf[i1] := true;
 fracMultipleOf[i1] := 1.0;
-divider[i1]:=16;
+divider[i1]:=14;
 
 call ConstructStateLimbo2(i1, r);
 packedStateMultipleOf2StateLimbo[r] := false;
