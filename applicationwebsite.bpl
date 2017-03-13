@@ -1,3 +1,4 @@
+
 type MapIntCollege = [int] Ref;
 
 // Each ApplicationWebsite will have its own map of college.
@@ -21,7 +22,7 @@ requires  (forall j:int :: (  ((j<=maxSize[this]) && (j>=0)) ==>
 procedure UnpackApplicationWebsiteField(m: MapIntCollege, this:Ref);
 requires packedApplicationWebsiteField[this];
 requires fracApplicationWebsiteField[this] > 0.0;
-ensures	(mapOfColleges[this] == m);
+requires (mapOfColleges[this] == m);
 // TODO add something about params, the values can be null or not
 ensures  (forall j:int :: (  ((j<=maxSize[this]) && (j>=0)) ==> 
            packedKeyValuePair[this, j] && (fracKeyValuePair[this, j] > 0.0) ) );
@@ -35,12 +36,12 @@ var fracKeyValuePair : [Ref, int]real;
 procedure PackKeyValuePair(m:MapIntCollege, key:int, value:Ref, this:Ref);
 requires packedKeyValuePair[this, key] == false;
 requires mapOfColleges[this] == m;
-requires  (m[key] == value);
+requires (m[key] == value);
 
 procedure UnpackKeyValuePair(m:MapIntCollege, key:int, value:Ref, this:Ref);
 requires packedKeyValuePair[this, key];
 requires fracKeyValuePair[this, key] > 0.0;
-ensures (mapOfColleges[this] == m);
+requires (mapOfColleges[this] == m);
 ensures (m[key] == value);
 
 procedure makeMapNull(i : int, this:Ref)

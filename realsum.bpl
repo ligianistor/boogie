@@ -21,8 +21,8 @@ requires n1 > 0;
 procedure UnpackBasicFieldsRealSum(su:real, n1:int, this:Ref);
 requires packedBasicFieldsRealSum[this];
 requires fracBasicFieldsRealSum[this] > 0.0;
-ensures	(n[this]==n1);
-ensures (sum[this] == su);
+requires (n[this]==n1);
+requires (sum[this] == su);
 ensures n1 > 0;
 
 procedure PackSumOKRealSum(n1:int, this:Ref);
@@ -34,7 +34,7 @@ requires ( sum[this] == (n1 * (n1+1) / 2) );
 procedure UnpackSumOKRealSum(n1:int, this:Ref);
 requires packedSumOKRealSum[this];
 requires fracSumOKRealSum[this] > 0.0;
-ensures	(n[this]==n1);
+requires (n[this]==n1);
 ensures n1 > 0;
 ensures	(sum[this] == (n1 * (n1+1) / 2) );
 
@@ -46,7 +46,7 @@ requires (s1 > 0.0);
 procedure UnpackSumGreater0RealSum(s1:real, this:Ref);
 requires packedSumGreater0RealSum[this];
 requires fracSumGreater0RealSum[this] > 0.0;
-ensures (sum[this] == s1);
+requires (sum[this] == s1);
 ensures	(s1 > 0.0);
 
 procedure ConstructRealSum(n1:int, this:Ref)

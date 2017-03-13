@@ -1,3 +1,4 @@
+
 var college : [Ref]Ref;
 var campusNumber : [Ref]int;
 // facilities is a field of StudentApplication
@@ -19,8 +20,8 @@ requires (campusNumber[this] == camp);
 
 procedure UnpackStudentApplicationFields(c:Ref, camp:int, this:Ref);
 requires packedStudentApplicationFields[this];
-ensures (college[this] == c);
-ensures	(campusNumber[this] == camp);
+requires (college[this] == c);
+requires (campusNumber[this] == camp);
 
 procedure PackStudentAppFacilitiesMany(fa:int, col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesMany[this] == false;
@@ -32,8 +33,8 @@ requires fa >= 10 * collegeNumber[col];
 procedure UnpackStudentAppFacilitiesMany(fa:int, col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesMany[this];
 requires fracStudentAppFacilitiesMany[this] > 0.0;
-ensures (college[this] == col);
-ensures	(campusNumber[this] == c);
+requires (college[this] == col);
+requires (campusNumber[this] == c);
 ensures	(fracCollegeFacilitiesMany[col] > 0.0);
 ensures fa >= 10 * collegeNumber[col];
 
@@ -47,8 +48,8 @@ requires fa <= 4 * collegeNumber[col];
 procedure UnpackStudentAppFacilitiesFew(fa:int, col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesFew[this];
 requires fracStudentAppFacilitiesFew[this] > 0.0;
-ensures (college[this] == col);
-ensures	(campusNumber[this] == c);
+requires (college[this] == col);
+requires (campusNumber[this] == c);
 ensures	(fracCollegeFacilitiesFew[col] > 0.0);
 ensures fa <= 4 * collegeNumber[col];
 

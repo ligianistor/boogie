@@ -1,3 +1,4 @@
+
 var packedStateMultipleOf3StateLimbo: [Ref]bool;
 var fracStateMultipleOf3StateLimbo: [Ref]real;
 
@@ -13,7 +14,7 @@ requires (divider[cell[this]] == 33);
 procedure UnpackStateMultipleOf3StateLimbo(c:Ref, this:Ref);
 requires packedStateMultipleOf3StateLimbo[this];
 requires fracStateMultipleOf3StateLimbo[this] > 0.0;
-ensures (cell[this] == c);
+requires (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
 ensures (divider[cell[this]] == 33);
 
@@ -26,7 +27,7 @@ requires (divider[cell[this]] == 14);
 procedure UnpackStateMultipleOf2StateLimbo(c:Ref, this:Ref);
 requires packedStateMultipleOf2StateLimbo[this];
 requires fracStateMultipleOf2StateLimbo[this] > 0.0;
-ensures (cell[this] == c);
+requires (cell[this] == c);
 ensures (fracMultipleOf[c] > 0.0);
 ensures (divider[cell[this]] == 14);
 
@@ -67,12 +68,12 @@ ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple3[x] == o
 {
 var i1:Ref;
 
-call ConstructIntCell(33, num*33, i1);
+call ConstructIntCell(15, num*15, i1);
 packedMultipleOf[i1] := false;
-call PackMultipleOf(33, num*33, i1);
+call PackMultipleOf(15, num*15, i1);
 packedMultipleOf[i1] := true;
 fracMultipleOf[i1] := 1.0;
-divider[i1]:=33;
+divider[i1]:=15;
 
 call ConstructStateSleep2(i1, r);
 packedStateMultipleOf3StateSleep[r] := false;
@@ -109,12 +110,12 @@ ensures (forall  x:Ref :: ((x!=context) ==> (packedStateContextMultiple2[x] == o
 {
 var i1:Ref;
 
-call ConstructIntCell(14, num*14, i1);
+call ConstructIntCell(4, num*4, i1);
 packedMultipleOf[i1] := false;
-call PackMultipleOf(14, num*14, i1);
+call PackMultipleOf(4, num*4, i1);
 packedMultipleOf[i1] := true;
 fracMultipleOf[i1] := 1.0;
-divider[i1]:=14;
+divider[i1]:=4;
 
 call ConstructStateLive2(i1, r);
 packedStateMultipleOf2StateLive[r] := false;

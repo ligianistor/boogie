@@ -1,3 +1,4 @@
+
 var collegeNumber :[Ref]int;
 var endowment : [Ref]int;
 
@@ -18,7 +19,7 @@ requires c>0;
 procedure UnpackCollegeNumberField(c: int, this:Ref);
 requires packedCollegeNumberField[this];
 requires fracCollegeNumberField[this] > 0.0;
-ensures	(collegeNumber[this] == c);
+requires (collegeNumber[this] == c);
 ensures c>0;
 
 procedure PackCollegeFacilitiesMany(numFacilities:int, colNum:int, this:Ref);
@@ -29,7 +30,7 @@ requires (numFacilities >= 10 * colNum);
 procedure UnpackCollegeFacilitiesMany(numFacilities:int, colNum:int, this:Ref);
 requires packedCollegeFacilitiesMany[this];
 requires fracCollegeFacilitiesMany[this] > 0.0;
-ensures (collegeNumber[this] == colNum);
+requires (collegeNumber[this] == colNum);
 ensures	(numFacilities >= 10 * colNum);
 
 procedure PackCollegeFacilitiesFew(numFacilities:int, colNum:int, this:Ref);
@@ -40,7 +41,7 @@ requires (numFacilities <= 4 * colNum);
 procedure UnpackCollegeFacilitiesFew(numFacilities:int, colNum:int, this:Ref);
 requires packedCollegeFacilitiesFew[this];
 requires fracCollegeFacilitiesFew[this] > 0.0;
-ensures (collegeNumber[this] == colNum);
+requires (collegeNumber[this] == colNum);
 ensures	(numFacilities <= 4 * colNum);
 
 procedure ConstructCollege(number:int, this:Ref) 

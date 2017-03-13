@@ -14,7 +14,7 @@ requires (fracStateContextMultiple2[s] > 0.0);
 procedure UnpackStateClientMultiple2(s:Ref, this:Ref);
 requires packedStateClientMultiple2[this];
 requires fracStateClientMultiple2[this] > 0.0;
-ensures (scon[this] == s);
+requires (scon[this] == s);
 ensures (fracStateContextMultiple2[s] > 0.0);
 
 procedure PackStateClientMultiple3(s:Ref, this:Ref);
@@ -25,7 +25,7 @@ requires (fracStateContextMultiple3[s] > 0.0);
 procedure UnpackStateClientMultiple3(s:Ref, this:Ref);
 requires packedStateClientMultiple3[this];
 requires fracStateClientMultiple3[this] > 0.0;
-ensures (scon[this] == s);
+requires (scon[this] == s);
 ensures (fracStateContextMultiple3[s] > 0.0);
 
 procedure ConstructStateClient(sco:Ref, this:Ref)
@@ -102,21 +102,25 @@ requires (forall  x:Ref :: ( packedStateMultipleOf3StateSleep[x]));
 requires (forall  x:Ref :: ( packedStateContextMultiple3[x])); 
 requires (forall  x:Ref :: ( packedStateClientMultiple3[x]));
 {
-var i1 : Ref;
-var st1 : Ref;
-var scontext1: Ref;
-var sclient1, sclient2: Ref;
+var i1, i2 : Ref;
+var st1, st2 : Ref;
+var scontext1, scontext2 : Ref;
+var sclient1, sclient2, sclient3, sclient4 : Ref;
 var tempRef : Ref;
 var tempBool : bool;
 
+assume (i1 != i2);
+assume (st1 != st2);
 assume (sclient1 != sclient2);
+assume (sclient3 != sclient4);
+assume (scontext1 != scontext2);
 
-call ConstructIntCell(15, 15, i1);
+call ConstructIntCell(21, 21, i1);
 packedMultipleOf[i1] := false;
-call PackMultipleOf(15, 15, i1);
+call PackMultipleOf(21, 21, i1);
 packedMultipleOf[i1] := true;
 fracMultipleOf[i1] := 1.0;
-divider[i1]:=15;
+divider[i1]:=21;
 
 call ConstructStateLive2(i1, st1);
 packedStateMultipleOf3StateLive[st1] := false;
@@ -177,21 +181,25 @@ requires (forall  x:Ref :: ( packedStateMultipleOf2StateSleep[x]));
 requires (forall  x:Ref :: ( packedStateContextMultiple2[x])); 
 requires (forall  x:Ref :: ( packedStateClientMultiple2[x]));
 {
-var i2 : Ref;
-var st2 : Ref;
-var scontext2 : Ref;
-var sclient3, sclient4 : Ref;
+var i1, i2 : Ref;
+var st1, st2 : Ref;
+var scontext1, scontext2 : Ref;
+var sclient1, sclient2, sclient3, sclient4 : Ref;
 var tempRef : Ref;
 var tempBool : bool;
 
+assume (i1 != i2);
+assume (st1 != st2);
+assume (sclient1 != sclient2);
 assume (sclient3 != sclient4);
+assume (scontext1 != scontext2);
 
-call ConstructIntCell(14, 14, i2);
+call ConstructIntCell(4, 4, i2);
 packedMultipleOf[i2] := false;
-call PackMultipleOf(14, 14, i2);
+call PackMultipleOf(4, 4, i2);
 packedMultipleOf[i2] := true;
 fracMultipleOf[i2] := 1.0;
-divider[i2] := 14;
+divider[i2] := 4;
 
 call ConstructStateLive2(i2, st2);
 packedStateMultipleOf2StateLive[st2] := false;

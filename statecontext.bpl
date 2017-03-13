@@ -25,7 +25,7 @@ requires (instanceof[m] == 3) ==> (fracStateMultipleOf2StateSleep[m] > 0.0);
 procedure UnpackStateContextMultiple2(m:Ref, this:Ref);
 requires packedStateContextMultiple2[this];
 requires fracStateContextMultiple2[this] > 0.0;
-ensures (myState[this] == m);
+requires (myState[this] == m);
 ensures (instanceof[m] == 1) ==> (fracStateMultipleOf2StateLive[m] > 0.0);
 ensures (instanceof[m] == 2) ==> (fracStateMultipleOf2StateLimbo[m] > 0.0);
 ensures (instanceof[m] == 3) ==> (fracStateMultipleOf2StateSleep[m] > 0.0);
@@ -40,7 +40,7 @@ requires (instanceof[m] == 3) ==> (fracStateMultipleOf3StateSleep[m] > 0.0);
 procedure UnpackStateContextMultiple3(m:Ref, this:Ref);
 requires packedStateContextMultiple3[this];
 requires fracStateContextMultiple3[this] > 0.0;
-ensures (myState[this] == m);
+requires (myState[this] == m);
 ensures (instanceof[m] == 1) ==> (fracStateMultipleOf3StateLive[m] > 0.0);
 ensures (instanceof[m] == 2) ==> (fracStateMultipleOf3StateLimbo[m] > 0.0);
 ensures (instanceof[m] == 3) ==> (fracStateMultipleOf3StateSleep[m] > 0.0);
@@ -53,7 +53,7 @@ requires instanceof[m]==1;
 
 procedure UnpackStateLive(m:Ref, this:Ref);
 requires packedStateLive[this];
-ensures (myState[this] == m);
+requires (myState[this] == m);
 ensures instanceof[m]==1;
 
 procedure PackStateLimbo(m:Ref, this:Ref);
@@ -64,7 +64,7 @@ requires instanceof[m]==2;
 
 procedure UnpackStateLimbo(m:Ref, this:Ref);
 requires  packedStateLimbo[this];
-ensures (myState[this] == m);
+requires (myState[this] == m);
 ensures instanceof[m]==2;
 
 procedure PackStateSleep(m:Ref, this:Ref);
@@ -75,7 +75,7 @@ requires instanceof[m]==3;
 
 procedure UnpackStateSleep(m:Ref, this:Ref);
 requires packedStateSleep[this];
-ensures (myState[this] == m);
+requires (myState[this] == m);
 ensures instanceof[m]==3;
 	
 procedure ConstructStateContext(mysta:Ref, this:Ref) 

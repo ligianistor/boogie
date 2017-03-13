@@ -1,4 +1,3 @@
-//intcell.bpl
 type Ref;
 const null: Ref;
 
@@ -35,8 +34,8 @@ requires (divider[this] == a);
 procedure UnpackBasicIntCell(a: int, v:int, this:Ref);
 requires packedBasicIntCell[this];
 requires fracBasicIntCell[this] > 0.0;
-ensures	(value[this] == v);
-ensures (divider[this] == a);
+requires (value[this] == v);
+requires (divider[this] == a);
 
 procedure PackMultipleOf(a: int, v:int, this:Ref);
 requires (packedMultipleOf[this]==false);
@@ -47,7 +46,7 @@ requires ( (v - int(v/a)*a )==0);
 procedure UnpackMultipleOf(a: int, v:int, this:Ref);
 requires packedMultipleOf[this];
 requires fracMultipleOf[this] > 0.0;
-ensures	(value[this] == v);
+requires (value[this] == v);
 ensures (divider[this] == a);
 ensures	 ( (v - int(v/a)*a )==0);
 
@@ -60,8 +59,8 @@ requires (quot >= 10);
 procedure UnpackIntCellMany(divi: int, val:int, quot:int, this:Ref);
 requires packedIntCellMany[this];
 requires fracIntCellMany[this] > 0.0;
-ensures	(value[this] == val);
-ensures (divider[this] == divi);
+requires (value[this] == val);
+requires (divider[this] == divi);
 ensures (quot >= 10);
 
 procedure PackIntCellFew(divi: int, v:int, quot:int, this:Ref);
@@ -73,8 +72,8 @@ requires (quot <= 4);
 procedure UnpackIntCellFew(divi: int, v:int, quot:int, this:Ref);
 requires packedIntCellFew[this];
 requires fracIntCellFew[this] > 0.0;
-ensures	(value[this] == v);
-ensures (divider[this] == divi);
+requires (value[this] == v);
+requires (divider[this] == divi);
 ensures (quot <= 4);
 
 procedure ConstructIntCell(divider1: int, value1: int, this: Ref)
