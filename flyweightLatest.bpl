@@ -35,8 +35,8 @@ requires (divider[this] == a);
 procedure UnpackBasicIntCell(a: int, v:int, this:Ref);
 requires packedBasicIntCell[this];
 requires fracBasicIntCell[this] > 0.0;
-ensures	(value[this] == v);
-ensures (divider[this] == a);
+requires (value[this] == v);
+requires (divider[this] == a);
 
 procedure PackMultipleOf(a: int, v:int, this:Ref);
 requires (packedMultipleOf[this]==false);
@@ -47,7 +47,7 @@ requires ( (v - int(v/a)*a )==0);
 procedure UnpackMultipleOf(a: int, v:int, this:Ref);
 requires packedMultipleOf[this];
 requires fracMultipleOf[this] > 0.0;
-ensures	(value[this] == v);
+requires (value[this] == v);
 ensures (divider[this] == a);
 ensures	 ( (v - int(v/a)*a )==0);
 
@@ -60,8 +60,8 @@ requires (quot >= 10);
 procedure UnpackIntCellMany(divi: int, val:int, quot:int, this:Ref);
 requires packedIntCellMany[this];
 requires fracIntCellMany[this] > 0.0;
-ensures	(value[this] == val);
-ensures (divider[this] == divi);
+requires (value[this] == val);
+requires (divider[this] == divi);
 ensures (quot >= 10);
 
 procedure PackIntCellFew(divi: int, v:int, quot:int, this:Ref);
@@ -73,8 +73,8 @@ requires (quot <= 4);
 procedure UnpackIntCellFew(divi: int, v:int, quot:int, this:Ref);
 requires packedIntCellFew[this];
 requires fracIntCellFew[this] > 0.0;
-ensures	(value[this] == v);
-ensures (divider[this] == divi);
+requires (value[this] == v);
+requires (divider[this] == divi);
 ensures (quot <= 4);
 
 procedure ConstructIntCell(divider1: int, value1: int, this: Ref)
@@ -114,7 +114,7 @@ requires c>0;
 procedure UnpackCollegeNumberField(c: int, this:Ref);
 requires packedCollegeNumberField[this];
 requires fracCollegeNumberField[this] > 0.0;
-ensures	(collegeNumber[this] == c);
+requires (collegeNumber[this] == c);
 ensures c>0;
 
 procedure PackCollegeFacilitiesMany(numFacilities:int, colNum:int, this:Ref);
@@ -125,7 +125,7 @@ requires (numFacilities >= 10 * colNum);
 procedure UnpackCollegeFacilitiesMany(numFacilities:int, colNum:int, this:Ref);
 requires packedCollegeFacilitiesMany[this];
 requires fracCollegeFacilitiesMany[this] > 0.0;
-ensures (collegeNumber[this] == colNum);
+requires (collegeNumber[this] == colNum);
 ensures	(numFacilities >= 10 * colNum);
 
 procedure PackCollegeFacilitiesFew(numFacilities:int, colNum:int, this:Ref);
@@ -136,7 +136,7 @@ requires (numFacilities <= 4 * colNum);
 procedure UnpackCollegeFacilitiesFew(numFacilities:int, colNum:int, this:Ref);
 requires packedCollegeFacilitiesFew[this];
 requires fracCollegeFacilitiesFew[this] > 0.0;
-ensures (collegeNumber[this] == colNum);
+requires (collegeNumber[this] == colNum);
 ensures	(numFacilities <= 4 * colNum);
 
 procedure ConstructCollege(number:int, this:Ref) 
@@ -201,8 +201,8 @@ requires (campusNumber[this] == camp);
 
 procedure UnpackStudentApplicationFields(c:Ref, camp:int, this:Ref);
 requires packedStudentApplicationFields[this];
-ensures (college[this] == c);
-ensures	(campusNumber[this] == camp);
+requires (college[this] == c);
+requires (campusNumber[this] == camp);
 
 procedure PackStudentAppFacilitiesMany(fa:int, col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesMany[this] == false;
@@ -214,8 +214,8 @@ requires fa >= 10 * collegeNumber[col];
 procedure UnpackStudentAppFacilitiesMany(fa:int, col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesMany[this];
 requires fracStudentAppFacilitiesMany[this] > 0.0;
-ensures (college[this] == col);
-ensures	(campusNumber[this] == c);
+requires (college[this] == col);
+requires (campusNumber[this] == c);
 ensures	(fracCollegeFacilitiesMany[col] > 0.0);
 ensures fa >= 10 * collegeNumber[col];
 
@@ -229,8 +229,8 @@ requires fa <= 4 * collegeNumber[col];
 procedure UnpackStudentAppFacilitiesFew(fa:int, col:Ref, c:int, this:Ref);
 requires packedStudentAppFacilitiesFew[this];
 requires fracStudentAppFacilitiesFew[this] > 0.0;
-ensures (college[this] == col);
-ensures	(campusNumber[this] == c);
+requires (college[this] == col);
+requires (campusNumber[this] == c);
 ensures	(fracCollegeFacilitiesFew[col] > 0.0);
 ensures fa <= 4 * collegeNumber[col];
 
@@ -396,7 +396,7 @@ requires  (forall j:int :: (  ((j<=maxSize[this]) && (j>=0)) ==>
 procedure UnpackApplicationWebsiteField(m: MapIntCollege, this:Ref);
 requires packedApplicationWebsiteField[this];
 requires fracApplicationWebsiteField[this] > 0.0;
-ensures	(mapOfColleges[this] == m);
+requires (mapOfColleges[this] == m);
 // TODO add something about params, the values can be null or not
 ensures  (forall j:int :: (  ((j<=maxSize[this]) && (j>=0)) ==> 
            packedKeyValuePair[this, j] && (fracKeyValuePair[this, j] > 0.0) ) );
@@ -410,12 +410,12 @@ var fracKeyValuePair : [Ref, int]real;
 procedure PackKeyValuePair(m:MapIntCollege, key:int, value:Ref, this:Ref);
 requires packedKeyValuePair[this, key] == false;
 requires mapOfColleges[this] == m;
-requires  (m[key] == value);
+requires (m[key] == value);
 
 procedure UnpackKeyValuePair(m:MapIntCollege, key:int, value:Ref, this:Ref);
 requires packedKeyValuePair[this, key];
 requires fracKeyValuePair[this, key] > 0.0;
-ensures (mapOfColleges[this] == m);
+requires (mapOfColleges[this] == m);
 ensures (m[key] == value);
 
 procedure makeMapNull(i : int, this:Ref)
