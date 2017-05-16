@@ -115,11 +115,18 @@ ensures (parent[this] != null) && (right[op] == this) ==>
 	  );
 ensures (parent[this] == null) ==> (count[this] == c);
 
-procedure ConstructComposite(count1 :int, left1 : Ref, right1 : Ref, parent1 : Ref, this: Ref);
-	 ensures (count[this] == count1) &&
- 	 	 (left[this] == left1) &&
- 	 	 (right[this] == right1) &&
- 	 	 (parent[this] == parent1); 
+procedure ConstructComposite(c :int, l : Ref,  : Ref, p : Ref, this: Ref)
+modifies count, left, right, parent;
+ensures (count[this] == c) &&
+ 	 (left[this] == l) &&
+ 	 (right[this] == r) &&
+ 	 (parent[this] == p);
+{
+	count[this] := c;
+	left[this] := l;
+	right[this] := r;
+	parent[this] := p;	
+}
 
 procedure updateCount(c:int, ol:Ref, or:Ref, op:Ref, c1:int, c2:int, c3:int, this: Ref)
 modifies count, packedCount, packedLeft, packedRight, 

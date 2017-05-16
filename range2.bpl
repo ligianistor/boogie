@@ -23,7 +23,7 @@ procedure PackRange(x:int, y:int, this:Ref);
 	requires (val[this] <= y);
   	requires (next[this] != this);
 	requires ((next[this] == null) ||
-		  (fracRange[next[this]] > 0.0)
+		  ((fracRange[next[this]] > 0.0) && (paramRangeX[next[this]]==x) && (paramRangeY[next[this]]==y))
 	 );
 
 procedure UnpackRange(x:int, y:int, this:Ref);
@@ -32,7 +32,7 @@ procedure UnpackRange(x:int, y:int, this:Ref);
 	ensures  (val[this] >= x) &&
 		 (val[this] <= y) &&
 		 ((next[this] == null) ||
-		  (fracRange[next[this]] > 0.0) 
+		 ( (fracRange[next[this]] > 0.0) && (paramRangeX[next[this]]==x) && (paramRangeY[next[this]]==y))
 		 );
   ensures (next[this] != this);
 
