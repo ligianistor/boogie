@@ -55,8 +55,9 @@ procedure ConstructRealSum(n1:int, this:Ref)
 modifies n, sum, packedBasicFieldsRealSum, fracBasicFieldsRealSum, packedSumOKRealSum,
         fracSumOKRealSum;
 requires n1 > 0;
+ensures packedSumOKRealSum[this];
+ensures fracSumOKRealSum[this] == 1.0;
 ensures n[this] == n1;
-ensures sum[this] == (n1*(n1+1)/2);
 // since the constructors also have a body now, they ensures forall like the other
 // procedures
 ensures (forall y:Ref :: ( (y!=this) ==> (n[y] == old(n[y]) ) ) );
@@ -83,16 +84,16 @@ requires (n[this] == n1);
 requires (sum[this] == s1);
 ensures packedSumGreater0RealSum[this];
 ensures (fracSumGreater0RealSum[this] > 0.0);
-//result becomes a keyword in Oprop to refer to the return result of this procedure
 ensures r > 0.0;
 {
-  var temp : real;
+  var temp, temp2 : real;
   n[this] := n1;
-  call temp := calculateSumRealSum(n[this], sum[this], this);
+  call temp := calculateSumRealSum(n1, s1, this);
+  call UnpackSumOKRealSum(n1, this);
+  packedSumOKRealSum[this] := false;
   sum[this] := temp + 1.0;
-//transfer 
-
-  call PackSumGreater0RealSum(sum[this], this);
+  temp2 := sum[this];
+  call PackSumGreater0RealSum(n1, sum[this], this);
   packedSumGreater0RealSum[this] := true;
   r := sum[this];
 }
@@ -101,18 +102,27 @@ procedure calculateSumRealSum(n1:int, s1:real, this:Ref) returns (r:real)
 modifies sum, packedSumOKRealSum, fracSumOKRealSum, packedBasicFieldsRealSum;
 requires packedBasicFieldsRealSum[this];
 requires (fracBasicFieldsRealSum[this] > 0.0);
+requires (n[this] == n1);
+requires (sum[this] == s1);
 ensures r > 0.0;
-ensures sum[this] == (n[this]*(n[this]+1)/2);
-ensures (packedSumOKRealSum[this] == false);
+ensures n[this] == n1;
+ensures packedSumOKRealSum[this];
 ensures (fracSumOKRealSum[this] > 0.0);
 //ensures (forall y:Ref :: ( (y!=this) ==> (fracSumOKRealSum[y] == old(fracSumOKRealSum[y]) ) ) );
 {
-  call UnpackBasicFieldsRealSum(sum[this], n[this], this);
+  call UnpackBasicFieldsRealSum(s1, n1, this);
   packedBasicFieldsRealSum[this] := false;
-  sum[this] := n[this] * (n[this] + 1) / 2;
+  sum[this] := n1 * (n1 + 1) / 2;
   r := sum[this];
+  call PackBasicFieldsRealSum(n1 * (n1 + 1) / 2, n1, this);
+  packedBasicFieldsRealSum[this] := true;
   
-   //transfer
+  call PackSumOKRealSum(n1, this);
+  packedSumOKRealSum[this] := true;
+// TODO might need to manipulate fractions for 
+// BasicFields inside predicate
+    
+  return r;
 }
 
 
@@ -200,7 +210,9 @@ procedure ConstructProxySum(n1:int, this:Ref)
 modifies n, sum, realSum;
 ensures n[this] == n1;
 ensures sum[this] == 0.0;
-ensures (realSum[this] == null);
+ensures realSum[this] == null;
+ensures packedBasicFieldsProxySum[this];
+ensures fracBasicFieldsProxySum[this] == 1.0;
 {
 	n[this] := n1;
 	sum[this] := 0.0;
