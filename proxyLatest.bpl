@@ -269,16 +269,13 @@ ensures n[this] == n1;
 	r := sum[this];
 }
 
-procedure addOneToSumProxySum(n1:int, s1:real, this:Ref) returns (r:real)
+procedure addOneToSumProxySum(n1:int, s1:real, ob:Ref, this:Ref) returns (r:real)
 modifies n, sum, packedSumOKRealSum, fracSumOKRealSum
         , packedBasicFieldsRealSum, fracBasicFieldsRealSum,
         packedSumGreater0RealSum, fracSumGreater0RealSum,
         packedSumGreater0ProxySum, packedBasicFieldsProxySum,
         fracSumGreater0ProxySum;
 requires packedBasicFieldsProxySum[this]==false;
-//Should this be 1.0 or 0.0 , in all the requires here?
-//I think it should be > 0 because it is like calculateSum, where sumOK() is the invariant.
-//Only here sumGreater0() is the invariant.
 requires (fracBasicFieldsProxySum[this] > 0.0);
 requires n[this] > 0;
 requires (realSum[this]!=null) ==> ( packedBasicFieldsRealSum[realSum[this]] && (fracBasicFieldsRealSum[realSum[this]] > 0.0) && (n[realSum[this]] == n[this]));
