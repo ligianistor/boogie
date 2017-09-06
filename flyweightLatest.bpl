@@ -299,8 +299,6 @@ ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesFew[y] == ol
 	campusNumber[this] := modulo(newCampusNumber, 4) + 1;
     
   	//transfer
-    	packedCollegeNumberField[college[this]] := packedCollegeFacilitiesFew[college[this]];
-    	fracCollegeNumberField[college[this]] := fracCollegeFacilitiesFew[college[this]];
 
     	call UnpackCollegeNumberField(collegeNumber[college[this]], college[this]);
     	packedCollegeNumberField[college[this]] := false;
@@ -327,8 +325,6 @@ ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesMany[y] == o
 	campusNumber[this] := newCampusNumber * 10 + 1;
     
     	//transfer
-    	packedCollegeNumberField[college[this]] := packedCollegeFacilitiesMany[college[this]];
-    	fracCollegeNumberField[college[this]] := fracCollegeFacilitiesMany[college[this]];
 
     	call UnpackCollegeNumberField(collegeNumber[college[this]], college[this]);
     	packedCollegeNumberField[college[this]] := false;
@@ -570,8 +566,6 @@ requires (forall y:Ref :: ( packedStudentAppFacilitiesFew[y]));
 	fracCollegeFacilitiesFew[college] := fracCollegeFacilitiesFew[college] / 2.0;
 
  	//transfer
-  	packedCollegeNumberField[college] := packedCollegeFacilitiesFew[college];
-  	fracCollegeNumberField[college] := fracCollegeFacilitiesFew[college];
   
    	call UnpackCollegeNumberField(collegeNumber[college], college);
     	packedCollegeNumberField[college] := false;
@@ -628,8 +622,8 @@ requires (forall y:Ref :: ( packedStudentAppFacilitiesMany[y]));
 	fracCollegeFacilitiesMany[college2] := fracCollegeFacilitiesMany[college2] / 2.0;
   
    	//transfer
-  	packedCollegeNumberField[college2] := packedCollegeFacilitiesMany[college2];
-  	fracCollegeNumberField[college2] := fracCollegeFacilitiesMany[college2];
+
+
    	call UnpackCollegeNumberField(collegeNumber[college2], college2);
     	packedCollegeNumberField[college2] := false;
 	call ConstructStudentApplication(college2, 97, app4);
