@@ -55,8 +55,7 @@ procedure ConstructRealSum(n1:int, this:Ref)
 modifies n, sum, packedBasicFieldsRealSum, fracBasicFieldsRealSum, packedSumOKRealSum,
         fracSumOKRealSum;
 requires n1 > 0;
-ensures packedSumOKRealSum[this];
-ensures fracSumOKRealSum[this] == 1.0;
+//ensures packedSumOKRealSum[this];
 ensures n[this] == n1;
 // since the constructors also have a body now, they ensures forall like the other
 // procedures
@@ -73,6 +72,20 @@ ensures (forall y:Ref :: ( (y!=this) ==> (sum[y] == old(sum[y]) ) ) );
   packedBasicFieldsRealSum[this] := true;
   fracBasicFieldsRealSum[this] := 1.0;
   call temp := calculateSumRealSum(this);
+}
+
+procedure getRealSum( this:Ref) returns (r:double) 
+modifies packedSumOKRealSum;
+requires packedSumOKRealSum[this];
+requires (fracSumOKRealSum[this] > 0.0);
+ensures packedSumOKRealSum[this];
+ensures (fracSumOKRealSum[this] > 0.0);
+{
+	call UnpackSumOKRealSum(n[this], this);
+	packedSumOKRealSum[this] := false;
+	r := sum[this];
+	call PackSumOKRealSum(n[this], this);
+	packedSumOKRealSum[this] := true;
 }
 
 procedure addOneToSumRealSum(n1:int, s1:real, this:Ref) returns (r:real)
@@ -211,37 +224,45 @@ modifies n, sum, realSum;
 ensures n[this] == n1;
 ensures sum[this] == 0.0;
 ensures realSum[this] == null;
-ensures packedBasicFieldsProxySum[this];
-ensures fracBasicFieldsProxySum[this] == 1.0;
+//ensures packedBasicFieldsProxySum[this];
+//ensures fracBasicFieldsProxySum[this] == 1.0;
 {
 	n[this] := n1;
 	sum[this] := 0.0;
 	realSum[this] := null;
 }
 
-procedure calculateSumProxySum(n1:int, s1:real, this:Ref)  returns (r:real)
+procedure calculateSumProxySum(n1:int, s1:real, ob:Ref, this:Ref)  returns (r:real)
 modifies n, sum, packedSumOKRealSum, fracSumOKRealSum,
       packedBasicFieldsRealSum, fracBasicFieldsRealSum, packedBasicFieldsProxySum,
       packedSumOKProxySum, fracSumOKProxySum;
-requires packedBasicFieldsProxySum[this] == false;
+requires packedBasicFieldsProxySum[this];
 requires (fracBasicFieldsProxySum[this] > 0.0);
-requires n[this] > 0;
-requires (realSum[this]!=null) ==> ( packedSumOKRealSum[realSum[this]] && (fracSumOKRealSum[realSum[this]] > 0.0) && (n[realSum[this]] == n[this]) );
+requires n[this] == n1;
+requires sum[this] == s1;
+requires realSum[this] == ob;
+requires (ob!=null) ==> ( packedSumOKRealSum[ob] && (fracSumOKRealSum[ob] > 0.0) && (n[ob] == n[this]) );
 ensures packedSumOKProxySum[this];
 ensures	(fracSumOKProxySum[this] > 0.0);
+ensures n[this] == n1;
 { 
 	var temp : real;
-	if (realSum[this]==null) {
-		call ConstructRealSum(n[this], realSum[this]);
-		packedSumOKRealSum[realSum[this]] := false;
-		call PackSumOKRealSum(n[this], realSum[this]);
-		packedSumOKRealSum[realSum[this]] := true;
-		fracSumOKRealSum[realSum[this]] := 1.0;
+
+	call UnpackBasicFieldsProxySum(ob, s1, n1, this);
+	packedBasicFieldsProxySum[this] := false;
+
+	if (ob==null) {
+		call ConstructRealSum(n[this], ob);
+		packedSumOKRealSum[ob] := false;
+		call PackSumOKRealSum(n[this], ob);
+		packedSumOKRealSum[ob] := true;
+		fracSumOKRealSum[ob] := 1.0;
 	}
-	call temp := calculateSumRealSum(realSum[this]);
+	call temp := getRealSum(ob);
 	sum[this] := temp;
 
-	// transfer 
+	call PackBasicFieldsProxySum(ob, sum[this], n1, this);
+	packedBasicFieldsProxySum[this]ed := true;
 
 	call PackSumOKProxySum(n[this], this);
 	packedSumOKProxySum[this] := true;
