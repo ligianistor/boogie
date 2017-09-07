@@ -270,36 +270,34 @@ ensures n[this] == n1;
 }
 
 procedure addOneToSumProxySum(n1:int, s1:real, ob:Ref, this:Ref) returns (r:real)
-modifies n, sum, packedSumOKRealSum, fracSumOKRealSum
-        , packedBasicFieldsRealSum, fracBasicFieldsRealSum,
+modifies n, sum, packedSumOKRealSum, fracSumOKRealSum,
+        packedBasicFieldsRealSum, fracBasicFieldsRealSum,
         packedSumGreater0RealSum, fracSumGreater0RealSum,
         packedSumGreater0ProxySum, packedBasicFieldsProxySum,
         fracSumGreater0ProxySum;
-requires packedBasicFieldsProxySum[this]==false;
+requires packedBasicFieldsProxySum[this];
 requires (fracBasicFieldsProxySum[this] > 0.0);
-requires n[this] > 0;
-requires (realSum[this]!=null) ==> ( packedBasicFieldsRealSum[realSum[this]] && (fracBasicFieldsRealSum[realSum[this]] > 0.0) && (n[realSum[this]] == n[this]));
+requires n[this] == n1;
+requires sum[this] == s1;
+requires realSum[this] == ob;
+requires (ob!=null) ==> ( packedBasicFieldsRealSum[ob] && (fracBasicFieldsRealSum[ob] > 0.0) && (n[ob] == n[this]));
 ensures packedSumGreater0ProxySum[this];
 ensures (fracSumGreater0ProxySum[this] > 0.0);
 {
-  var temp : real;
-	if (realSum[this] == null) {
-		call ConstructRealSum(n[this], realSum[this]);
-		packedSumOKRealSum[realSum[this]] := false;
-		call PackSumOKRealSum(n[this], realSum[this]);
-		packedSumOKRealSum[realSum[this]] := true;
-		fracSumOKRealSum[realSum[this]] := 1.0;
-    // transfer 
-
+	var temp : real;
+	if (ob == null) {
+		call ConstructRealSum(n[this], ob);
+		packedSumOKRealSum[ob] := false;
+		call PackSumOKRealSum(n[this], ob);
+		packedSumOKRealSum[ob] := true;
+		fracSumOKRealSum[ob] := 1.0;
 	} 
 
-  call temp := addOneToSumRealSum(realSum[this]);
-  sum[this] := temp;
-  // transfer 
-
-  call PackSumGreater0ProxySum(sum[this], this);
-  packedSumGreater0ProxySum[this] := true;
-  r := sum[this];
+	  call temp := addOneToSumRealSum(ob);
+	  sum[this] := temp;
+	  call PackSumGreater0ProxySum(ob, n1, sum[this], this);
+	  packedSumGreater0ProxySum[this] := true;
+	  r := sum[this];
 }
 
 procedure sumIsOKProxySum(this:Ref) returns (r:bool)
@@ -346,7 +344,6 @@ var fracClientSumGreater0 : [Ref]real;
 procedure PackClientSumOK(suCli:Ref, this:Ref);
 requires (packedClientSumOK[this] == false);
 requires sumClient[this] == suCli;
-// TODO add requires about parameters if needed
 requires (instanceof[suCli] == 1) ==> (fracSumOKProxySum[suCli] > 0.0) ;
 requires (instanceof[suCli] == 2) ==> (fracSumOKRealSum[suCli] > 0.0) ;
 
@@ -354,14 +351,12 @@ procedure UnpackClientSumOK(suCli:Ref, this:Ref);
 requires packedClientSumOK[this];
 requires fracClientSumOK[this] > 0.0;
 requires sumClient[this] == suCli;
-// TODO add requires about parameters if needed
 ensures (instanceof[suCli] == 1) ==> (fracSumOKProxySum[suCli] > 0.0) ;
 ensures (instanceof[suCli] == 2) ==> (fracSumOKRealSum[suCli] > 0.0) ;
 
 procedure PackClientSumGreater0(suCli:Ref, this:Ref);
 requires (packedClientSumGreater0[this] == false);
 requires sumClient[this] == suCli;
-// TODO add requires about parameters if needed
 requires (instanceof[suCli] == 1) ==> (fracSumGreater0ProxySum[suCli] > 0.0) ;
 requires (instanceof[suCli] == 2) ==> (fracSumGreater0RealSum[suCli] > 0.0) ;
 
@@ -369,7 +364,6 @@ procedure UnpackClientSumGreater0(suCli:Ref, this:Ref);
 requires packedClientSumGreater0[this];
 requires fracClientSumGreater0[this] > 0.0;
 requires sumClient[this] == suCli;
-// TODO add requires about parameters if needed
 ensures (instanceof[suCli] == 1) ==> (fracSumGreater0ProxySum[suCli] > 0.0) ;
 ensures (instanceof[suCli] == 2) ==> (fracSumGreater0RealSum[suCli] > 0.0) ;
 
@@ -465,11 +459,9 @@ call PackBasicFieldsProxySum(realSum[s], sum[s], n[s], s);
 packedBasicFieldsProxySum[s] := true;
 fracBasicFieldsProxySum[s] := 1.0;
 instanceof[s] := 1;
-// could keep the if like below
-// but I instead simplified it
-call UnpackBasicFieldsProxySum(realSum[s], sum[s], n[s], s);
-packedBasicFieldsProxySum[s] := false;
+
 call temp := calculateSumProxySum(s);
+
 call ConstructClientSum(s, client1);
 packedClientSumOK[client1] := false;
 call PackClientSumOK(s, client1);
@@ -477,24 +469,17 @@ packedClientSumOK[client1] := true;
 fracClientSumOK[client1] := 1.0;
 
 call ConstructClientSum(s, client2);
-
 packedClientSumOK[client2] := false;
 call PackClientSumOK(s, client2);
 packedClientSumOK[client2] := true;
 fracClientSumOK[client2] := 1.0;
 
-call UnpackClientSumOK(s, client1);
-packedClientSumOK[client1] := false;
 call temp2 := checkSumIsOK(client1);
 
-//transfer 
+call UnpackSumOKProxySum(n[s], s);
+packedSumOKProxySum[s] := false;
 
-call UnpackBasicFieldsProxySum(realSum[s], sum[s], n[s], s);
-packedBasicFieldsProxySum[s] := false;
 call temp := calculateSumProxySum(s);
-
-call UnpackClientSumOK(s, client2);
-packedClientSumOK[client2] := false;
 
 call temp2 := checkSumIsOK(client2);
 }
@@ -527,8 +512,7 @@ call PackBasicFieldsProxySum(realSum[s2], sum[s2], n[s2], s2);
 packedBasicFieldsProxySum[s2] := true;
 fracBasicFieldsProxySum[s2] := 1.0;
 instanceof[s2] := 1;
-call UnpackBasicFieldsProxySum(realSum[s2], sum[s2], n[s2], s2);
-packedBasicFieldsProxySum[s2] := false;
+
 call temp1 := addOneToSumProxySum(s2);
 
 call ConstructClientSum(s2, client3);
@@ -543,20 +527,12 @@ call PackClientSumGreater0(s2, client4);
 packedClientSumGreater0[client4] := true;
 fracClientSumGreater0[client4] := 1.0;
 
-call UnpackClientSumGreater0(s2, client3);
-packedClientSumGreater0[client3] := false;
-
 call temp2 := checkSumGreater0(client3);
 
-//transfer 
+call UnpackSumGreater0ProxySum(realSum[s2], sum[s2], n[s2], s2);
+packedSumGreater0ProxySum[s2] := false;
 
-
-call UnpackBasicFieldsProxySum(realSum[s2], sum[s2], n[s2], s2);
-packedBasicFieldsProxySum[s2] := false;
 call temp1 := addOneToSumProxySum(s2);
-
-call UnpackClientSumGreater0(s2, client4);
-packedClientSumGreater0[client4] := false;
 
 call temp2 := checkSumGreater0(client4);
 }
