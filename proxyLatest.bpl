@@ -459,7 +459,7 @@ packedBasicFieldsProxySum[s] := true;
 fracBasicFieldsProxySum[s] := 1.0;
 instanceof[s] := 1;
 
-call temp := calculateSumProxySum(s);
+call temp := calculateSumProxySum(  n[s], sum[s],realSum[s], s);
 
 call ConstructClientSum(s, client1);
 packedClientSumOK[client1] := false;
@@ -478,7 +478,7 @@ call temp2 := checkSumIsOK(client1);
 call UnpackSumOKProxySum(n[s], realSum[s], s);
 packedSumOKProxySum[s] := false;
 
-call temp := calculateSumProxySum(s);
+call temp := calculateSumProxySum( n[s],sum[s],realSum[s], s);
 
 call temp2 := checkSumIsOK(client2);
 }
@@ -512,7 +512,7 @@ packedBasicFieldsProxySum[s2] := true;
 fracBasicFieldsProxySum[s2] := 1.0;
 instanceof[s2] := 1;
 
-call temp1 := addOneToSumProxySum(s2);
+call temp1 := addOneToSumProxySum(  n[s2],sum[s2], realSum[s2], s2);
 
 call ConstructClientSum(s2, client3);
 packedClientSumGreater0[client3] := false;
@@ -528,10 +528,10 @@ fracClientSumGreater0[client4] := 1.0;
 
 call temp2 := checkSumGreater0(client3);
 
-call UnpackSumGreater0ProxySum(sum[s2], n[s2], realSum[s2], s2);
+call UnpackSumGreater0ProxySum( n[s2],sum[s2], realSum[s2], s2);
 packedSumGreater0ProxySum[s2] := false;
 
-call temp1 := addOneToSumProxySum(s2);
+call temp1 := addOneToSumProxySum(  n[s2],sum[s2],realSum[s2],s2);
 
 call temp2 := checkSumGreater0(client4);
 }

@@ -70,7 +70,7 @@ ensures (collegeNumber[this] == number);
 	endowment[this] := (number *1000) - 5;
 }
 
-procedure getCollegeNumber(int c, this:Ref) returns (r:int)
+procedure getCollegeNumber(c:int, this:Ref) returns (r:int)
 modifies packedCollegeNumberField;
 requires packedCollegeNumberField[this];
 requires collegeNumber[this] == c;
@@ -88,6 +88,7 @@ ensures collegeNumber[this] == c;
 
 // the method that calculates the extrinsic state
 procedure getNumberFacilities(campNum:int, colNum:int, this:Ref) returns (r:int)
+modifies packedCollegeNumberField;
 requires packedCollegeNumberField[this] == false;
 requires fracCollegeNumberField[this] > 0.0;
 requires (collegeNumber[this] == colNum);
@@ -341,7 +342,7 @@ requires (mapOfColleges[this] == m);
 ensures (m[key] == value);
 
 procedure makeMapNull(i : int, this:Ref)
-modifies mapOfColleges, packedKeyValuePair, fracKeyValuePair;
+modifies mapOfColleges, packedKeyValuePair, fracKeyValuePair, packedMapOfCollegesField;
 requires (i>=0);
 ensures (forall j:int :: (((j<=i) && (j>=0) ) ==> (packedKeyValuePair[this, j] && ( fracKeyValuePair[this, j] == 1.0 )))  );
 {
@@ -363,7 +364,7 @@ if (i==0) {
 }
 }
 
-procedure containsKey(key1: int, this:Ref) returns (b:bool);
+procedure containsKey(key1: int, this:Ref) returns (b:bool)
 requires packedApplicationWebsiteField[this];
 requires (fracApplicationWebsiteField[this] > 0.0);
 //requires this#k MapOfCollegesField()
@@ -376,8 +377,8 @@ ensures (b == false) ==> packedKeyValuePair[this, key1] && (fracKeyValuePair[thi
 	} 
 }
 	
-procedure put(key1 : int, college1: Ref, this:Ref) ;
-modifies mapOfColleges, packedKeyValuePair;
+procedure put(key1 : int, college1: Ref, this:Ref) 
+modifies mapOfColleges, packedKeyValuePair, packedMapOfCollegesField;
 requires packedApplicationWebsiteField[this]==false;
 requires (fracApplicationWebsiteField[this] > 0.0);
 // This put procedure will be called with null for the value in packedKeyValuePair.
@@ -397,7 +398,7 @@ ensures	(fracKeyValuePair[this, key1] > 0.0);
 	packedKeyValuePair[this, key1] := true;
  }
 	
-procedure get(key1:int, this:Ref) returns (c:Ref);
+procedure get(key1:int, this:Ref) returns (c:Ref)
 requires packedKeyValuePair[this, key1];
 requires (fracKeyValuePair[this, key1] > 0.0);
 ensures packedKeyValuePair[this, key1];
@@ -412,7 +413,7 @@ ensures fracCollegeNumberField[c] > 0.0;
 	
 procedure lookup(colNum:int, this:Ref) returns (r:Ref)
 modifies mapOfColleges, packedCollegeNumberField, fracCollegeNumberField,collegeNumber,
-       endowment, packedKeyValuePair, packedApplicationWebsiteField;
+       endowment, packedKeyValuePair, packedApplicationWebsiteField, packedMapOfCollegesField;
 requires (0<colNum);
 requires packedApplicationWebsiteField[this];
 requires (fracApplicationWebsiteField[this] > 0.0);
@@ -441,7 +442,7 @@ ensures fracCollegeNumberField[r] > 0.0;
 }
 
 procedure ConstructApplicationWebsite(maxSize1:int, this:Ref)
-modifies maxSize, mapOfColleges, packedKeyValuePair, fracKeyValuePair;
+modifies maxSize, mapOfColleges, packedKeyValuePair, fracKeyValuePair, packedMapOfCollegesField;
 requires (maxSize1>=0);
 ensures (forall j:int :: ((j<=maxSize1) && (j>=0)) ==> (packedKeyValuePair[this, j] && (fracKeyValuePair[this, j]==1.0)) ) ;
 ensures maxSize[this] == maxSize1;
@@ -452,7 +453,7 @@ ensures maxSize[this] == maxSize1;
 
 procedure submitApplicationGetCollege(colNum:int, this:Ref) returns (r: Ref)
 modifies mapOfColleges, packedCollegeNumberField, fracCollegeNumberField, collegeNumber, endowment,
-        packedKeyValuePair, packedApplicationWebsiteField;
+        packedKeyValuePair, packedApplicationWebsiteField, packedMapOfCollegesField;
 requires packedApplicationWebsiteField[this];
 requires (fracApplicationWebsiteField[this] > 0.0);
 requires (0<colNum);
@@ -473,7 +474,7 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
   packedKeyValuePair, fracKeyValuePair,
   packedCollegeFacilitiesFew, packedCollegeFacilitiesMany, packedCollegeNumberField,
-  fracCollegeNumberField;
+  fracCollegeNumberField, packedMapOfCollegesField;
 requires (forall  x:Ref :: ( packedCollegeFacilitiesFew[x]));
 requires (forall y:Ref :: ( packedStudentAppFacilitiesFew[y]));
 {
@@ -528,7 +529,7 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
   packedKeyValuePair, fracKeyValuePair,
   packedCollegeFacilitiesFew, packedCollegeFacilitiesMany,
-  packedCollegeNumberField, fracCollegeNumberField;
+  packedCollegeNumberField, fracCollegeNumberField, packedMapOfCollegesField;
 requires (forall  x:Ref :: ( packedCollegeFacilitiesMany[x]));
 requires (forall y:Ref :: ( packedStudentAppFacilitiesMany[y]));
 {
