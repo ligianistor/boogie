@@ -89,7 +89,7 @@ ensures collegeNumber[this] == c;
 // the method that calculates the extrinsic state
 procedure getNumberFacilities(campNum:int, colNum:int, this:Ref) returns (r:int)
 modifies packedCollegeNumberField;
-requires packedCollegeNumberField[this] == false;
+requires packedCollegeNumberField[this];
 requires fracCollegeNumberField[this] > 0.0;
 requires (collegeNumber[this] == colNum);
 requires campNum > 0;
@@ -165,7 +165,7 @@ modifies college, facilities, campusNumber,
         fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
         packedCollegeNumberField;
 requires campusNum > 0;
-requires (packedCollegeNumberField[col] == false);
+requires packedCollegeNumberField[col];
 requires fracCollegeNumberField[col] > 0.0;
 requires collegeNumber[col] > 0;
 ensures (college[this] == col);
@@ -184,22 +184,22 @@ ensures  (forall  x:Ref :: ( old(packedCollegeFacilitiesMany[x]) == true ==>  pa
 {
     var temp : int;
     college[this] := col;
-    call temp := getNumberFacilities(campusNum, collegeNumber[college[this]], college[this]);
+    call temp := getNumberFacilities(campusNum, collegeNumber[col], col);
     facilities[this] := temp;// !!!Here I need to add in the Java program what is the
     // new predicate that has to hold about col, because only now I have all the information
     // to know which predicate holds.
     // I have a fraction to col since it is given as input.
     campusNumber[this] := campusNum;	
     if (0 < campusNum  && campusNum <= 4) {
-      call PackCollegeNumberField(collegeNumber[college[this]], college[this]);
-      packedCollegeNumberField[college[this]] := true;
-      call PackCollegeFacilitiesFew(facilities[this], collegeNumber[college[this]], college[this]);
-      packedCollegeFacilitiesFew[college[this]] := true;
+      packedCollegeFacilitiesFew[col] := false;
+      call PackCollegeFacilitiesFew(facilities[this], collegeNumber[col], col);
+      packedCollegeFacilitiesFew[col] := true;
+      fracCollegeFacilitiesFew[col] := fracCollegeNumberField[col];
     } else if (campusNum >= 10) {
-      call PackCollegeNumberField(collegeNumber[college[this]], college[this]);
-      packedCollegeNumberField[college[this]] := true;
-      call PackCollegeFacilitiesMany(facilities[this] ,collegeNumber[college[this]], college[this]);
-      packedCollegeFacilitiesMany[college[this]] := true;
+      packedCollegeFacilitiesMany[col] := false;
+      call PackCollegeFacilitiesMany(facilities[this] ,collegeNumber[col], col);
+      packedCollegeFacilitiesMany[col] := true;
+      fracCollegeFacilitiesMany[col] := fracCollegeNumberField[col];
     } else {
       // we cannot end up here
       assume false;
