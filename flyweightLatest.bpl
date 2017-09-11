@@ -403,16 +403,22 @@ if (i==0) {
 }
 
 procedure containsKey(key1: int, this:Ref) returns (b:bool)
-requires packedApplicationWebsiteField[this];
-requires (fracApplicationWebsiteField[this] > 0.0);
+modifies packedKeyValuePair, fracMapOfCollegesField;
+requires packedKeyValuePair[this, key1];
+requires ( fracKeyValuePair[this, key1] > 0.0 );
 //requires this#k MapOfCollegesField()
 ensures (b == true) ==> packedKeyValuePair[this, key1] && (fracKeyValuePair[this, key1] > 0.0);
 ensures (b == false) ==> packedKeyValuePair[this, key1] && (fracKeyValuePair[this, key1] > 0.0) &&(mapOfColleges[this][key1] == null);
 {
 	b := true;
+  call UnpackKeyValuePair(key1, mapOfColleges[this][key1] , mapOfColleges[this], this);
+  packedKeyValuePair[this, key1] := false;
+  fracMapOfCollegesField[this] := 0.1;
 	if (mapOfColleges[this][key1] == null) {
 		b := false;	
 	} 
+  call PackKeyValuePair(key1, mapOfColleges[this][key1] , mapOfColleges[this], this);
+  packedKeyValuePair[this, key1] := true;
 }
 	
 procedure put(key1 : int, college1: Ref, this:Ref) 
@@ -451,7 +457,8 @@ ensures fracCollegeNumberField[c] > 0.0;
 	
 procedure lookup(colNum:int, this:Ref) returns (r:Ref)
 modifies mapOfColleges, packedCollegeNumberField, fracCollegeNumberField,collegeNumber,
-       endowment, packedKeyValuePair, packedApplicationWebsiteField, packedMapOfCollegesField;
+       endowment, packedKeyValuePair, packedApplicationWebsiteField, packedMapOfCollegesField, 
+       fracMapOfCollegesField;
 requires (0<colNum);
 requires packedApplicationWebsiteField[this];
 requires (fracApplicationWebsiteField[this] > 0.0);
@@ -491,7 +498,8 @@ ensures maxSize[this] == maxSize1;
 
 procedure submitApplicationGetCollege(colNum:int, this:Ref) returns (r: Ref)
 modifies mapOfColleges, packedCollegeNumberField, fracCollegeNumberField, collegeNumber, endowment,
-        packedKeyValuePair, packedApplicationWebsiteField, packedMapOfCollegesField;
+        packedKeyValuePair, packedApplicationWebsiteField, packedMapOfCollegesField,
+        fracMapOfCollegesField;
 requires packedApplicationWebsiteField[this];
 requires (fracApplicationWebsiteField[this] > 0.0);
 requires (0<colNum);
@@ -512,7 +520,7 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
   packedKeyValuePair, fracKeyValuePair,
   packedCollegeFacilitiesFew, packedCollegeFacilitiesMany, packedCollegeNumberField,
-  fracCollegeNumberField, packedMapOfCollegesField;
+  fracCollegeNumberField, packedMapOfCollegesField, fracMapOfCollegesField;
 requires (forall  x:Ref :: ( packedCollegeFacilitiesFew[x]));
 requires (forall y:Ref :: ( packedStudentAppFacilitiesFew[y]));
 {
@@ -568,7 +576,8 @@ modifies mapOfColleges, packedApplicationWebsiteField,
   fracCollegeFacilitiesFew, fracCollegeFacilitiesMany,
   packedKeyValuePair, fracKeyValuePair,
   packedCollegeFacilitiesFew, packedCollegeFacilitiesMany,
-  packedCollegeNumberField, fracCollegeNumberField, packedMapOfCollegesField;
+  packedCollegeNumberField, fracCollegeNumberField, packedMapOfCollegesField,
+  fracMapOfCollegesField;
 requires (forall  x:Ref :: ( packedCollegeFacilitiesMany[x]));
 requires (forall y:Ref :: ( packedStudentAppFacilitiesMany[y]));
 {
