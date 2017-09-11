@@ -469,8 +469,10 @@ requires mapOfColleges[this] == ma;
 requires (forall  z:int :: ( packedKeyValuePair[this, z]));
 requires (forall  z:int :: ( fracKeyValuePair[this, z] > 0.0));
 
-ensures (forall j:int :: ((j<=maxSize1) && (j>=0)) ==> (packedKeyValuePair[this, j] && (fracKeyValuePair[this, j]> 0.0)) ) ;
+ensures (forall j:int :: (packedKeyValuePair[this, j] && (fracKeyValuePair[this, j]> 0.0)) ) ;
 ensures maxSize[this] == maxSize1;
+ensures packedMapOfCollegesField[this];
+ensures fracMapOfCollegesField[this] > 0.0;
 {  
 	call makeMapNull(maxSize1, ma, this);
 	maxSize[this] := maxSize1;
@@ -504,10 +506,7 @@ requires (forall  x:Ref, z:int :: ( fracKeyValuePair[x, z] > 0.0));
 	fracMapOfCollegesField[website] := 1.0;
 
 	call InitializeApplicationWebsite(100, ma, website);
-	packedApplicationWebsiteField[website] := false;
-	call PackApplicationWebsiteField(mapOfColleges[website], website);
-	packedApplicationWebsiteField[website] := true;
-	fracApplicationWebsiteField[website] := 1.0;
+
 
 	call college := lookup(2, website);
 
@@ -566,10 +565,6 @@ requires (forall  x:Ref, z:int :: ( fracKeyValuePair[x, z] > 0.0));
 	fracMapOfCollegesField[website] := 1.0;
   
   	call InitializeApplicationWebsite(100, ma, website);
-	packedApplicationWebsiteField[website] := false;
-	call PackApplicationWebsiteField(mapOfColleges[website], website);
-	packedApplicationWebsiteField[website] := true;
-	fracApplicationWebsiteField[website] := 1.0;
   
 	call college2 := lookup(56, website);
 
