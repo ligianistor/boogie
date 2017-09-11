@@ -360,16 +360,25 @@ procedure makeMapNull(i : int, ma: MapIntCollege, this:Ref)
 modifies mapOfColleges, packedKeyValuePair, fracKeyValuePair, packedMapOfCollegesField;
 requires (i>=0);
 requires packedMapOfCollegesField[this] == true;
-requires fracMapOfCollegesField[this] == 1.0;
+requires fracMapOfCollegesField[this] > 0.0;
 requires mapOfColleges[this] == ma;
+requires (forall  z:int :: ( packedKeyValuePair[this, z]));
+requires (forall  z:int :: ( fracKeyValuePair[this, z] > 0.0));
 requires (forall j:int :: (((j<=i) && (j>=0) ) ==> (packedKeyValuePair[this, j] && ( fracKeyValuePair[this, j] > 0.0 )))  );
 ensures (forall j:int :: (((j<=i) && (j>=0) ) ==> (packedKeyValuePair[this, j] && ( fracKeyValuePair[this, j] > 0.0 ) && (mapOfColleges[this][j] == null)))  );
+ensures packedMapOfCollegesField[this] == true;
+
+ensures fracMapOfCollegesField[this] > 0.0;
+
+ensures (forall  z:int :: ( packedKeyValuePair[this, z]));
+ensures (forall  z:int :: ( fracKeyValuePair[this, z] > 0.0));
+
 {
 if (i==0) {
- 	call UnpackMapOfCollegesField(mapOfColleges[this], this);
-	packedMapOfCollegesField[this] := false;
-  call UnpackKeyValuePair(i, mapOfColleges[this][i] , ma, this);
+  call UnpackKeyValuePair(i, ma[i] , ma, this);
   packedKeyValuePair[this, i] := false;
+  call UnpackMapOfCollegesField(ma, this);
+	packedMapOfCollegesField[this] := false;
   
 	mapOfColleges[this][i] := null;	
 	call PackMapOfCollegesField(mapOfColleges[this], this);
@@ -380,7 +389,10 @@ if (i==0) {
   fracKeyValuePair[this, i] := 1.0;
 } else if (i>0) {
 	call makeMapNull(i-1, ma, this);
-  
+  call UnpackKeyValuePair(i, ma[i] , mapOfColleges[this], this);
+  packedKeyValuePair[this, i] := false;
+  call UnpackMapOfCollegesField(mapOfColleges[this], this);
+	packedMapOfCollegesField[this] := false;
   mapOfColleges[this][i] := null;	
 	call PackMapOfCollegesField(mapOfColleges[this], this);
 	packedMapOfCollegesField[this] := true;
