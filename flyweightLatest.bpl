@@ -169,7 +169,6 @@ modifies college, facilities, campusNumber,
 requires campusNum > 0;
 requires packedCollegeNumberField[col];
 requires fracCollegeNumberField[col] > 0.0;
-requires collegeNumber[col] > 0;
 ensures (college[this] == col);
 ensures (campusNumber[this] == campusNum);
 ensures ( (campusNum <= 4) && (campusNum > 0)  )==> ( packedCollegeFacilitiesFew[col] && 
@@ -426,9 +425,8 @@ modifies mapOfColleges, packedCollegeNumberField, fracCollegeNumberField,college
        endowment, packedKeyValuePair, packedApplicationWebsiteField, packedMapOfCollegesField, 
        fracMapOfCollegesField,fracKeyValuePair;
 requires (0<colNum);
-requires packedApplicationWebsiteField[this];
-requires (fracApplicationWebsiteField[this] > 0.0);
 requires (forall j:int :: (packedKeyValuePair[this, j]));
+requires (fracKeyValuePair[this, colNum] > 0.0);
 ensures packedKeyValuePair[this, colNum];
 ensures	(fracKeyValuePair[this, colNum] > 0.0);
 
@@ -436,10 +434,7 @@ ensures	(fracKeyValuePair[this, colNum] > 0.0);
 {
 	var temp:bool;
 	var c:Ref;
-	call UnpackApplicationWebsiteField(mapOfColleges[this], this);
-	packedApplicationWebsiteField[this] := false;
-// this below might have to be a forall?
-	fracKeyValuePair[this, colNum] := 0.1;
+
 	call temp := containsKey(colNum, this);
 	if (temp == false) {
 		call ConstructCollege(colNum, c);
@@ -510,8 +505,7 @@ requires (forall  x:Ref, z:int :: ( fracKeyValuePair[x, z] > 0.0));
 
 	call college := lookup(2, website);
 
- 	call UnpackCollegeNumberField(collegeNumber[college], college);
- 	packedCollegeNumberField[college] := false;
+
 	call ConstructStudentApplication(college, 3, app1);
 
 	packedStudentAppFacilitiesFew[app1] := false;
@@ -520,9 +514,6 @@ requires (forall  x:Ref, z:int :: ( fracKeyValuePair[x, z] > 0.0));
 	fracStudentAppFacilitiesFew[app1] := 1.0;
 	fracCollegeFacilitiesFew[college] := fracCollegeFacilitiesFew[college] / 2.0;
 
-  
-   	call UnpackCollegeNumberField(collegeNumber[college], college);
-    	packedCollegeNumberField[college] := false;
 	call ConstructStudentApplication(college, 2, app2);
 	packedStudentAppFacilitiesFew[app2] := false;
 	call PackStudentAppFacilitiesFew(facilities[app2], college, 2, app2);
@@ -568,8 +559,6 @@ requires (forall  x:Ref, z:int :: ( fracKeyValuePair[x, z] > 0.0));
   
 	call college2 := lookup(56, website);
 
-   	call UnpackCollegeNumberField(collegeNumber[college2], college2);
-    	packedCollegeNumberField[college2] := false;
 	call ConstructStudentApplication(college2, 45, app3);
 
 	packedStudentAppFacilitiesMany[app3] := false;
@@ -578,9 +567,7 @@ requires (forall  x:Ref, z:int :: ( fracKeyValuePair[x, z] > 0.0));
 	packedStudentAppFacilitiesMany[app3] := true;
 	fracStudentAppFacilitiesMany[app3] := 1.0;
 	fracCollegeFacilitiesMany[college2] := fracCollegeFacilitiesMany[college2] / 2.0;
-  
-   	call UnpackCollegeNumberField(collegeNumber[college2], college2);
-    	packedCollegeNumberField[college2] := false;
+
 	call ConstructStudentApplication(college2, 97, app4);
 	packedStudentAppFacilitiesMany[app4] := false;
 	call PackStudentAppFacilitiesMany(facilities[app4], college2, 97, app4);
