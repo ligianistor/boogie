@@ -422,9 +422,9 @@ ensures (b == false) ==> packedKeyValuePair[this, key1] && (fracKeyValuePair[thi
 }
 	
 procedure put(key1 : int, college1: Ref, this:Ref) 
-modifies mapOfColleges, packedKeyValuePair, packedMapOfCollegesField;
-requires packedApplicationWebsiteField[this]==false;
-requires (fracApplicationWebsiteField[this] > 0.0);
+modifies mapOfColleges, packedKeyValuePair, packedMapOfCollegesField, fracMapOfCollegesField;
+requires packedKeyValuePair[this, key1];
+requires ( fracKeyValuePair[this, key1] > 0.0 );
 // This put procedure will be called with null for the value in packedKeyValuePair.
 requires packedKeyValuePair[this, key1];
 requires (fracKeyValuePair[this, key1] > 0.0);
@@ -433,11 +433,10 @@ ensures	(fracKeyValuePair[this, key1] > 0.0);
 {
 	call UnpackKeyValuePair(key1, null, mapOfColleges[this], this);
 	packedKeyValuePair[this, key1] := false;
-	call UnpackMapOfCollegesField(mapOfColleges[this], this);
-	packedMapOfCollegesField[this] := false;
+  fracMapOfCollegesField[this] := 0.1;
+
 	mapOfColleges[this][key1] := college1;
-	call PackMapOfCollegesField(mapOfColleges[this], this);
-	packedMapOfCollegesField[this] := true;	
+
 	call PackKeyValuePair(key1, college1, mapOfColleges[this], this);
 	packedKeyValuePair[this, key1] := true;
  }
