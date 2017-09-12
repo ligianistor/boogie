@@ -95,8 +95,11 @@ requires packedCollegeNumberField[this];
 requires fracCollegeNumberField[this] > 0.0;
 requires (collegeNumber[this] == colNum);
 requires campNum > 0;
-requires colNum > 0;
+ensures packedCollegeNumberField[this];
+ensures fracCollegeNumberField[this] > 0.0;
+ensures  (forall  x:Ref :: ( old(packedCollegeNumberField[x]) ==> packedCollegeNumberField[x]));
 ensures  r == colNum * campNum;
+ensures r>0;
 {
 	call UnpackCollegeNumberField(colNum, this);
 	packedCollegeNumberField[this] := false;
@@ -171,17 +174,20 @@ requires packedCollegeNumberField[col];
 requires fracCollegeNumberField[col] > 0.0;
 ensures (college[this] == col);
 ensures (campusNumber[this] == campusNum);
+ensures packedCollegeNumberField[col];
 ensures ( (campusNum <= 4) && (campusNum > 0)  )==> ( packedCollegeFacilitiesFew[col] && 
-	(fracCollegeFacilitiesFew[col] > 0.0)  && (facilities[this] == collegeNumber[col] * campusNum) );
+	(fracCollegeFacilitiesFew[col] > 0.0)  && (facilities[this] == collegeNumber[col] * campusNum) && 
+  (collegeNumber[col] > 0) );
 ensures (campusNum >= 10) ==> ( packedCollegeFacilitiesMany[col] &&
-	(fracCollegeFacilitiesMany[col] > 0.0)  && (facilities[this] == collegeNumber[col] * campusNum) );
+	(fracCollegeFacilitiesMany[col] > 0.0)  && (facilities[this] == collegeNumber[col] * campusNum) && (collegeNumber[col] > 0) );
 // The ensures here are because the variables of type College can satisfy either packedCollegeFacilitiesFew or packedCollegeFacilitiesMany.
 // This is an artifact of Boogie, if we could specify more granular "modifies" clauses then we wouldn't need all these ensures forall or 
 // requires forall.
 // The alternative would be to have a constructor ConstructStudentApplication that constructs a College with many facilities and
 // another constructor for a College with few facilities.
-ensures  (forall  x:Ref :: ( old(packedCollegeFacilitiesFew[x]) == true ==> packedCollegeFacilitiesFew[x]));
-ensures  (forall  x:Ref :: ( old(packedCollegeFacilitiesMany[x]) == true ==>  packedCollegeFacilitiesMany[x]));
+ensures  (forall  x:Ref :: ( old(packedCollegeFacilitiesFew[x])  ==> packedCollegeFacilitiesFew[x]));
+ensures  (forall  x:Ref :: ( old(packedCollegeFacilitiesMany[x])  ==>  packedCollegeFacilitiesMany[x]));
+ensures  (forall  x:Ref :: ( old(packedCollegeNumberField[x]) ==> packedCollegeNumberField[x]));
 {
     var temp : int;
     college[this] := col;
@@ -408,6 +414,8 @@ requires ( fracKeyValuePair[this, key1] > 0.0 );
 //requires this#k MapOfCollegesField()
 ensures (b == true) ==> packedKeyValuePair[this, key1] && (fracKeyValuePair[this, key1] > 0.0);
 ensures (b == false) ==> packedKeyValuePair[this, key1] && (fracKeyValuePair[this, key1] > 0.0) &&(mapOfColleges[this][key1] == null);
+ensures (forall x:Ref ::(packedCollegeNumberField[x] == old(packedCollegeNumberField[x]))); 
+
 {
 	b := true;
   call UnpackKeyValuePair(key1, mapOfColleges[this][key1] , mapOfColleges[this], this);
@@ -425,24 +433,27 @@ modifies mapOfColleges, packedCollegeNumberField, fracCollegeNumberField,college
        endowment, packedKeyValuePair, packedApplicationWebsiteField, packedMapOfCollegesField, 
        fracMapOfCollegesField,fracKeyValuePair;
 requires (0<colNum);
+requires (forall x:Ref ::packedCollegeNumberField[x]); 
 requires (forall j:int :: (packedKeyValuePair[this, j]));
 requires (fracKeyValuePair[this, colNum] > 0.0);
 ensures packedKeyValuePair[this, colNum];
 ensures	(fracKeyValuePair[this, colNum] > 0.0);
-
+ensures (forall x:Ref ::packedCollegeNumberField[x]); 
+ensures (0<colNum);
 //ensures this#k KeyValuePair(colNum, result)
 {
 	var temp:bool;
 	var c:Ref;
 
 	call temp := containsKey(colNum, this);
+
 	if (temp == false) {
-		call ConstructCollege(colNum, c);
+		call ConstructCollege(colNum, c); 
 		packedCollegeNumberField[c] := false;
 		call PackCollegeNumberField(colNum, c);
 		packedCollegeNumberField[c] := true;
 		fracCollegeNumberField[c] := 1.0;
-	    
+  
 		mapOfColleges[this][colNum] := c;
 	}
 	r := mapOfColleges[this][colNum];
@@ -488,6 +499,7 @@ requires (forall  x:Ref :: ( packedCollegeFacilitiesFew[x]));
 requires (forall y:Ref :: ( packedStudentAppFacilitiesFew[y]));
 requires (forall  x:Ref, z:int :: ( packedKeyValuePair[x, z]));
 requires (forall  x:Ref, z:int :: ( fracKeyValuePair[x, z] > 0.0));
+requires (forall  x:Ref :: ( packedCollegeNumberField[x]));
 {
 	var website : Ref;
 	var college : Ref;
@@ -499,28 +511,35 @@ requires (forall  x:Ref, z:int :: ( fracKeyValuePair[x, z] > 0.0));
 	call ConstructApplicationWebsite(ma, website);
 	packedMapOfCollegesField[website] := true;
 	fracMapOfCollegesField[website] := 1.0;
-
+assert (forall  x:Ref :: ( packedCollegeNumberField[x]));
 	call InitializeApplicationWebsite(100, ma, website);
-
-
+assert (forall  x:Ref :: ( packedCollegeNumberField[x]));
 	call college := lookup(2, website);
-
+assert (forall  x:Ref :: ( packedCollegeNumberField[x]));
+	call UnpackKeyValuePair(2, ma[2], mapOfColleges[website], website);
+	packedKeyValuePair[website, 2] := false;
+	fracCollegeNumberField[college] := 0.1;
+  
+  assert (packedCollegeNumberField[college] == true);
 
 	call ConstructStudentApplication(college, 3, app1);
-
 	packedStudentAppFacilitiesFew[app1] := false;
+  assert (forall  x:Ref :: ( packedCollegeNumberField[x]));
+  assert (packedCollegeNumberField[college] == true);
 	call PackStudentAppFacilitiesFew(facilities[app1], college, 3, app1);
 	packedStudentAppFacilitiesFew[app1] := true;
 	fracStudentAppFacilitiesFew[app1] := 1.0;
 	fracCollegeFacilitiesFew[college] := fracCollegeFacilitiesFew[college] / 2.0;
-
+assert (packedCollegeNumberField[college] == true);
 	call ConstructStudentApplication(college, 2, app2);
 	packedStudentAppFacilitiesFew[app2] := false;
 	call PackStudentAppFacilitiesFew(facilities[app2], college, 2, app2);
 	packedStudentAppFacilitiesFew[app2] := true;
 	fracStudentAppFacilitiesFew[app2] := 1.0;
 	fracCollegeFacilitiesFew[college] := fracCollegeFacilitiesFew[college] / 2.0;
+assert (forall  x:Ref :: ( packedCollegeNumberField[x]));
 	call tempbo := checkFacilitiesFew(app1);
+  assert (forall  x:Ref :: ( packedCollegeNumberField[x]));
 	call changeApplicationFew(34, app1);
 	call tempbo := checkFacilitiesFew(app2);
 }
@@ -543,6 +562,7 @@ requires (forall  x:Ref :: ( packedCollegeFacilitiesMany[x]));
 requires (forall y:Ref :: ( packedStudentAppFacilitiesMany[y]));
 requires (forall  x:Ref, z:int :: ( packedKeyValuePair[x, z]));
 requires (forall  x:Ref, z:int :: ( fracKeyValuePair[x, z] > 0.0));
+requires (forall  x:Ref :: ( packedCollegeNumberField[x]));
 {
 	var website : Ref;
 	var college2 : Ref;
@@ -559,10 +579,12 @@ requires (forall  x:Ref, z:int :: ( fracKeyValuePair[x, z] > 0.0));
   
 	call college2 := lookup(56, website);
 
-	call ConstructStudentApplication(college2, 45, app3);
+	call UnpackKeyValuePair(56, ma[56], mapOfColleges[website], website);
+	packedKeyValuePair[website, 56] := false;
+	fracCollegeNumberField[college2] := 0.1;
 
-	packedStudentAppFacilitiesMany[app3] := false;
-  
+	call ConstructStudentApplication(college2, 45, app3);
+	packedStudentAppFacilitiesMany[app3] := false; 
 	call PackStudentAppFacilitiesMany(facilities[app3], college2, 45, app3);
 	packedStudentAppFacilitiesMany[app3] := true;
 	fracStudentAppFacilitiesMany[app3] := 1.0;
