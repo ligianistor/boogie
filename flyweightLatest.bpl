@@ -37,7 +37,6 @@ requires packedCollegeFacilitiesMany[this];
 requires fracCollegeFacilitiesMany[this] > 0.0;
 requires (collegeNumber[this] == colNum);
 ensures	(numFacilities >= 10 * colNum);
-ensures colNum > 0;
 
 procedure PackCollegeFacilitiesFew(numFacilities:int, colNum:int, this:Ref);
 requires (packedCollegeFacilitiesFew[this] == false);
@@ -50,7 +49,6 @@ requires packedCollegeFacilitiesFew[this];
 requires fracCollegeFacilitiesFew[this] > 0.0;
 requires (collegeNumber[this] == colNum);
 ensures	(numFacilities <= 4 * colNum);
-ensures colNum > 0;
 
 function modulo(x:int, y:int) returns (int);
 axiom (forall x:int, y:int :: {modulo(x,y)} 

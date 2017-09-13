@@ -17,6 +17,7 @@ requires (packedBasicFieldsRealSum[this] == false);
 requires (n[this]==n1);
 requires (sum[this] == su);
 requires n1 > 0;
+requires su>=0.0;
 
 procedure UnpackBasicFieldsRealSum(su:real, n1:int, this:Ref);
 requires packedBasicFieldsRealSum[this];
@@ -56,7 +57,6 @@ procedure ConstructRealSum(n1:int, this:Ref)
 modifies n, sum, packedBasicFieldsRealSum, fracBasicFieldsRealSum, packedSumOKRealSum,
         fracSumOKRealSum;
 requires n1 > 0;
-//ensures packedSumOKRealSum[this];
 ensures n[this] == n1;
 requires (forall y:Ref :: (packedBasicFieldsRealSum[y]));
 // since the constructors also have a body now, they ensures forall like the other
@@ -75,6 +75,22 @@ ensures (forall y:Ref :: (packedBasicFieldsRealSum[y]));
   packedBasicFieldsRealSum[this] := true;
   fracBasicFieldsRealSum[this] := 1.0;
   call temp := calculateSumRealSum(n1, 0.0, this);
+}
+
+procedure getRealSum( this:Ref) returns (r:real) 
+modifies packedSumOKRealSum, fracBasicFieldsRealSum;
+requires packedSumOKRealSum[this];
+requires (fracSumOKRealSum[this] > 0.0);
+ensures packedSumOKRealSum[this];
+ensures (fracSumOKRealSum[this] > 0.0);
+ensures (r == sum[this]);
+{
+	call UnpackSumOKRealSum(n[this], this);
+	packedSumOKRealSum[this] := false;
+  	fracBasicFieldsRealSum[this] := 0.1;
+	r := sum[this];
+	call PackSumOKRealSum(n[this], this);
+	packedSumOKRealSum[this] := true;
 }
 
 procedure addOneToSumRealSum(n1:int, s1:real, this:Ref) returns (r:real)
@@ -121,7 +137,6 @@ ensures packedSumOKRealSum[this];
 ensures (fracSumOKRealSum[this] > 0.0);
 ensures (forall y:Ref :: ( (y!=this) ==> (sum[y] == old(sum[y]) ) ) );
 ensures (forall y:Ref :: (packedBasicFieldsRealSum[y]));
-//ensures (forall y:Ref :: ( (y!=this) ==> (fracSumOKRealSum[y] == old(fracSumOKRealSum[y]) ) ) );
 {
   call UnpackBasicFieldsRealSum(s1, n1, this);
   packedBasicFieldsRealSum[this] := false;
@@ -225,8 +240,6 @@ modifies n, sum, realSum;
 ensures n[this] == n1;
 ensures sum[this] == 0.0;
 ensures realSum[this] == null;
-//ensures packedBasicFieldsProxySum[this];
-//ensures fracBasicFieldsProxySum[this] == 1.0;
 {
 	n[this] := n1;
 	sum[this] := 0.0;
@@ -260,13 +273,14 @@ ensures (forall y:Ref :: (packedBasicFieldsRealSum[y]));
 		packedSumOKRealSum[ob] := true;
 		fracSumOKRealSum[ob] := 1.0;
 	}
-	sum[this] := sum[ob];
+	call temp := getRealSum(ob);
+	sum[this] := temp;
 
 	call PackBasicFieldsProxySum(ob, sum[this], n1, this);
 	packedBasicFieldsProxySum[this]:= true;
   
-  call UnpackSumOKRealSum(n[ob], ob);
-  packedSumOKRealSum[ob] := false;
+  	call UnpackSumOKRealSum(n[ob], ob);
+  	packedSumOKRealSum[ob] := false;
   
   // Just for this case when we have to pack to a bigger predicate
   // that contains a smaller predicate but we don't have the bigger
@@ -297,29 +311,29 @@ ensures (forall y:Ref :: (packedBasicFieldsProxySum[y] == old(packedBasicFieldsP
 ensures (forall y:Ref :: (packedBasicFieldsRealSum[y]));
 {
 	var temp : real;
-  call UnpackBasicFieldsProxySum(ob, s1, n1, this);
+  	call UnpackBasicFieldsProxySum(ob, s1, n1, this);
 	packedBasicFieldsProxySum[this] := false;
 
 	if (ob == null) {
 		call ConstructRealSum(n[this], ob);
 		packedSumOKRealSum[ob] := true;
 		fracSumOKRealSum[ob] := 1.0;
-    call UnpackSumOKRealSum(n[ob], ob);
-    packedSumOKRealSum[ob] := false;
-    fracBasicFieldsRealSum[ob] := 0.1;
+    		call UnpackSumOKRealSum(n[ob], ob);
+    		packedSumOKRealSum[ob] := false;
+    		fracBasicFieldsRealSum[ob] := 0.1;
 	} 
 
 	  call temp := addOneToSumRealSum(n[ob], sum[ob], ob);
 
 	  sum[this] := temp;
     
-    call PackBasicFieldsProxySum(ob, temp, n1, this);
+    	  call PackBasicFieldsProxySum(ob, temp, n1, this);
 	  packedBasicFieldsProxySum[this] := true;
     
-    packedSumGreater0ProxySum[this] := false;
+    	  packedSumGreater0ProxySum[this] := false;
 	  call PackSumGreater0ProxySum(n1, sum[this], ob, this);
 	  packedSumGreater0ProxySum[this] := true;
-    fracSumGreater0ProxySum[this] := fracBasicFieldsProxySum[this];
+    	  fracSumGreater0ProxySum[this] := fracBasicFieldsProxySum[this];
 	  r := sum[this];
 }
 
