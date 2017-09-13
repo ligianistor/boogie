@@ -76,21 +76,6 @@ ensures (forall y:Ref :: (packedBasicFieldsRealSum[y]));
   call temp := calculateSumRealSum(n1, 0.0, this);
 }
 
-procedure getRealSum( this:Ref) returns (r:real) 
-modifies packedSumOKRealSum, fracBasicFieldsRealSum;
-requires packedSumOKRealSum[this];
-requires (fracSumOKRealSum[this] > 0.0);
-ensures packedSumOKRealSum[this];
-ensures (fracSumOKRealSum[this] > 0.0);
-ensures (r == sum[this]);
-{
-	call UnpackSumOKRealSum(n[this], this);
-	packedSumOKRealSum[this] := false;
-  fracBasicFieldsRealSum[this] := 0.1;
-	r := sum[this];
-	call PackSumOKRealSum(n[this], this);
-	packedSumOKRealSum[this] := true;
-}
 
 procedure addOneToSumRealSum(n1:int, s1:real, this:Ref) returns (r:real)
 modifies n, sum, packedSumGreater0RealSum, packedSumOKRealSum,
@@ -275,8 +260,8 @@ ensures (forall y:Ref :: (packedBasicFieldsRealSum[y]));
 		packedSumOKRealSum[ob] := true;
 		fracSumOKRealSum[ob] := 1.0;
 	}
-	call temp := getRealSum(ob);
-	sum[this] := temp;
+
+	sum[this] := sum[ob];
 
 	call PackBasicFieldsProxySum(ob, sum[this], n1, this);
 	packedBasicFieldsProxySum[this]:= true;

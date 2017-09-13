@@ -511,35 +511,32 @@ requires (forall  x:Ref :: ( packedCollegeNumberField[x]));
 	call ConstructApplicationWebsite(ma, website);
 	packedMapOfCollegesField[website] := true;
 	fracMapOfCollegesField[website] := 1.0;
-assert (forall  x:Ref :: ( packedCollegeNumberField[x]));
+
 	call InitializeApplicationWebsite(100, ma, website);
-assert (forall  x:Ref :: ( packedCollegeNumberField[x]));
+
 	call college := lookup(2, website);
-assert (forall  x:Ref :: ( packedCollegeNumberField[x]));
+
 	call UnpackKeyValuePair(2, ma[2], mapOfColleges[website], website);
 	packedKeyValuePair[website, 2] := false;
 	fracCollegeNumberField[college] := 0.1;
   
-  assert (packedCollegeNumberField[college] == true);
-
 	call ConstructStudentApplication(college, 3, app1);
 	packedStudentAppFacilitiesFew[app1] := false;
-  assert (forall  x:Ref :: ( packedCollegeNumberField[x]));
-  assert (packedCollegeNumberField[college] == true);
+
 	call PackStudentAppFacilitiesFew(facilities[app1], college, 3, app1);
 	packedStudentAppFacilitiesFew[app1] := true;
 	fracStudentAppFacilitiesFew[app1] := 1.0;
 	fracCollegeFacilitiesFew[college] := fracCollegeFacilitiesFew[college] / 2.0;
-assert (packedCollegeNumberField[college] == true);
+
 	call ConstructStudentApplication(college, 2, app2);
 	packedStudentAppFacilitiesFew[app2] := false;
 	call PackStudentAppFacilitiesFew(facilities[app2], college, 2, app2);
 	packedStudentAppFacilitiesFew[app2] := true;
 	fracStudentAppFacilitiesFew[app2] := 1.0;
 	fracCollegeFacilitiesFew[college] := fracCollegeFacilitiesFew[college] / 2.0;
-assert (forall  x:Ref :: ( packedCollegeNumberField[x]));
+
 	call tempbo := checkFacilitiesFew(app1);
-  assert (forall  x:Ref :: ( packedCollegeNumberField[x]));
+
 	call changeApplicationFew(34, app1);
 	call tempbo := checkFacilitiesFew(app2);
 }
