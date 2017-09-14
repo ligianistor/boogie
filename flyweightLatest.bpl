@@ -229,14 +229,16 @@ ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesFew[y] == ol
 	packedStudentAppFacilitiesFew[this] := false;
 	campusNumber[this] := (newCampusNumber - int(newCampusNumber/4)*4) + 1; 
   
-  call UnpackCollegeFacilitiesFew(facilities[this],collegeNumber[college[this]],  college[this]);
-  packedCollegeFacilitiesFew[college[this]] := false;
-  fracCollegeNumberField[college[this]] := 0.1;
+  	call UnpackCollegeFacilitiesFew(facilities[this],collegeNumber[college[this]],  college[this]);
+	packedCollegeFacilitiesFew[college[this]] := false;
+  	fracCollegeNumberField[college[this]] := 0.1;
   
 	call temp := getNumberFacilities(campusNumber[this], collegeNumber[college[this]], college[this]);
-  facilities[this] := temp;
-  call PackStudentAppFacilitiesFew(facilities[this], college[this], campusNumber[this], this);
-  packedStudentAppFacilitiesFew[this] := true;
+  	facilities[this] := temp;
+        call PackCollegeFacilitiesFew(facilities[this],collegeNumber[college[this]],  college[this]);
+	packedCollegeFacilitiesFew[college[this]] := true;
+  	call PackStudentAppFacilitiesFew(facilities[this], college[this], campusNumber[this], this);
+  	packedStudentAppFacilitiesFew[this] := true;
 }
 
 procedure changeApplicationMany(newCampusNumber:int, this:Ref)
@@ -253,16 +255,18 @@ ensures	(fracStudentAppFacilitiesMany[this] > 0.0);
 ensures (forall y:Ref :: ( (y!=this) ==> (packedStudentAppFacilitiesMany[y] == old(packedStudentAppFacilitiesMany[y]) ) ) );
 {
 	var temp:int; 
-  call UnpackStudentAppFacilitiesMany(facilities[this], college[this], campusNumber[this], this);
-  packedStudentAppFacilitiesMany[this] := false;
+  	call UnpackStudentAppFacilitiesMany(facilities[this], college[this], campusNumber[this], this);
+  	packedStudentAppFacilitiesMany[this] := false;
 	campusNumber[this] := newCampusNumber * 10 + 1;
   
-  call UnpackCollegeFacilitiesMany(facilities[this],collegeNumber[college[this]],  college[this]);
-  packedCollegeFacilitiesMany[college[this]] := false;
-  fracCollegeNumberField[college[this]] := 0.1;
-  
+	call UnpackCollegeFacilitiesMany(facilities[this],collegeNumber[college[this]],  college[this]);
+	packedCollegeFacilitiesMany[college[this]] := false;
+	fracCollegeNumberField[college[this]] := 0.1;
+
 	call temp := getNumberFacilities(campusNumber[this],collegeNumber[college[this]], college[this]);
   	facilities[this] := temp;
+	call PackCollegeFacilitiesMany(facilities[this],collegeNumber[college[this]],  college[this]);
+	packedCollegeFacilitiesMany[college[this]] := true;
     	call PackStudentAppFacilitiesMany(facilities[this], college[this], campusNumber[this], this);
     	packedStudentAppFacilitiesMany[this] := true;
 }
@@ -327,7 +331,6 @@ requires packedMapOfCollegesField[this];
 requires fracMapOfCollegesField[this] > 0.0;
 requires (mapOfColleges[this] == m); 
 
-
 procedure PackApplicationWebsiteField(m: MapIntCollege, this:Ref);
 requires (packedApplicationWebsiteField[this]==false);
 requires (mapOfColleges[this] == m); 
@@ -370,38 +373,35 @@ requires (forall  z:int :: ( fracKeyValuePair[this, z] > 0.0));
 requires (forall j:int :: (((j<=i) && (j>=0) ) ==> (packedKeyValuePair[this, j] && ( fracKeyValuePair[this, j] > 0.0 )))  );
 ensures (forall j:int :: (((j<=i) && (j>=0) ) ==> (packedKeyValuePair[this, j] && ( fracKeyValuePair[this, j] > 0.0 ) && (mapOfColleges[this][j] == null)))  );
 ensures packedMapOfCollegesField[this] == true;
-
 ensures fracMapOfCollegesField[this] > 0.0;
-
 ensures (forall  z:int :: ( packedKeyValuePair[this, z]));
 ensures (forall  z:int :: ( fracKeyValuePair[this, z] > 0.0));
-
 {
 if (i==0) {
-  call UnpackKeyValuePair(i, ma[i] , ma, this);
-  packedKeyValuePair[this, i] := false;
-  call UnpackMapOfCollegesField(ma, this);
+	call UnpackKeyValuePair(i, ma[i] , ma, this);
+	packedKeyValuePair[this, i] := false;
+	call UnpackMapOfCollegesField(ma, this);
 	packedMapOfCollegesField[this] := false;
-  
+
 	mapOfColleges[this][i] := null;	
 	call PackMapOfCollegesField(mapOfColleges[this], this);
 	packedMapOfCollegesField[this] := true;
-  
+
 	call PackKeyValuePair(i, null, mapOfColleges[this], this);
-  packedKeyValuePair[this, i] := true;
-  fracKeyValuePair[this, i] := 1.0;
+	packedKeyValuePair[this, i] := true;
+	fracKeyValuePair[this, i] := 1.0;
 } else if (i>0) {
 	call makeMapNull(i-1, ma, this);
-  call UnpackKeyValuePair(i, ma[i] , mapOfColleges[this], this);
-  packedKeyValuePair[this, i] := false;
-  call UnpackMapOfCollegesField(mapOfColleges[this], this);
+	call UnpackKeyValuePair(i, ma[i] , mapOfColleges[this], this);
+	packedKeyValuePair[this, i] := false;
+	call UnpackMapOfCollegesField(mapOfColleges[this], this);
 	packedMapOfCollegesField[this] := false;
-  mapOfColleges[this][i] := null;	
+	mapOfColleges[this][i] := null;	
 	call PackMapOfCollegesField(mapOfColleges[this], this);
 	packedMapOfCollegesField[this] := true;
 	call PackKeyValuePair(i, null, mapOfColleges[this], this);
-  packedKeyValuePair[this, i] := true;
-  fracKeyValuePair[this, i] := 1.0;
+	packedKeyValuePair[this, i] := true;
+	fracKeyValuePair[this, i] := 1.0;
 }
 }
 
@@ -409,21 +409,19 @@ procedure containsKey(key1: int, this:Ref) returns (b:bool)
 modifies packedKeyValuePair, fracMapOfCollegesField;
 requires packedKeyValuePair[this, key1];
 requires ( fracKeyValuePair[this, key1] > 0.0 );
-//requires this#k MapOfCollegesField()
 ensures (b == true) ==> packedKeyValuePair[this, key1] && (fracKeyValuePair[this, key1] > 0.0);
 ensures (b == false) ==> packedKeyValuePair[this, key1] && (fracKeyValuePair[this, key1] > 0.0) &&(mapOfColleges[this][key1] == null);
 ensures (forall x:Ref ::(packedCollegeNumberField[x] == old(packedCollegeNumberField[x]))); 
-
 {
 	b := true;
-  call UnpackKeyValuePair(key1, mapOfColleges[this][key1] , mapOfColleges[this], this);
-  packedKeyValuePair[this, key1] := false;
-  fracMapOfCollegesField[this] := 0.1;
+	call UnpackKeyValuePair(key1, mapOfColleges[this][key1] , mapOfColleges[this], this);
+	packedKeyValuePair[this, key1] := false;
+	fracMapOfCollegesField[this] := 0.1;
 	if (mapOfColleges[this][key1] == null) {
 		b := false;	
 	} 
-  call PackKeyValuePair(key1, mapOfColleges[this][key1] , mapOfColleges[this], this);
-  packedKeyValuePair[this, key1] := true;
+	call PackKeyValuePair(key1, mapOfColleges[this][key1] , mapOfColleges[this], this);
+	packedKeyValuePair[this, key1] := true;
 }
 			
 procedure lookup(colNum:int, this:Ref) returns (r:Ref)
@@ -437,21 +435,17 @@ requires (fracKeyValuePair[this, colNum] > 0.0);
 ensures packedKeyValuePair[this, colNum];
 ensures	(fracKeyValuePair[this, colNum] > 0.0);
 ensures (forall x:Ref ::packedCollegeNumberField[x]); 
-ensures (0<colNum);
-//ensures this#k KeyValuePair(colNum, result)
+ensures (0 < colNum);
 {
 	var temp:bool;
 	var c:Ref;
-
 	call temp := containsKey(colNum, this);
-
 	if (temp == false) {
 		call ConstructCollege(colNum, c); 
 		packedCollegeNumberField[c] := false;
 		call PackCollegeNumberField(colNum, c);
 		packedCollegeNumberField[c] := true;
-		fracCollegeNumberField[c] := 1.0;
-  
+		fracCollegeNumberField[c] := 1.0; 
 		mapOfColleges[this][colNum] := c;
 	}
 	r := mapOfColleges[this][colNum];
